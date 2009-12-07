@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:element name="node" type="node"/>
+
+  <xs:complexType name="nodeGraph">
+    <xs:sequence>
+      <xs:element name="nodes" type="xs:IDREF" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="node">
+    <xs:sequence>
+	  <xs:element name="id" type="xs:ID" />
+      <xs:element name="nodes" type="xs:IDREF" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
+
