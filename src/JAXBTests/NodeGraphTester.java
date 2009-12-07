@@ -44,15 +44,26 @@ public class NodeGraphTester {
 	
 	public static void main(String... args)
 		throws JAXBException, FileNotFoundException {
-		Node n1 = new Node();
-		Node n2 = new Node();
-		Node n3 = new Node();
-		n1.connect(n2);
-		//n2.connect(n1);
-		n2.connect(n3);
-		//n3.connect(n2);
+		ObjectFactory of = new ObjectFactory();
+		Node n1 = of.createNode();
+		n1.setId("1");
+		Node n2 = of.createNode();
+		n2.setId("2");
+		Node n3 = of.createNode();
+		n3.setId("3");
+		
+		n1.node.add(of.createNodeNode(n2));
+		n2.node.add(of.createNodeNode(n1));
+		n2.node.add(of.createNodeNode(n3));
+		n3.node.add(of.createNodeNode(n2));
+		
+		NodeGraph graph = of.createNodeGraph();
+		graph.node.add(of.createNodeNode(n1));
+		graph.node.add(of.createNodeNode(n2));
+		graph.node.add(of.createNodeNode(n3));
+		
 		
 		NodeGraphTester tester = new NodeGraphTester();
-		tester.marshal(n1, new FileOutputStream(new File("nodetest.o")));
+		tester.marshal(graph, new FileOutputStream(new File("nodetest.o")));
 	}
 }
