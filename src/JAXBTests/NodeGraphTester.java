@@ -1,10 +1,12 @@
 package JAXBTests;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -29,8 +31,9 @@ public class NodeGraphTester {
 		String packageName = docClass.getPackage().getName();
 		JAXBContext jc = JAXBContext.newInstance( packageName );
 		Unmarshaller u = jc.createUnmarshaller();
-		JAXBElement<T> doc = (JAXBElement<T>)u.unmarshal(inputStream);
-		return doc.getValue();
+		//JAXBElement<T> doc = (JAXBElement<T>)u.unmarshal(inputStream);
+		//return doc.getValue();
+		return (T)u.unmarshal(inputStream);
 	}
 	
 	public void marshal(Object jaxbElement, OutputStream outputStream) 
@@ -52,18 +55,53 @@ public class NodeGraphTester {
 		Node n3 = of.createNode();
 		n3.setId("3");
 		
-		n1.node.add(of.createNodeNode(n2));
-		n2.node.add(of.createNodeNode(n1));
-		n2.node.add(of.createNodeNode(n3));
-		n3.node.add(of.createNodeNode(n2));
+		n1.connected = new ArrayList<Node.Connected>();
+		Node.Connected temp = of.createNodeConnected();
+		temp.setNode(n2);
+		n1.connected.add(temp);
+		n2.connected = new ArrayList<Node.Connected>();
+		temp = of.createNodeConnected();
+		temp.setNode(n3);
+		n2.connected.add(temp);
+		
 		
 		NodeGraph graph = of.createNodeGraph();
-		graph.node.add(of.createNodeNode(n1));
-		graph.node.add(of.createNodeNode(n2));
-		graph.node.add(of.createNodeNode(n3));
+		graph.node = new ArrayList<Node>();
+		graph.node.add(n1);
+		graph.node.add(n2);
+		graph.node.add(n3);
+		
+
 		
 		
 		NodeGraphTester tester = new NodeGraphTester();
 		tester.marshal(graph, new FileOutputStream(new File("nodetest.o")));
+		NodeGraph unmarshalled = tester.unmarshal(NodeGraph.class, new FileInputStream(new File("C:/Users/user/workspaces/gradproject/hardware-varying-network-simulator/nodetestin2.xml")));
+		if( unmarshalled.node != null ) {
+			System.out.println("not null!");
+			if( unmarshalled.node.size() > 0 ) {
+				System.out.println(unmarshalled.node.size());
+				System.out.println(unmarshalled.node.get(0).getClass());
+				Node un1 = unmarshalled.node.get(0);
+				Node un2 = unmarshalled.node.get(1);
+				Node un3 = unmarshalled.node.get(2);
+				
+				System.out.println(un1.getId());
+				System.out.println(un2.getId());
+				System.out.println(un3.getId());
+				
+				if(un1.connected.get(0).getNode() == un2) {
+					System.out.println("HOLY CRAP!");
+				}
+				if(un1.connected.get(1).getNode() == un3) {
+					System.out.println("HOLY CRAP!");
+				}
+				
+				
+//				if( ((Node)un1.connected.get(0).getValue()) == un2 ) {
+//					System.out.println("HOLY CRAP!");
+			}
+		}
+		tester.marshal(unmarshalled, new FileOutputStream(new File("nodetest.o")));
 	}
 }

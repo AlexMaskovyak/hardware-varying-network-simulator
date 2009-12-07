@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <nodeGraph>
-	<nodes>
-		<node>
-			<id>1</id>
-			<connected node="2"/>
-		</node>
-		<node>
-			<id>2</id>
-			<connected node="3"/>
-		</node>
-		<node>
-			<id>3</id>
-		</node>
-	</nodes>
+	<Node>
+		<Id>1</Id>
+		<Connected node="2"/>
+		<Connected node="3"/>
+	</Node>
+	<Node>
+		<Id>2</Id>
+		<Connected node="3"/>
+	</Node>
+	<Node>
+		<Id>3</Id>
+	</Node>
 </nodeGraph>
