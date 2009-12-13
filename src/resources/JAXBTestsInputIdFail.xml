@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<nodeGraph 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+			xsi:schemaLocation="JAXBTestsSchema.xsd">
+	<Node>
+		<Id>1</Id>
+		<Connected node="2"/>
+		<Connected node="4"/>
+	</Node>
+	<Node>
+		<Id>2</Id>
+		<Connected node="3"/>
+	</Node>
+	<Node>
+		<Id>3</Id>
+	</Node>
+</nodeGraph>

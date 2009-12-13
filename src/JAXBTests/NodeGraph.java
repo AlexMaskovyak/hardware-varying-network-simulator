@@ -75,4 +75,36 @@ public class NodeGraph {
         return this.node;
     }
 
+    
+    /**
+     * Override equals.
+     */
+    public boolean equals(Object o) {
+    	if(o instanceof NodeGraph) {
+    		return equals((NodeGraph)o);
+    	}
+    	return false;
+    }
+    
+    /**
+     * Determines whether this NodeGraph is content equivalent with the one provided.
+     * @param graph to compare against.
+     * @return true if this NodeGraph is content equivalent to the one provided, false otherwise.
+     */
+    public boolean equals(NodeGraph graph) {
+		List<Node> n1 = getNode();
+    	List<Node> n2 = graph.getNode();
+
+    	if(n1.size() != n2.size()) {
+    		return false;
+    	}
+    	
+    	// foreach node ensure that it exists in the provided object    	
+    	for(int i = 0; i < n1.size(); ++i) {
+    		if(!n1.get(i).equals(n2.get(i))) {
+    			return false;
+        	}        
+    	}
+    	return true;    	
+    }
 }
