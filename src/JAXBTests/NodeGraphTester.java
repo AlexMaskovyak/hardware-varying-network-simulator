@@ -15,29 +15,50 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
 /**
- * Unmarshals an xml file containing a node map.
+ * Performs JAXB related tests.
  * @author Alex Maskovyak
  *
  */
 public class NodeGraphTester {
 	
+	/** responsible for programmatic object creation. */
+	protected ObjectFactory _of;
+	
+	/** expected output from unmarshalling test, and output for marshalling tests */
+	protected NodeGraph _expected;
+	
+	/**
+	 * Default constructor.
+	 */
 	public NodeGraphTester() {
-		
+		_of = new ObjectFactory();
 	}
 	
+	/**
+	 * Perform an unmarshalling procedures (Java objects instantiated).
+	 * @param <T> Java type to be unmarshalled from the file.
+	 * @param docClass JAXB unmarshallable class.
+	 * @param inputStream containing the XML.
+	 * @return unmarshalled Java object of type T.
+	 * @throws JAXBException in the event that a problem occurs.
+	 */
 	public <T> T unmarshal(Class<T> docClass, InputStream inputStream)
-		throws JAXBException {
+			throws JAXBException {
 		
 		String packageName = docClass.getPackage().getName();
 		JAXBContext jc = JAXBContext.newInstance( packageName );
 		Unmarshaller u = jc.createUnmarshaller();
-		//JAXBElement<T> doc = (JAXBElement<T>)u.unmarshal(inputStream);
-		//return doc.getValue();
 		return (T)u.unmarshal(inputStream);
 	}
 	
+	/**
+	 * Performs a marshalling procedure (Java objects serialized to XML).
+	 * @param jaxbElement to be marshalled to the outputstream.
+	 * @param outputStream where to send the marshalled object.
+	 * @throws JAXBException in the event that a problem occurs.
+	 */
 	public void marshal(Object jaxbElement, OutputStream outputStream) 
-		throws JAXBException {
+			throws JAXBException {
 		
 		String packageName = jaxbElement.getClass().getPackage().getName();
 		JAXBContext jc = JAXBContext.newInstance(packageName);
@@ -45,63 +66,98 @@ public class NodeGraphTester {
 		m.marshal(jaxbElement, outputStream);
 	}
 	
+	/**
+	 * Unmarshalls from a resource and performs a test to ensure that the IDREF/object reference
+	 * functionality is working. 
+	 */
+	public void performUnmarshallingTest() {
+		try {
+			InputStream inputStream = ClassLoader.getSystemResourceAsStream("resources/JAXBTestsinput.xml");
+			NodeGraph unmarshalled = unmarshal(NodeGraph.class, inputStream);
+			if( getExpectedNodeGraph().equals(unmarshalled) ) {
+				System.out.println("UnmarshallingTest completed successfully.");
+			} else {
+				System.out.println("UnmarshallingTest completed unsuccessfully.");				
+			}
+			
+		} catch( Exception e ) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+
+	
+	/**
+	 * Marshalls to the file system and then unmarshalls and compares the result.
+	 */
+	public void performMarshallingRountTripTest() {
+		try {
+			marshal(getExpectedNodeGraph(), new FileOutputStream(new File("nodetest.o")));
+			NodeGraph unmarshalled = unmarshal(NodeGraph.class, new FileInputStream(new File("nodetest.o")));
+			if( getExpectedNodeGraph().equals(unmarshalled) ) {
+				System.out.println("MarshallingRountTripTest completed successfully.");
+			} else {
+				System.out.println("MarshallingRountTripTest completed unsuccessfully.");				
+			}
+		} catch( Exception e ) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Programmatically creates the expected NodeGraph.
+	 * @return expected NodeGraph from unmarshalling.
+	 */
+	protected NodeGraph getExpectedNodeGraph() {
+		// build it
+		if( _expected == null ) {
+			// create nodegraph
+			_expected = _of.createNodeGraph();
+			
+			// create nodes and assign ids
+			Node n1 = _of.createNode();
+			n1.setId("1");
+			Node n2 = _of.createNode();
+			n2.setId("2");
+			Node n3 = _of.createNode();
+			n3.setId("3");
+			
+			// assign connections to nodes
+			Node.Connected temp = _of.createNodeConnected();
+			temp.setNode(n2);
+			n1.getConnected().add(temp);
+			temp = _of.createNodeConnected();
+			temp.setNode(n3);
+			n1.getConnected().add(temp);
+			n2.getConnected().add(temp);
+			
+			// add them to the graph
+			_expected.getNode().add(n1);
+			_expected.getNode().add(n2);
+			_expected.getNode().add(n3);
+		} 
+		
+		return _expected;
+	}
+	
+	/**
+	 * Ensures that JAXB is upholding proper ID restrictions.
+	 */
+	public void performInvalidIdTest() {
+		try {
+			unmarshal(NodeGraph.class, ClassLoader.getSystemResourceAsStream("resources/JAXBTestsInputIdFail.xml"));
+		} catch( Exception e ) {
+			e.printStackTrace();
+		}
+	}
+	
 	public static void main(String... args)
 		throws JAXBException, FileNotFoundException {
-		ObjectFactory of = new ObjectFactory();
-		Node n1 = of.createNode();
-		n1.setId("1");
-		Node n2 = of.createNode();
-		n2.setId("2");
-		Node n3 = of.createNode();
-		n3.setId("3");
-		
-		n1.connected = new ArrayList<Node.Connected>();
-		Node.Connected temp = of.createNodeConnected();
-		temp.setNode(n2);
-		n1.connected.add(temp);
-		n2.connected = new ArrayList<Node.Connected>();
-		temp = of.createNodeConnected();
-		temp.setNode(n3);
-		n2.connected.add(temp);
-		
-		
-		NodeGraph graph = of.createNodeGraph();
-		graph.node = new ArrayList<Node>();
-		graph.node.add(n1);
-		graph.node.add(n2);
-		graph.node.add(n3);
-		
 
-		
-		
 		NodeGraphTester tester = new NodeGraphTester();
-		tester.marshal(graph, new FileOutputStream(new File("nodetest.o")));
-		NodeGraph unmarshalled = tester.unmarshal(NodeGraph.class, new FileInputStream(new File("C:/Users/user/workspaces/gradproject/hardware-varying-network-simulator/nodetestin2.xml")));
-		if( unmarshalled.node != null ) {
-			System.out.println("not null!");
-			if( unmarshalled.node.size() > 0 ) {
-				System.out.println(unmarshalled.node.size());
-				System.out.println(unmarshalled.node.get(0).getClass());
-				Node un1 = unmarshalled.node.get(0);
-				Node un2 = unmarshalled.node.get(1);
-				Node un3 = unmarshalled.node.get(2);
-				
-				System.out.println(un1.getId());
-				System.out.println(un2.getId());
-				System.out.println(un3.getId());
-				
-				if(un1.connected.get(0).getNode() == un2) {
-					System.out.println("HOLY CRAP!");
-				}
-				if(un1.connected.get(1).getNode() == un3) {
-					System.out.println("HOLY CRAP!");
-				}
-				
-				
-//				if( ((Node)un1.connected.get(0).getValue()) == un2 ) {
-//					System.out.println("HOLY CRAP!");
-			}
-		}
-		tester.marshal(unmarshalled, new FileOutputStream(new File("nodetest.o")));
+		tester.performUnmarshallingTest();
+		tester.performMarshallingRountTripTest();
+		tester.performInvalidIdTest();
 	}
 }

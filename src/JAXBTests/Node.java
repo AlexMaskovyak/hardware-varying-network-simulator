@@ -118,6 +118,39 @@ public class Node {
         return this.connected;
     }
 
+    /**
+     * Override of equals for content equivalence.
+     */
+    public boolean equals(Object o) {
+    	if(o instanceof Node) {
+    		return equals((Node)o);
+    	}
+    	return false;
+    }
+    
+    /**
+     * Delegated to for node content comparison.
+     * @param node to compare against.
+     * @return true if the two nodes are value equivalent, false otherwise.
+     */
+    public boolean equals(Node node) {
+    	List<Node.Connected> nc1 = getConnected();
+    	List<Node.Connected> nc2 = node.getConnected(); 
+    	
+    	int size1 = nc1.size();
+    	int size2 = nc2.size();
+    	if( size1 != size2 ) {
+    		return false;
+    	}
+    	    	
+    	for(int i = 0; i < size1; ++i) {
+    		if(!nc1.get(i).equals(nc2.get(i))) {
+    			return false;
+    		}
+    	}
+    	
+    	return true;
+    }
 
     /**
      * <p>Java class for anonymous complex type.
@@ -168,7 +201,24 @@ public class Node {
         public void setNode(Node value) {
             this.node = value;
         }
-
+        
+        /***
+         * Override equals for content equivalence.
+         */
+        public boolean equals(Object o) {
+        	if(o instanceof Node.Connected) {
+        		return equals((Node.Connected)o);
+        	}
+        	return false;
+        }
+        
+        /**
+         * Determines if two Node.Connected objects have Nodes with the same id.
+         * @param connected other node to test for equivalence.
+         * @return true if both point to the same node, false otherwise.
+         */
+        public boolean equals(Node.Connected connected) {
+        	return getNode().getId().equals(connected.getNode().getId());
+        }
     }
-
 }
