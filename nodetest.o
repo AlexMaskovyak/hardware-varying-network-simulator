@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><NodeGraph><Node><Id>n1</Id><Connected node="n2"/><Connected node="n3"/></Node><Node><Id>n2</Id><Connected node="n3"/></Node><Node><Id>n3</Id></Node></NodeGraph>
