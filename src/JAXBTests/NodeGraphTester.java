@@ -13,6 +13,12 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+
+import org.xml.sax.SAXException;
 
 /**
  * Performs JAXB related tests.
@@ -43,11 +49,14 @@ public class NodeGraphTester {
 	 * @throws JAXBException in the event that a problem occurs.
 	 */
 	public <T> T unmarshal(Class<T> docClass, InputStream inputStream)
-			throws JAXBException {
+			throws JAXBException, SAXException {
 		
 		String packageName = docClass.getPackage().getName();
 		JAXBContext jc = JAXBContext.newInstance( packageName );
 		Unmarshaller u = jc.createUnmarshaller();
+		SchemaFactory sf = SchemaFactory.newInstance(javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI);
+		Schema schema = sf.newSchema(new StreamSource(ClassLoader.getSystemResourceAsStream("resources/JAXBTestsSchema.xsd")));
+		u.setSchema(schema);
 		return (T)u.unmarshal(inputStream);
 	}
 	
@@ -79,7 +88,6 @@ public class NodeGraphTester {
 			} else {
 				System.out.println("UnmarshallingTest completed unsuccessfully.");				
 			}
-			
 		} catch( Exception e ) {
 			e.printStackTrace();
 		}
@@ -117,11 +125,11 @@ public class NodeGraphTester {
 			
 			// create nodes and assign ids
 			Node n1 = _of.createNode();
-			n1.setId("1");
+			n1.setId("n1");
 			Node n2 = _of.createNode();
-			n2.setId("2");
+			n2.setId("n2");
 			Node n3 = _of.createNode();
-			n3.setId("3");
+			n3.setId("n3");
 			
 			// assign connections to nodes
 			Node.Connected temp = _of.createNodeConnected();
@@ -147,8 +155,10 @@ public class NodeGraphTester {
 	public void performInvalidIdTest() {
 		try {
 			unmarshal(NodeGraph.class, ClassLoader.getSystemResourceAsStream("resources/JAXBTestsInputIdFail.xml"));
+			System.out.println("Invalid id unmarshalling test completex unsuccessfully.");
 		} catch( Exception e ) {
-			e.printStackTrace();
+			// the saxparseexception is a linked exception...figure out how to check for that.
+			System.out.println("Invalid id unmarshalling test completed successfully.");
 		}
 	}
 	

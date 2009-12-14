@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<nodeGraph 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+<NodeGraph 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
 			xsi:schemaLocation="JAXBTestsSchema.xsd">
 	<Node>
-		<Id>1</Id>
-		<Connected node="2"/>
-		<Connected node="4"/>
+		<Id>n1</Id>
+		<Connected node="n2"/>
+		<Connected node="n4"/>
 	</Node>
 	<Node>
-		<Id>2</Id>
-		<Connected node="3"/>
+		<Id>n2</Id>
+		<Connected node="n3"/>
 	</Node>
 	<Node>
-		<Id>3</Id>
+		<Id>n3</Id>
 	</Node>
-</nodeGraph>
+</NodeGraph>

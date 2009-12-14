@@ -40,7 +40,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "NodeGraph", propOrder = {
     "node"
 })
-@XmlRootElement
+@XmlRootElement(name = "NodeGraph")
 public class NodeGraph {
 
     @XmlElement(name = "Node", required = true)
