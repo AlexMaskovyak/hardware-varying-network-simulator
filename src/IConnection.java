@@ -20,6 +20,12 @@ public interface IConnection {
 	public void connect(INode node);
 	
 	/**
+	 * Receives data.
+	 * @param data to receive.
+	 */
+	public void receive(IData data);
+	
+	/**
 	 * Sends data to connected nodes in an implementation specific way.
 	 * @param sender node sending information.
 	 * @param data to be sent.

@@ -35,11 +35,21 @@ public class Node implements INode, ISimulatable {
 	}
 
 	@Override
+	public void send(IData data) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void send(IData data, IConnection connection) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
 	public void handleTickEvent(EventObject o) {
 		// TODO Auto-generated method stub
 		System.out.printf("Got a tick! %s", id);
 	}
 
-	
-	
 }
