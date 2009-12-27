@@ -18,4 +18,11 @@ public interface IConnection {
 	 * @param node to connect.
 	 */
 	public void connect(INode node);
+	
+	/**
+	 * Sends data to connected nodes in an implementation specific way.
+	 * @param sender node sending information.
+	 * @param data to be sent.
+	 */
+	public void send(INode sender, IData data);
 }

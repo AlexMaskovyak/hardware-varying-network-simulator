@@ -7,5 +7,7 @@
  */
 public interface INode {
 
+	public void connect(IConnection connect);
 	
+	public void receive(IData data);
 }
