@@ -162,6 +162,12 @@ public class NodeGraphTester {
 		}
 	}
 	
+	/**
+	 * Driver for tests.
+	 * @param args N/A
+	 * @throws JAXBException
+	 * @throws FileNotFoundException
+	 */
 	public static void main(String... args)
 		throws JAXBException, FileNotFoundException {
 

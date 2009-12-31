@@ -1,15 +1,29 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <NodeGraph xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="JAXBTestsSchema.xsd">
-	<Node>
-		<Id>n1</Id>
-		<Connected node="n2"/>
-		<Connected node="n3"/>
-	</Node>
-	<Node>
-		<Id>n2</Id>
-		<Connected node="n3"/>
-	</Node>
-	<Node>
-		<Id>n3</Id>
-	</Node>
+	<Nodes>
+		<Node>
+			<Id>n1</Id>
+			<Connected connection="c1"/>
+		</Node>
+		<Node>
+			<Id>n2</Id>
+			<Connected connection="c1"/>
+			<Connected connection="c2"/>
+		</Node>
+		<Node>
+			<Id>n3</Id>
+			<Connected connection="c2"/>
+		</Node>
+		<Connection>
+		
+		</Connection>
+	</Nodes>
+	<Connections>
+		<Connection>
+			<Id>c1</Id>
+		</Connection>
+		<Connection>
+			<Id>c2</Id>
+		</Connection>
+	</Connections>
 </NodeGraph>

@@ -15,7 +15,7 @@ public class Driver {
 		//	System.err.println( "java -jar program.jar <path to config file>" );
 		//}
 		
-		ISimulator sim = new Simulator();
+		ISimulator sim = new Simulator(1000);
 		INode n = new Node();
 		INode n2 = new Node();
 		IConnection c = new Connection();
