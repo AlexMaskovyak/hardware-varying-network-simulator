@@ -8,7 +8,9 @@ import java.util.Stack;
 import java.util.UUID;
 
 import simulation.ISimulatable;
+import simulation.ISimulatableListener;
 import simulation.ISimulator;
+import simulation.ISimulatorEvent;
 
 import network.IConnection;
 import network.IData;
@@ -74,12 +76,24 @@ public class Node implements INode, ISimulatable {
 	}
 
 	@Override
-	public void handleTickEvent(EventObject o) {
+	public void handleTickEvent(ISimulatorEvent o) {
 		// TODO Auto-generated method stub
 		System.out.printf("Got a tick! %s\n", _id);
 		for( ISimulator simulator : _listeners ) {
 			simulator.signalDone(this);
 		}
+	}
+
+	@Override
+	public void addListener(ISimulatableListener listener) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void removeListener(ISimulatableListener listener) {
+		// TODO Auto-generated method stub
+		
 	}
 }
 

@@ -8,7 +8,9 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import simulation.ISimulatable;
 import simulation.ISimulator;
+import simulation.ISimulatorEvent;
 import simulation.ISimulatorListener;
+import simulation.SimulatorEvent;
 
 
 
@@ -63,12 +65,12 @@ public class Simulator implements ISimulator, Runnable {
 	}
 	
 	public void fireEvent() {
-		EventObject o = new EventObject(this);
+		ISimulatorEvent o = new SimulatorEvent(this);
 		fireEvent(o);
 	}
 	
 	@Override
-	public void fireEvent(EventObject o) {
+	public void fireEvent(ISimulatorEvent o) {
 		for(ISimulatable simulatable : _simulatables) {
 			System.out.println("fire" + _simulatables.size());
 			simulatable.handleTickEvent(o);
