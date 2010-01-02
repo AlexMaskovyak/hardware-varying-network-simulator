@@ -57,4 +57,10 @@ public interface ISimulatorListener extends EventListener {
 	 * @param e ISimulatorEvent containing information about this event.
 	 */
 	public void resumeUpdate(ISimulatorEvent e);
+	
+	/**
+	 * Simulator was stopped.
+	 * @param e ISimulatorEvent containing information about this event.
+	 */
+	public void stopUpdate(ISimulatorEvent e);
 }
