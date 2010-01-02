@@ -1,3 +1,6 @@
+package network;
+import simulation.ISimulator;
+
 
 /**
  * An atomic network element.  Represents an information source and sink.
@@ -31,4 +34,8 @@ public interface INode {
 	 * @param connection to receive the data.
 	 */
 	public void send(IData data, IConnection connection);
+
+	public void addListener(ISimulator simulator);
+
+	public void removeListener(ISimulator simulator);
 }

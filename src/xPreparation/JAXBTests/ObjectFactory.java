@@ -6,7 +6,7 @@
 //
 
 
-package JAXBTests;
+package xPreparation.JAXBTests;
 
 import javax.xml.bind.annotation.XmlRegistry;
 
