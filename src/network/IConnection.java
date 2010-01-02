@@ -1,3 +1,5 @@
+package network;
+
 
 /**
  * An atomic network element.  Represents an information propagation mechanism.

@@ -6,7 +6,7 @@
 //
 
 
-package JAXBTests;
+package xPreparation.JAXBTests;
 
 import java.util.ArrayList;
 import java.util.List;

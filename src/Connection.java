@@ -4,6 +4,9 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Stack;
 
+import network.IConnection;
+import network.IData;
+import network.INode;
 
 public class Connection implements IConnection {
 

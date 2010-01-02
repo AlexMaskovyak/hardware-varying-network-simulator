@@ -1,4 +1,4 @@
-package PauseTests;
+package xPreparation.PauseTests;
 
 public class PausableTest implements Runnable {
 

@@ -1,10 +1,18 @@
 import java.util.ArrayList;
+import java.util.EventListener;
 import java.util.EventObject;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Stack;
 import java.util.UUID;
+
+import simulation.ISimulatable;
+import simulation.ISimulator;
+
+import network.IConnection;
+import network.IData;
+import network.INode;
 
 
 /**
@@ -15,6 +23,8 @@ import java.util.UUID;
 public class Node implements INode, ISimulatable {
 
 	protected List<IConnection> _connections;
+	protected List<ISimulator> _listeners;
+	
 	protected Queue<IData> _bufferIn;
 	protected Queue<IData> _bufferOut;
 	
@@ -25,11 +35,19 @@ public class Node implements INode, ISimulatable {
 		_id = UUID.randomUUID().toString();
 		_bufferIn = new LinkedList<IData>();
 		_bufferOut = new LinkedList<IData>();
+		_listeners = new ArrayList<ISimulator>();
+	}
+	
+	public void addListener(ISimulator simulator) {
+		_listeners.add(simulator);
+	}
+	
+	public void removeListener(ISimulator simulator) {
+		_listeners.remove(simulator);
 	}
 	
 	@Override
 	public void connect(IConnection connect) {
-		// TODO Auto-generated method stub
 		_connections.add(connect);
 		connect.connect(this);
 	}
@@ -58,7 +76,10 @@ public class Node implements INode, ISimulatable {
 	@Override
 	public void handleTickEvent(EventObject o) {
 		// TODO Auto-generated method stub
-		System.out.printf("Got a tick! %s", _id);
+		System.out.printf("Got a tick! %s\n", _id);
+		for( ISimulator simulator : _listeners ) {
+			simulator.signalDone(this);
+		}
 	}
-
 }
+

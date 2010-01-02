@@ -1,4 +1,4 @@
-package JAXBTests;
+package xPreparation.JAXBTests;
 
 import java.io.File;
 import java.io.FileInputStream;

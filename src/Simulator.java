@@ -6,10 +6,17 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import simulation.ISimulatable;
+import simulation.ISimulator;
+import simulation.ISimulatorListener;
 
-public class Simulator extends Observable implements ISimulator, Runnable {
+
+
+public class Simulator implements ISimulator, Runnable {
 
 	protected List<ISimulatable> _simulatables;
+	protected List<ISimulatorListener> _listeners;
+	
 	protected Integer _simulatablesDone;
 	protected final Lock lock = new ReentrantLock();
 	protected final Condition _allSimulatableActivityDone = lock.newCondition();
@@ -35,11 +42,26 @@ public class Simulator extends Observable implements ISimulator, Runnable {
 		_stopped = false;
 	}
 	
+	
+	
 	@Override
-	public void addListener(ISimulatable simulatable) {
-		_simulatables.add(simulatable);
+	public void addListener(ISimulatorListener simulatorListener) {
+		_listeners.add(simulatorListener);
 	}
 
+	public void removeListener(ISimulatorListener simulatorListener) {
+		_listeners.remove(simulatorListener);
+	}
+	
+	@Override
+	public void registerSimulatable(ISimulatable simulatable) {
+		_simulatables.remove(simulatable);
+	}
+	
+	public void unregisterSimulatable(ISimulatable simulatable) {
+		_simulatables.add(simulatable);
+	}
+	
 	public void fireEvent() {
 		EventObject o = new EventObject(this);
 		fireEvent(o);
@@ -48,25 +70,24 @@ public class Simulator extends Observable implements ISimulator, Runnable {
 	@Override
 	public void fireEvent(EventObject o) {
 		for(ISimulatable simulatable : _simulatables) {
+			System.out.println("fire" + _simulatables.size());
 			simulatable.handleTickEvent(o);
 		}
 	}
 
-	@Override
-	public void removeListener(ISimulatable simulatable) {
-		_simulatables.remove(simulatable);
-	}
+
 	
 	@Override
 	public void step() {
 		lock.lock();		
 		try { 
+			System.out.println(_allSimulatablesDone);
 			// create a tick
 			fireEvent();
 			// wait for everyone to signal completion
-			while(!_allSimulatablesDone) { _allSimulatableActivityDone.await(); }
+			while(!_allSimulatablesDone) { System.out.println("all sims not done"); _allSimulatableActivityDone.await(); }
 			_allSimulatablesDone = false;
-		} catch( Exception e ) {}
+		} catch( Exception e ) { e.printStackTrace(); }
 		finally {
 			lock.unlock();
 		}
@@ -74,6 +95,7 @@ public class Simulator extends Observable implements ISimulator, Runnable {
 
 	@Override
 	public void simulate(int time) {
+		System.out.println("a");
 		lock.lock();
 		try {
 			for( int i = 0; i < time && !_stopped; ++i ) {
@@ -82,7 +104,7 @@ public class Simulator extends Observable implements ISimulator, Runnable {
 				_pause = false;
 				
 			}
-		} catch( Exception e ) {}
+		} catch( Exception e ) { e.printStackTrace(); } 
 		finally {
 			lock.unlock();
 		}
@@ -114,7 +136,9 @@ public class Simulator extends Observable implements ISimulator, Runnable {
 		synchronized( _simulatablesDone ) {
 			++_simulatablesDone;
 			if( _simulatablesDone.intValue() == _simulatables.size() ) {
+				System.out.println("signal!");
 				_allSimulatablesDone = true;
+				_simulatablesDone = 0;
 				_allSimulatableActivityDone.signal();
 			}
 		}
