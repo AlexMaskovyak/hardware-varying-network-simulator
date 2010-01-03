@@ -14,7 +14,7 @@ import simulation.SimulatorEvent;
 
 
 
-public class Simulator implements ISimulator, Runnable {
+public class SimulatorOld implements ISimulator, Runnable {
 
 	protected List<ISimulatable> _simulatables;
 	protected List<ISimulatorListener> _listeners;
@@ -31,7 +31,7 @@ public class Simulator implements ISimulator, Runnable {
 	protected boolean _allSimulatablesDone;
 	protected Thread _thread;
 	
-	public Simulator(int timeSteps) {
+	public SimulatorOld(int timeSteps) {
 		_timeSteps = timeSteps;
 		init();
 	}

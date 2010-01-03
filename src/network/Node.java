@@ -1,9 +1,12 @@
+package network;
 import java.util.ArrayList;
 import java.util.EventListener;
 import java.util.EventObject;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.Set;
 import java.util.Stack;
 import java.util.UUID;
 
@@ -11,6 +14,7 @@ import simulation.ISimulatable;
 import simulation.ISimulatableListener;
 import simulation.ISimulator;
 import simulation.ISimulatorEvent;
+import simulation.SimulatableEvent;
 
 import network.IConnection;
 import network.IData;
@@ -18,34 +22,56 @@ import network.INode;
 
 
 /**
- * 
+ * Basic simulatable network component.  Serves as an information source and sink.  Can be "physically" connected to a IConnection.
  * @author Alex Maskovyak
  *
  */
 public class Node implements INode, ISimulatable {
 
-	protected List<IConnection> _connections;
-	protected List<ISimulator> _listeners;
+	protected Set<IConnection> _connections;
+	protected Set<ISimulatableListener> _listeners;
 	
 	protected Queue<IData> _bufferIn;
 	protected Queue<IData> _bufferOut;
 	
 	protected String _id;
 	
+	/**
+	 * Default constructor.
+	 */
 	public Node() {
-		_connections = new ArrayList<IConnection>();
+		init();
+	}
+	
+	public Node(String id) {
+		init();
+		_id = id;
+	}
+	
+	/**
+	 * Wraps all object instantiation code for the constructor for easier override-ability.
+	 */
+	protected void init() {
+		_connections = new HashSet<IConnection>();
 		_id = UUID.randomUUID().toString();
 		_bufferIn = new LinkedList<IData>();
 		_bufferOut = new LinkedList<IData>();
-		_listeners = new ArrayList<ISimulator>();
+		_listeners = new HashSet<ISimulatableListener>();
 	}
 	
-	public void addListener(ISimulator simulator) {
-		_listeners.add(simulator);
+	@Override
+	public void addListener(ISimulatableListener listener) {
+		_listeners.add(listener);
 	}
 	
-	public void removeListener(ISimulator simulator) {
-		_listeners.remove(simulator);
+	@Override
+	public void removeListener(ISimulatableListener listener) {
+		_listeners.remove(listener);
+	}
+	
+	@Override
+	public String getId() {
+		return _id;
 	}
 	
 	@Override
@@ -78,22 +104,10 @@ public class Node implements INode, ISimulatable {
 	@Override
 	public void handleTickEvent(ISimulatorEvent o) {
 		// TODO Auto-generated method stub
-		System.out.printf("Got a tick! %s\n", _id);
-		for( ISimulator simulator : _listeners ) {
-			simulator.signalDone(this);
+		for( ISimulatableListener listener : _listeners ) {
+			listener.tickUpdate(new SimulatableEvent(this));
 		}
 	}
 
-	@Override
-	public void addListener(ISimulatableListener listener) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void removeListener(ISimulatableListener listener) {
-		// TODO Auto-generated method stub
-		
-	}
 }
 

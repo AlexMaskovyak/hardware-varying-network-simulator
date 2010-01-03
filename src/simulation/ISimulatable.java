@@ -9,20 +9,20 @@ import java.util.EventListener;
 public interface ISimulatable extends EventListener {
 
 	/**
-	 * 
-	 * @param listener
+	 * Adds an eventlistener.
+	 * @param listener to add.
 	 */
 	public void addListener(ISimulatableListener listener);
 	
 	/**
-	 * 
-	 * @param listener
+	 * Removes an eventlistener.
+	 * @param listener to remove.
 	 */
 	public void removeListener(ISimulatableListener listener);
 	
 	/**
 	 * Signals for operations to occur.
-	 * @param o 
+	 * @param o ISimulatorEvent describing the tick event that occurred.
 	 */
 	public void handleTickEvent(ISimulatorEvent o);
 }

@@ -17,6 +17,12 @@ public interface INode {
 	public void connect(IConnection connection);
 	
 	/**
+	 * Retrieves this node's identifier.
+	 * @return node id.
+	 */
+	public String getId();
+	
+	/**
 	 * Receives data.
 	 * @param data to have this node receive.
 	 */
@@ -34,8 +40,4 @@ public interface INode {
 	 * @param connection to receive the data.
 	 */
 	public void send(IData data, IConnection connection);
-
-	public void addListener(ISimulator simulator);
-
-	public void removeListener(ISimulator simulator);
 }

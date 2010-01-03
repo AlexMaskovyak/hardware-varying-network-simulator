@@ -31,6 +31,7 @@ public class SimulatorSimulatableListener implements ISimulatableListener {
 		_delegate.signalDone(e.getSimulatable());
 	}
 	
+	@Override
 	public boolean equals(Object o) {
 		if(o instanceof SimulatorSimulatableListener) {
 			return equals((SimulatorSimulatableListener)o);
@@ -38,10 +39,16 @@ public class SimulatorSimulatableListener implements ISimulatableListener {
 		return false;
 	}
 	
+	/**
+	 * Compares another SimulatorSimulatableListener to this one.
+	 * @param listener to which to compare.
+	 * @return true if both listeners have the same delegate, false otherwise.
+	 */
 	public boolean equals(SimulatorSimulatableListener listener) {
 		return (getDelegate() == listener.getDelegate());
 	}
 	
+	@Override
 	public int hashCode() {
 		return _delegate.hashCode();
 	}

@@ -6,7 +6,7 @@ import javax.management.OperationsException;
  * @author Alex Maskovyak
  *
  */
-public class ComputerNode extends Node implements IComputer {
+public class ComputerNode extends NodeOld implements IComputer {
 
 	/** Algorithm to run. */
 	protected IAlgorithm _algorithm;

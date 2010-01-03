@@ -2,7 +2,10 @@ package simulation;
 
 import java.util.ArrayList;
 import java.util.EventObject;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -12,27 +15,33 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author Alex Maskovyak
  *
  */
-public class Simulator implements ISimulator {
+public class Simulator implements ISimulator, Runnable {
 
 	/**
 	 * States of operation a simulator can enter.
 	 * @author Alex Maskovyak
 	 */
-	protected enum State { INITIALIZED, STARTED, PAUSED, STOPPED, TICK, SIMULATED };
+	protected enum State { INITIALIZED, STARTED, PAUSED, STEPPED, STOPPED, TICK, SIMULATED };
 
 	/** provides protection for multi-threaded operation. */
 	protected final Lock _lock = new ReentrantLock();
-
+	/** occurs when all simulatables have reported "done" */
+	protected final Condition _simulatablesDoneCondition = _lock.newCondition();
+	/** occurs when the simulator has been "started" again */
+	protected final Condition _startedCondition = _lock.newCondition();
+	
 	
 	/** listeners of state change. */
-	protected List<ISimulatorListener> _listeners;
+	protected Set<ISimulatorListener> _listeners;
 	/** simulatable objects to receive tick events. */
-	protected List<ISimulatable> _simulatables;
+	protected Set<ISimulatable> _simulatables;
 	/** current state of the simulator. */
 	protected State _state;
 	
 	/** number of simulatables done. */
-	protected int _simulatablesDone;
+	protected int _simulatablesDoneCount;
+	protected boolean _simulatablesDone;
+	
 	
 	/**
 	 * Default constructor.
@@ -42,25 +51,35 @@ public class Simulator implements ISimulator {
 	}
 	
 	/**
-	 * Wraps all object instantiation code for the constructor.
+	 * Wraps all object instantiation code for the constructor for easier override-ability.
 	 */
-	public void init() {
-		_listeners = new ArrayList<ISimulatorListener>();
-		_simulatables = new ArrayList<ISimulatable>();
+	protected void init() {
+		_listeners = new HashSet<ISimulatorListener>();
+		_simulatables = new HashSet<ISimulatable>();
 		_state = State.INITIALIZED;
-		_simulatablesDone = 0;
+		_simulatablesDoneCount = 0;
 	}
 	
 /// listener management
 	
 	@Override
 	public void addListener(ISimulatorListener simulatorListener) {
-		_listeners.add(simulatorListener);
+		_lock.lock();
+		try {
+			_listeners.add(simulatorListener);
+		} finally {
+			_lock.unlock();
+		}
 	}
 
 	@Override
 	public void removeListener(ISimulatorListener simulatorListener) {
-		_listeners.remove(simulatorListener);
+		_lock.lock();
+		try {
+			_listeners.remove(simulatorListener);
+		} finally {
+			_lock.unlock();
+		}
 	}
 	
 
@@ -68,21 +87,41 @@ public class Simulator implements ISimulator {
 
 	@Override
 	public void registerSimulatable(ISimulatable simulatable) {
-		_simulatables.add(simulatable);
-		_listeners.add(new SimulatableSimulatorListener(simulatable));
-		simulatable.addListener(new SimulatorSimulatableListener(this));
+		_lock.lock();
+		try {
+			_simulatables.add(simulatable);
+			_listeners.add(new SimulatableSimulatorListener(simulatable));
+			simulatable.addListener(new SimulatorSimulatableListener(this));
+		} finally {
+			_lock.unlock();
+		}
 	}
 	
 	@Override
 	public void unregisterSimulatable(ISimulatable simulatable) {
-		_simulatables.remove(simulatable);
-		_listeners.remove(new SimulatableSimulatorListener(simulatable));
-		simulatable.removeListener(new SimulatorSimulatableListener(this));
+		_lock.lock();
+		try {
+			_simulatables.remove(simulatable);
+			_listeners.remove(new SimulatableSimulatorListener(simulatable));
+			simulatable.removeListener(new SimulatorSimulatableListener(this));
+		} finally {
+			_lock.unlock();
+		}
 	}
 	
 	@Override
 	public void signalDone(ISimulatable simulatable) {
-		++_simulatablesDone;
+		_lock.lock();
+		try {
+			++_simulatablesDoneCount;
+			if( _simulatablesDoneCount == _simulatables.size() ) {
+				_simulatablesDoneCount = 0;
+				_state = State.STEPPED;
+				_simulatablesDoneCondition.signalAll();
+			}
+		} finally {
+			_lock.unlock();
+		}
 	}
 	
 	public void fireEvent() {
@@ -91,13 +130,19 @@ public class Simulator implements ISimulator {
 	
 	@Override
 	public void fireEvent(ISimulatorEvent o) {
-		for(ISimulatorListener listeners : _listeners) {
-			switch(_state) {
-				case PAUSED: listeners.pauseUpdate(o); break;
-				case STARTED: listeners.startUpdate(o); break;
-				case STOPPED: listeners.stopUpdate(o); break;
-				case TICK: listeners.tickUpdate(o); break;
+		_lock.lock();
+		try {
+			for(ISimulatorListener listeners : _listeners) {
+				switch(_state) {
+					case PAUSED: listeners.pauseUpdate(o); break;
+					case STARTED: listeners.startUpdate(o); break;
+					case STOPPED: listeners.stopUpdate(o); break;
+					case TICK: listeners.tickUpdate(o); break;
+					case SIMULATED: listeners.simulatedUpdate(o); break;
+				}
 			}
+		} finally {
+			_lock.unlock();
 		}
 	}
 
@@ -105,36 +150,76 @@ public class Simulator implements ISimulator {
 	
 	@Override
 	public void pause() {
-		_state = State.PAUSED;
-		fireEvent();
+		_lock.lock();
+		try {
+			_state = State.PAUSED;
+			fireEvent();
+		} finally {
+			_lock.unlock();
+		}
 	}
 
 	@Override
 	public void start() {
-		_state = State.STARTED;
-		fireEvent();
+		_lock.lock();
+		try {
+			_state = State.STARTED;
+			_simulatablesDoneCount = 0;
+			fireEvent();
+			_startedCondition.signalAll();
+		} finally {
+			_lock.unlock();
+		}
 	}
 
 	@Override
 	public void stop() {
-		_state = State.STOPPED;
-		fireEvent();
+		_lock.lock();
+		try {
+			_state = State.STOPPED;
+			fireEvent();
+		} finally {
+			_lock.unlock();
+		}
 	}
 	
 /// simulator primary operation
 	
 	@Override
 	public void step() {
-		// TODO Auto-generated method stub
-
+		_lock.lock();
+		try {
+			// create a tick
+			_state = State.TICK;
+			fireEvent();
+			while( _state == State.TICK ) { _simulatablesDoneCondition.await(); }
+			_state = State.STARTED;
+			System.out.println("---");
+		} catch (Exception e) { e.printStackTrace(); } 
+		finally {
+			_lock.unlock();
+		}
 	}
 
 	@Override
 	public void simulate(int time) {
-		// TODO Auto-generated method stub
-
+		_lock.lock();
+		try {
+			for( int i = 0; i < time && _state != State.STOPPED; ++i ) {
+				step();
+				while( _state != State.STARTED ) { _startedCondition.await(); }
+			}
+			_state = State.SIMULATED;
+			fireEvent();
+		} catch (Exception e) { e.printStackTrace(); }
+		finally {
+			_lock.unlock();
+		}
 	}
 
-
-
+	@Override
+	public void run() {
+		start();
+		simulate(10);
+	}
 }
