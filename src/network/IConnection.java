@@ -22,6 +22,12 @@ public interface IConnection {
 	public void connect(INode node);
 	
 	/**
+	 * Disconnects a single node.
+	 * @param node to disconnect.
+	 */
+	public void disconnect(INode node);
+	
+	/**
 	 * Receives data.
 	 * @param data to receive.
 	 */

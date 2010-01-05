@@ -1,3 +1,5 @@
+package computation;
+
 /**
  * Represents an algorithm for distributed I/O runnable on an IComputer.
  * @author Alex Maskovyak

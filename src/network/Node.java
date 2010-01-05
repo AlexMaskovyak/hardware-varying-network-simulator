@@ -43,6 +43,10 @@ public class Node implements INode, ISimulatable {
 		init();
 	}
 	
+	/**
+	 * Constructor allowing id specification.
+	 * @param id to assign this node.
+	 */
 	public Node(String id) {
 		init();
 		_id = id;
@@ -75,16 +79,25 @@ public class Node implements INode, ISimulatable {
 	}
 	
 	@Override
-	public void connect(IConnection connect) {
+	public void registerConnection(IConnection connect) {
 		_connections.add(connect);
 		connect.connect(this);
 	}
 
+	public void unregisterConnection(IConnection connect) {
+		_connections.remove(connect);
+	}
+	
 	@Override
 	public void receive(IData data) {
 		_bufferIn.offer(data);
 	}
 
+	@Override
+	public void receive(IData data, IConnection connection) {
+		receive(data);
+	}
+	
 	public void send() {
 		send(_bufferOut.poll());
 	}
@@ -103,7 +116,9 @@ public class Node implements INode, ISimulatable {
 
 	@Override
 	public void handleTickEvent(ISimulatorEvent o) {
-		// TODO Auto-generated method stub
+		// here is where we would do something, like perhaps move some data along a connection
+		
+		
 		for( ISimulatableListener listener : _listeners ) {
 			listener.tickUpdate(new SimulatableEvent(this));
 		}
