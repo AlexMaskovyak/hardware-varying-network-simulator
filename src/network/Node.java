@@ -14,7 +14,7 @@ import simulation.ISimulatable;
 import simulation.ISimulatableListener;
 import simulation.ISimulator;
 import simulation.ISimulatorEvent;
-import simulation.Simulatable;
+import simulation.AbstractSimulatable;
 import simulation.SimulatableEvent;
 
 import network.IConnection;
@@ -27,7 +27,7 @@ import network.INode;
  * @author Alex Maskovyak
  *
  */
-public class Node extends Simulatable implements INode, ISimulatable {
+public class Node extends AbstractSimulatable implements INode, ISimulatable {
 
 	protected Set<IConnection> _connections;
 	

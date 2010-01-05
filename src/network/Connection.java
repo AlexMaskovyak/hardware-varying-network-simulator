@@ -10,7 +10,7 @@ import java.util.Stack;
 import simulation.ISimulatable;
 import simulation.ISimulatableListener;
 import simulation.ISimulatorEvent;
-import simulation.Simulatable;
+import simulation.AbstractSimulatable;
 import simulation.SimulatableEvent;
 
 /**
@@ -18,7 +18,7 @@ import simulation.SimulatableEvent;
  * @author Alex Maskovyak
  *
  */
-public class Connection extends Simulatable implements IConnection, ISimulatable {
+public class Connection extends AbstractSimulatable implements IConnection, ISimulatable {
 
 	/** connected nodes. */
 	protected Set<INode> _nodes;
