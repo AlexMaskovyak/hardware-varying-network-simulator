@@ -9,7 +9,7 @@ import java.util.Set;
  * @author Alex Maskovyak
  *
  */
-public abstract class Simulatable implements ISimulatable {
+public abstract class AbstractSimulatable implements ISimulatable {
 
 	/** listeners to be informed of events. */
 	protected Set<ISimulatableListener> _listeners;
@@ -17,7 +17,7 @@ public abstract class Simulatable implements ISimulatable {
 	/**
 	 * Default constructor.
 	 */
-	public Simulatable() {
+	public AbstractSimulatable() {
 		init();
 	}
 	
