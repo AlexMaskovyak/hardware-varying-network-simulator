@@ -14,6 +14,7 @@ import simulation.ISimulatable;
 import simulation.ISimulatableListener;
 import simulation.ISimulator;
 import simulation.ISimulatorEvent;
+import simulation.Simulatable;
 import simulation.SimulatableEvent;
 
 import network.IConnection;
@@ -26,10 +27,9 @@ import network.INode;
  * @author Alex Maskovyak
  *
  */
-public class Node implements INode, ISimulatable {
+public class Node extends Simulatable implements INode, ISimulatable {
 
 	protected Set<IConnection> _connections;
-	protected Set<ISimulatableListener> _listeners;
 	
 	protected Queue<IData> _bufferIn;
 	protected Queue<IData> _bufferOut;
@@ -40,7 +40,7 @@ public class Node implements INode, ISimulatable {
 	 * Default constructor.
 	 */
 	public Node() {
-		init();
+		this(UUID.randomUUID().toString());
 	}
 	
 	/**
@@ -48,29 +48,18 @@ public class Node implements INode, ISimulatable {
 	 * @param id to assign this node.
 	 */
 	public Node(String id) {
-		init();
-		_id = id;
+		super();
 	}
 	
 	/**
 	 * Wraps all object instantiation code for the constructor for easier override-ability.
 	 */
 	protected void init() {
+		super.init();
 		_connections = new HashSet<IConnection>();
-		_id = UUID.randomUUID().toString();
 		_bufferIn = new LinkedList<IData>();
 		_bufferOut = new LinkedList<IData>();
 		_listeners = new HashSet<ISimulatableListener>();
-	}
-	
-	@Override
-	public void addListener(ISimulatableListener listener) {
-		_listeners.add(listener);
-	}
-	
-	@Override
-	public void removeListener(ISimulatableListener listener) {
-		_listeners.remove(listener);
 	}
 	
 	@Override
@@ -118,10 +107,8 @@ public class Node implements INode, ISimulatable {
 	public void handleTickEvent(ISimulatorEvent o) {
 		// here is where we would do something, like perhaps move some data along a connection
 		
-		
-		for( ISimulatableListener listener : _listeners ) {
-			listener.tickUpdate(new SimulatableEvent(this));
-		}
+		// call Simulatable's to distribute the fact that we've handled it
+		super.handleTickEvent(o);
 	}
 
 }

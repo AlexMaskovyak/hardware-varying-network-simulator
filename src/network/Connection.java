@@ -10,6 +10,7 @@ import java.util.Stack;
 import simulation.ISimulatable;
 import simulation.ISimulatableListener;
 import simulation.ISimulatorEvent;
+import simulation.Simulatable;
 import simulation.SimulatableEvent;
 
 /**
@@ -17,10 +18,8 @@ import simulation.SimulatableEvent;
  * @author Alex Maskovyak
  *
  */
-public class Connection implements IConnection, ISimulatable {
+public class Connection extends Simulatable implements IConnection, ISimulatable {
 
-	protected Set<ISimulatableListener> _listeners;
-	
 	/** connected nodes. */
 	protected Set<INode> _nodes;
 	/** information coming in. */
@@ -32,10 +31,14 @@ public class Connection implements IConnection, ISimulatable {
 	 * Default constructor.
 	 */
 	public Connection() {
-		init();
+		super();
 	}
 	
-	public void init() {
+	/**
+	 * Wraps all object instantiation code for the constructor for easier override-ability.
+	 */
+	protected void init() {
+		super.init();
 		_listeners = new HashSet<ISimulatableListener>();
 		_nodes = new HashSet<INode>();
 		_bufferIn = new LinkedList<IData>();
@@ -79,25 +82,12 @@ public class Connection implements IConnection, ISimulatable {
 		}
 	}
 
-	@Override
-	public void addListener(ISimulatableListener listener) {
-		_listeners.add(listener);
-	}
-	
-	@Override
-	public void removeListener(ISimulatableListener listener) {
-		_listeners.remove(listener);
-	}
 	
 	@Override
 	public void handleTickEvent(ISimulatorEvent o) {
 		send();
 		
-		// it seems like this ISimulatable information is constant among all simulatables...
-		// everything should probably inherit from an abstract Simulatable class
-		for( ISimulatableListener listener : _listeners ) {
-			listener.tickUpdate(new SimulatableEvent(this));
-		}
+		super.handleTickEvent(o);
 	}
 
 }
