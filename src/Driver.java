@@ -3,6 +3,7 @@ import simulation.ISimulatableEvent;
 import simulation.ISimulatableListener;
 import simulation.ISimulator;
 import simulation.Simulator;
+import network.Connection;
 import network.IConnection;
 import network.INode;
 import network.Node;
@@ -29,8 +30,8 @@ public class Driver {
 		INode n = new Node();
 		INode n2 = new Node();
 		IConnection c = new Connection();
-		n.connect(c);
-		n2.connect(c);
+		n.registerConnection(c);
+		n2.registerConnection(c);
 		((ISimulatable)n).addListener(new ISimulatableListener() { 
 			@Override
 			public void tickUpdate(ISimulatableEvent e) {

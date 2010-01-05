@@ -1,5 +1,8 @@
 import javax.management.OperationsException;
 
+import computation.IAlgorithm;
+import computation.IComputer;
+
 /**
  * Simulatable Computer Node which has modular hardware components.
  * 
@@ -10,6 +13,8 @@ public class ComputerNode extends NodeOld implements IComputer {
 
 	/** Algorithm to run. */
 	protected IAlgorithm _algorithm;
+	/** cpu */
+	
 	
 	@Override
 	public void install(IAlgorithm algorithm) {

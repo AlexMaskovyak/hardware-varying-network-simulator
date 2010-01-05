@@ -49,7 +49,7 @@ public class NodeOld implements INode, ISimulatable {
 	}
 	
 	@Override
-	public void connect(IConnection connect) {
+	public void registerConnection(IConnection connect) {
 		_connections.add(connect);
 		connect.connect(this);
 	}
@@ -100,6 +100,18 @@ public class NodeOld implements INode, ISimulatable {
 	public String getId() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void receive(IData data, IConnection connection) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void unregisterConnection(IConnection connection) {
+		// TODO Auto-generated method stub
+		
 	}
 }
 
