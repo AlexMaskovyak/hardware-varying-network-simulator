@@ -1,17 +1,13 @@
 package network;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Queue;
 import java.util.Set;
-import java.util.Stack;
 
 import simulation.ISimulatable;
 import simulation.ISimulatableListener;
 import simulation.ISimulatorEvent;
 import simulation.AbstractSimulatable;
-import simulation.SimulatableEvent;
 
 /**
  * Bidirectional, multicast connection.

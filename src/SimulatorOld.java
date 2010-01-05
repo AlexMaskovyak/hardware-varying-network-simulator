@@ -1,7 +1,5 @@
 import java.util.ArrayList;
-import java.util.EventObject;
 import java.util.List;
-import java.util.Observable;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;

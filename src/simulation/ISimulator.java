@@ -1,7 +1,5 @@
 package simulation;
 
-import java.util.EventObject;
-
 /**
  * Discrete event simulator which delivers time events to registered simulatables.
  * 

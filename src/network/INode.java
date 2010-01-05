@@ -1,5 +1,4 @@
 package network;
-import simulation.ISimulator;
 
 
 /**

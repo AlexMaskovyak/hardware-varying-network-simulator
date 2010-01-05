@@ -1,10 +1,7 @@
 import java.util.ArrayList;
-import java.util.EventListener;
-import java.util.EventObject;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.Stack;
 import java.util.UUID;
 
 import simulation.ISimulatable;
