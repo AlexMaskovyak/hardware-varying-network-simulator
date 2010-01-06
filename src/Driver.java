@@ -35,12 +35,12 @@ public class Driver {
 		((ISimulatable)n).addListener(new ISimulatableListener() { 
 			@Override
 			public void tickUpdate(ISimulatableEvent e) {
-				System.out.printf("Got a tick! %s\n", ((INode)e.getSimulatable()).getId());
+				System.out.printf("Got tick #%d! %s\n", e.getEventTime(), ((INode)e.getSimulatable()).getId());
 			} } );
 		((ISimulatable)n2).addListener(new ISimulatableListener() { 
 			@Override
 			public void tickUpdate(ISimulatableEvent e) {
-				System.out.printf("Got a tick! %s\n", ((INode)e.getSimulatable()).getId());
+				System.out.printf("Got tick #%d! %s\n", e.getEventTime(), ((INode)e.getSimulatable()).getId());
 			} } );
 		
 		sim.registerSimulatable((ISimulatable)n);

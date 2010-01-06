@@ -20,6 +20,7 @@ public interface IComputer {
 	 * @param algorithm to install.
 	 */
 	public void install(IAlgorithm algorithm);
+
 	
 	/**
 	 * Removes a distributed algorithm from this computer.

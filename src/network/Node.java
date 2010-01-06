@@ -42,6 +42,7 @@ public class Node extends AbstractSimulatable implements INode, ISimulatable {
 	 */
 	public Node(String id) {
 		super();
+		_id = id;
 	}
 	
 	/**
@@ -68,11 +69,14 @@ public class Node extends AbstractSimulatable implements INode, ISimulatable {
 
 	public void unregisterConnection(IConnection connect) {
 		_connections.remove(connect);
+		connect.disconnect(this);
 	}
 	
 	@Override
 	public void receive(IData data) {
 		_bufferIn.offer(data);
+		
+		
 	}
 
 	@Override

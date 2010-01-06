@@ -18,7 +18,7 @@ public class Simulator implements ISimulator, Runnable {
 	 * States of operation a simulator can enter.
 	 * @author Alex Maskovyak
 	 */
-	protected enum State { INITIALIZED, STARTED, PAUSED, STEPPED, STOPPED, TICK, SIMULATED };
+	protected enum State { INITIALIZED, STARTED, PAUSED, RESUMED, STEPPED, STOPPED, TICK, SIMULATED };
 
 	/** provides protection for multi-threaded operation. */
 	protected final Lock _lock = new ReentrantLock();
@@ -37,7 +37,9 @@ public class Simulator implements ISimulator, Runnable {
 	
 	/** number of simulatables done. */
 	protected int _simulatablesDoneCount;
-	protected boolean _simulatablesDone;
+	
+	/** latest time that has occurred. */
+	protected int _currentTime;
 	
 	
 	/**
@@ -122,7 +124,7 @@ public class Simulator implements ISimulator, Runnable {
 	}
 	
 	public void fireEvent() {
-		fireEvent(new SimulatorEvent(this));
+		fireEvent(new SimulatorEvent(this, _currentTime));
 	}
 	
 	@Override
@@ -132,6 +134,7 @@ public class Simulator implements ISimulator, Runnable {
 			for(ISimulatorListener listeners : _listeners) {
 				switch(_state) {
 					case PAUSED: listeners.pauseUpdate(o); break;
+					case RESUMED: listeners.resumeUpdate(o); break;
 					case STARTED: listeners.startUpdate(o); break;
 					case STOPPED: listeners.stopUpdate(o); break;
 					case TICK: listeners.tickUpdate(o); break;
@@ -146,22 +149,12 @@ public class Simulator implements ISimulator, Runnable {
 /// simulator operation control
 	
 	@Override
-	public void pause() {
-		_lock.lock();
-		try {
-			_state = State.PAUSED;
-			fireEvent();
-		} finally {
-			_lock.unlock();
-		}
-	}
-
-	@Override
 	public void start() {
 		_lock.lock();
 		try {
 			_state = State.STARTED;
 			_simulatablesDoneCount = 0;
+			_currentTime = 0;
 			fireEvent();
 			_startedCondition.signalAll();
 		} finally {
@@ -180,6 +173,31 @@ public class Simulator implements ISimulator, Runnable {
 		}
 	}
 	
+	
+	@Override
+	public void pause() {
+		_lock.lock();
+		try {
+			_state = State.PAUSED;
+			fireEvent();
+		} finally {
+			_lock.unlock();
+		}
+	}
+	
+	public void resume() {
+		_lock.lock();
+		try {
+			_state = State.RESUMED;
+			fireEvent();
+			_state = State.STARTED;
+			fireEvent();
+			_startedCondition.signalAll();
+		} finally {
+			_lock.unlock();
+		}
+	}
+	
 /// simulator primary operation
 	
 	@Override
@@ -187,6 +205,7 @@ public class Simulator implements ISimulator, Runnable {
 		_lock.lock();
 		try {
 			// create a tick
+			++_currentTime;
 			_state = State.TICK;
 			fireEvent();
 			while( _state == State.TICK ) { _simulatablesDoneCondition.await(); }
