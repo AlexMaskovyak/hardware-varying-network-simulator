@@ -1,7 +1,12 @@
+package computation;
+
 import javax.management.OperationsException;
 
-import computation.IAlgorithm;
-import computation.IComputer;
+import network.INode;
+import network.Node;
+
+
+import simulation.ISimulatable;
 
 /**
  * Simulatable Computer Node which has modular hardware components.
@@ -9,12 +14,32 @@ import computation.IComputer;
  * @author Alex Maskovyak
  *
  */
-public class ComputerNode extends NodeOld implements IComputer {
+public class ComputerNode extends Node implements IComputer, INode, ISimulatable {
 
-	/** Algorithm to run. */
+	/** installed algorithm. */
 	protected IAlgorithm _algorithm;
-	/** cpu */
 	
+	/**
+	 * Default constructor.
+	 */
+	public ComputerNode() {
+		super();
+	}
+	
+	/**
+	 * Constructor, installs an algorithm.
+	 * @param algorithm to install.
+	 */
+	public ComputerNode(IAlgorithm algorithm) {
+		super();
+		install(algorithm);
+	}
+	
+	@Override
+	protected void init() {
+		super.init();
+		_algorithm = null;
+	}
 	
 	@Override
 	public void install(IAlgorithm algorithm) {

@@ -42,16 +42,40 @@ public interface ISimulator {
 	 */
 	public void signalDone(ISimulatable simulatable);
 	
+	/**
+	 * Fires the provided event for all listeners to receive.
+	 * @param o event that has occurred.
+	 */
 	public void fireEvent(ISimulatorEvent o);
 	
+	/**
+	 * Simulate the specified number of steps for all simulatables.
+	 * @param time steps to simulate.
+	 */
 	public void simulate(int time);
 	
+	/**
+	 * Place the Simulator into the start state, necessary to begin simulation.
+	 */
 	public void start();
 	
-	public void step();
-	
+	/**
+	 * Place the Simulator into the pause state to halt simulation until resumed.
+	 */
 	public void pause();
 	
+	/**
+	 * Places the Simulator into the resumed state, allowing the simulator to continue simulating from the point at which it was paused.
+	 */
+	public void resume();
+	
+	/**
+	 * Permanently halts the current simulation.
+	 */
 	public void stop();
 
+	/**
+	 * Proceeds with the next simulation time event.  Updates time.
+	 */
+	public void step();
 }
