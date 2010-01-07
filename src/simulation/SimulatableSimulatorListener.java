@@ -53,10 +53,10 @@ public class SimulatableSimulatorListener implements ISimulatorListener {
 	public void resumeUpdate(ISimulatorEvent e) {}
 
 	@Override
-	public void simulatableRegisteredUpdate(ISimulatableEvent e) {}
+	public void simulatableRegisteredUpdate(ISimulatorEvent e) {}
 
 	@Override
-	public void simulatableUnregisteredUpdate(ISimulatableEvent e) {}
+	public void simulatableUnregisteredUpdate(ISimulatorEvent e) {}
 
 	@Override
 	public void simulatedUpdate(ISimulatorEvent e) {}

@@ -18,7 +18,7 @@ public class Simulator implements ISimulator, Runnable {
 	 * States of operation a simulator can enter.
 	 * @author Alex Maskovyak
 	 */
-	protected enum State { INITIALIZED, STARTED, PAUSED, RESUMED, STEPPED, STOPPED, TICK, SIMULATED };
+	protected enum State { REGISTERED_SIMULATABLE, UNREGISTERED_SIMULATABLE, INITIALIZED, STARTED, PAUSED, RESUMED, STEPPED, STOPPED, TICK, SIMULATED };
 
 	/** provides protection for multi-threaded operation. */
 	protected final Lock _lock = new ReentrantLock();
@@ -91,6 +91,12 @@ public class Simulator implements ISimulator, Runnable {
 			_simulatables.add(simulatable);
 			_listeners.add(new SimulatableSimulatorListener(simulatable));
 			simulatable.addListener(new SimulatorSimulatableListener(this));
+			
+			State _temp = _state;
+			_state = State.REGISTERED_SIMULATABLE;
+			fireEvent();
+			_state = _temp;
+			
 		} finally {
 			_lock.unlock();
 		}
@@ -103,6 +109,12 @@ public class Simulator implements ISimulator, Runnable {
 			_simulatables.remove(simulatable);
 			_listeners.remove(new SimulatableSimulatorListener(simulatable));
 			simulatable.removeListener(new SimulatorSimulatableListener(this));
+			
+			State _temp = _state;
+			_state = State.UNREGISTERED_SIMULATABLE;
+			fireEvent();
+			_state = _temp;
+			
 		} finally {
 			_lock.unlock();
 		}
@@ -124,21 +136,23 @@ public class Simulator implements ISimulator, Runnable {
 	}
 	
 	public void fireEvent() {
-		fireEvent(new SimulatorEvent(this, _currentTime));
+		notify(new SimulatorEvent(this, _currentTime));
 	}
 	
 	@Override
-	public void fireEvent(ISimulatorEvent o) {
+	public void notify(ISimulatorEvent o) {
 		_lock.lock();
 		try {
-			for(ISimulatorListener listeners : _listeners) {
+			for(ISimulatorListener listener : _listeners) {
 				switch(_state) {
-					case PAUSED: listeners.pauseUpdate(o); break;
-					case RESUMED: listeners.resumeUpdate(o); break;
-					case STARTED: listeners.startUpdate(o); break;
-					case STOPPED: listeners.stopUpdate(o); break;
-					case TICK: listeners.tickUpdate(o); break;
-					case SIMULATED: listeners.simulatedUpdate(o); break;
+					case PAUSED: listener.pauseUpdate(o); break;
+					case RESUMED: listener.resumeUpdate(o); break;
+					case STARTED: listener.startUpdate(o); break;
+					case STOPPED: listener.stopUpdate(o); break;
+					case TICK: listener.tickUpdate(o); break;
+					case SIMULATED: listener.simulatedUpdate(o); break;
+					case REGISTERED_SIMULATABLE: listener.simulatableRegisteredUpdate(o); break;
+					case UNREGISTERED_SIMULATABLE: listener.simulatableUnregisteredUpdate(o); break;
 				}
 			}
 		} finally {
