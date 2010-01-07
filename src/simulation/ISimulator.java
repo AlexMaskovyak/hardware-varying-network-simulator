@@ -46,7 +46,7 @@ public interface ISimulator {
 	 * Fires the provided event for all listeners to receive.
 	 * @param o event that has occurred.
 	 */
-	public void fireEvent(ISimulatorEvent o);
+	public void notify(ISimulatorEvent o);
 	
 	/**
 	 * Simulate the specified number of steps for all simulatables.

@@ -39,9 +39,14 @@ public abstract class AbstractSimulatable implements ISimulatable {
 	}
 	
 	@Override
-	public void handleTickEvent(ISimulatorEvent o) {
+	public void handleTickEvent(ISimulatorEvent e) {
+		notify(new SimulatableEvent(this, e.getTime()));
+	}
+	
+	@Override
+	public void notify(ISimulatableEvent e) {
 		for( ISimulatableListener listener : _listeners ) {
-			listener.tickUpdate(new SimulatableEvent(this, o.getTime()));
+			listener.tickUpdate(e);
 		}
 	}
 }

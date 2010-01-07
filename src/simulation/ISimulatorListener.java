@@ -14,13 +14,13 @@ public interface ISimulatorListener extends EventListener {
 	 * ISimulatable newly registered to this simulator.
 	 * @param e ISimulatorEvent containing information about this event.
 	 */
-	public void simulatableRegisteredUpdate(ISimulatableEvent e);
+	public void simulatableRegisteredUpdate(ISimulatorEvent e);
 	
 	/**
 	 * ISimulatable unregistered fromt his simulator.
 	 * @param e ISimulatorEvent containing information about this event.
 	 */
-	public void simulatableUnregisteredUpdate(ISimulatableEvent e);
+	public void simulatableUnregisteredUpdate(ISimulatorEvent e);
 	
 	/**
 	 * Time increment event.

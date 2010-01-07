@@ -22,7 +22,13 @@ public interface ISimulatable extends EventListener {
 	
 	/**
 	 * Signals for operations to occur.
-	 * @param o ISimulatorEvent describing the tick event that occurred.
+	 * @param e ISimulatorEvent describing the tick event that occurred.
 	 */
-	public void handleTickEvent(ISimulatorEvent o);
+	public void handleTickEvent(ISimulatorEvent e);
+	
+	/**
+	 * Notifies all listeners that an event has occurred.
+	 * @param e ISimulatableEvent to disseminate.
+	 */
+	public void notify(ISimulatableEvent e);
 }
