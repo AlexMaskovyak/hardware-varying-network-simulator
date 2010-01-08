@@ -34,6 +34,13 @@ public interface IConnection {
 	public void receive(IData data);
 	
 	/**
+	 * Recevies data from the specified node.
+	 * @param sender who sent data.
+	 * @param data to receive.
+	 */
+	public void receive(INode sender, IData data);
+	
+	/**
 	 * Sends data to connected nodes in an implementation specific way.
 	 * @param sender node sending information.
 	 * @param data to be sent.

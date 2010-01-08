@@ -67,6 +67,8 @@ public class HardwareComputerNode extends ComputerNode implements IComputer, IHa
 	
 	@Override
 	public void handleTickEvent(ISimulatorEvent o) {
+		
+		
 		// flow should be: node gets info in buffer > mainmemory > cpu > harddrive
 		
 		super.handleTickEvent(o);

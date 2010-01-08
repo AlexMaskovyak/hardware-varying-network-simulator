@@ -61,8 +61,14 @@ public class Connection extends AbstractSimulatable implements IConnection, ISim
 	@Override
 	public void receive(IData data) {
 		_bufferIn.offer(data);
+		System.out.printf("Connection got %d\n", data.getID());
 	}
 
+	@Override
+	public void receive(INode sender, IData data) {
+		receive(data);
+	}
+	
 	public void send() {
 		IData data = _bufferOut.poll();
 		send(null, data);
@@ -85,5 +91,4 @@ public class Connection extends AbstractSimulatable implements IConnection, ISim
 		
 		super.handleTickEvent(o);
 	}
-
 }
