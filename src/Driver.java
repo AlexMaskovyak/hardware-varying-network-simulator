@@ -1,9 +1,11 @@
+import reporting.NodeReporter;
 import simulation.ISimulatable;
 import simulation.ISimulatableEvent;
 import simulation.ISimulatableListener;
 import simulation.ISimulator;
 import simulation.Simulator;
 import network.Connection;
+import network.Data;
 import network.IConnection;
 import network.INode;
 import network.Node;
@@ -37,17 +39,36 @@ public class Driver {
 			public void tickUpdate(ISimulatableEvent e) {
 				System.out.printf("Got tick #%d! %s\n", e.getEventTime(), ((INode)e.getSimulatable()).getId());
 			} } );
+		((ISimulatable)n).addListener(new ISimulatableListener() {			
+			
+			protected int _timesToRun = 5;
+			protected int _timesRun = 0;
+			
+			@Override
+			public void tickUpdate(ISimulatableEvent e) {
+				
+				
+				((INode)e.getSimulatable()).send(new Data(1, null));
+				_timesRun++;
+				if( _timesToRun == _timesRun ) {
+					e.getSimulatable().removeListener(this);
+				}
+			}
+		} );
 		((ISimulatable)n2).addListener(new ISimulatableListener() { 
 			@Override
 			public void tickUpdate(ISimulatableEvent e) {
 				System.out.printf("Got tick #%d! %s\n", e.getEventTime(), ((INode)e.getSimulatable()).getId());
 			} } );
-		
+		((ISimulatable)n).addListener(new NodeReporter(n));
 		sim.registerSimulatable((ISimulatable)n);
 		sim.registerSimulatable((ISimulatable)n2);
 
 		Thread t = new Thread((Runnable)sim);
 		t.start();
 		t.join();	
+		sim.unregisterSimulatable((ISimulatable)n);
+		sim.start();
+		sim.simulate(5);
 	}
 }

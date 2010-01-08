@@ -45,7 +45,10 @@ public abstract class AbstractSimulatable implements ISimulatable {
 	
 	@Override
 	public void notify(ISimulatableEvent e) {
-		for( ISimulatableListener listener : _listeners ) {
+		// copy the set and enumerate over that so that listeners can unregister themselves
+		// as a part of their computation
+		Set<ISimulatableListener> _listenersCopy = new HashSet<ISimulatableListener>(_listeners);
+		for( ISimulatableListener listener : _listenersCopy ) {
 			listener.tickUpdate(e);
 		}
 	}

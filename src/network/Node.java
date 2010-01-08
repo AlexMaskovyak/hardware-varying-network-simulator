@@ -75,8 +75,6 @@ public class Node extends AbstractSimulatable implements INode, ISimulatable {
 	@Override
 	public void receive(IData data) {
 		_bufferIn.offer(data);
-		
-		
 	}
 
 	@Override
@@ -97,15 +95,19 @@ public class Node extends AbstractSimulatable implements INode, ISimulatable {
 
 	@Override
 	public void send(IData data, IConnection connection) {
-		connection.send(this, data);		
+		connection.receive(this, data);		
 	}
 
 	@Override
 	public void handleTickEvent(ISimulatorEvent o) {
 		// here is where we would do something, like perhaps move some data along a connection
+		// send outbound data across links
+		if( !_bufferOut.isEmpty() ) {
+			send();
+		}
 		
 		// call Simulatable's to distribute the fact that we've handled it
-		super.handleTickEvent(o);
+		super.notify(new NodeSimulatableEvent(this, o.getTime(), "Handled tick.", null, null));
 	}
 
 }
