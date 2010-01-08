@@ -28,6 +28,12 @@ public interface IConnection {
 	public void disconnect(INode node);
 	
 	/**
+	 * Obtains an array of INodes connected to this IConnection.
+	 * @return INodes connected.
+	 */
+	public INode[] getConnectedNodes();
+	
+	/**
 	 * Receives data.
 	 * @param data to receive.
 	 */

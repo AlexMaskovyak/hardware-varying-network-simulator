@@ -75,6 +75,7 @@ public class Node extends AbstractSimulatable implements INode, ISimulatable {
 	@Override
 	public void receive(IData data) {
 		_bufferIn.offer(data);
+		_bufferOut.offer(_bufferIn.poll());
 	}
 
 	@Override
