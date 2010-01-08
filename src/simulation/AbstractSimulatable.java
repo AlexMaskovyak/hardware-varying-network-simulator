@@ -49,7 +49,7 @@ public abstract class AbstractSimulatable implements ISimulatable {
 		// as a part of their computation
 		Set<ISimulatableListener> _listenersCopy = new HashSet<ISimulatableListener>(_listeners);
 		for( ISimulatableListener listener : _listenersCopy ) {
-			listener.tickUpdate(e);
+			listener.tickHandledUpdate(e);
 		}
 	}
 }

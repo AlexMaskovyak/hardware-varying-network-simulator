@@ -9,6 +9,7 @@ import network.Data;
 import network.IConnection;
 import network.INode;
 import network.Node;
+import network.NodeSimulatableListener;
 
 /**
  * Creates a simulator from a configuration file and runs a simulation.
@@ -34,20 +35,28 @@ public class Driver {
 		IConnection c = new Connection();
 		n.registerConnection(c);
 		n2.registerConnection(c);
-		((ISimulatable)n).addListener(new ISimulatableListener() { 
+		/*((ISimulatable)n).addListener(new ISimulatableListener() { 
 			@Override
-			public void tickUpdate(ISimulatableEvent e) {
+			public void tickHandledUpdate(ISimulatableEvent e) {
+			}
+
+			@Override
+			public void tickReceivedUpdate(ISimulatableEvent e) {
 				System.out.printf("Got tick #%d! %s\n", e.getEventTime(), ((INode)e.getSimulatable()).getId());
-			} } );
+				
+			} } );*/
+		((ISimulatable)n).addListener(new NodeSimulatableListener(System.out));
 		((ISimulatable)n).addListener(new ISimulatableListener() {			
 			
 			protected int _timesToRun = 5;
 			protected int _timesRun = 0;
 			
 			@Override
-			public void tickUpdate(ISimulatableEvent e) {
-				
-				
+			public void tickHandledUpdate(ISimulatableEvent e) {
+			}
+
+			@Override
+			public void tickReceivedUpdate(ISimulatableEvent e) {
 				((INode)e.getSimulatable()).send(new Data(1, null));
 				_timesRun++;
 				if( _timesToRun == _timesRun ) {
@@ -55,12 +64,17 @@ public class Driver {
 				}
 			}
 		} );
-		((ISimulatable)n2).addListener(new ISimulatableListener() { 
+		((ISimulatable)n2).addListener(new NodeSimulatableListener(System.out));
+		/*((ISimulatable)n2).addListener(new ISimulatableListener() { 
 			@Override
-			public void tickUpdate(ISimulatableEvent e) {
+			public void tickHandledUpdate(ISimulatableEvent e) {
+			}
+
+			@Override
+			public void tickReceivedUpdate(ISimulatableEvent e) {
 				System.out.printf("Got tick #%d! %s\n", e.getEventTime(), ((INode)e.getSimulatable()).getId());
-			} } );
-		((ISimulatable)n).addListener(new NodeReporter(n));
+			} } );*/
+		//((ISimulatable)n).addListener(new NodeReporter(n));
 		sim.registerSimulatable((ISimulatable)n);
 		sim.registerSimulatable((ISimulatable)n2);
 
