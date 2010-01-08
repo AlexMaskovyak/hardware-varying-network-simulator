@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import simulation.ISimulatable;
+import simulation.ISimulatableEvent;
 import simulation.ISimulatableListener;
 import simulation.ISimulatorEvent;
 import simulation.AbstractSimulatable;
@@ -22,12 +23,16 @@ import network.INode;
  */
 public class Node extends AbstractSimulatable implements INode, ISimulatable {
 
+	protected enum State { RECEIVED, SENT, GOT_TICK, HANDLED_TICK, IDLE };
+	
 	protected Set<IConnection> _connections;
 	
 	protected Queue<IData> _bufferIn;
 	protected Queue<IData> _bufferOut;
 	
 	protected String _id;
+	
+	protected State _currentState; 
 	
 	/**
 	 * Default constructor.
@@ -53,7 +58,7 @@ public class Node extends AbstractSimulatable implements INode, ISimulatable {
 		_connections = new HashSet<IConnection>();
 		_bufferIn = new LinkedList<IData>();
 		_bufferOut = new LinkedList<IData>();
-		_listeners = new HashSet<ISimulatableListener>();
+		_currentState = State.IDLE;
 	}
 	
 	@Override
@@ -76,6 +81,10 @@ public class Node extends AbstractSimulatable implements INode, ISimulatable {
 	public void receive(IData data) {
 		_bufferIn.offer(data);
 		_bufferOut.offer(_bufferIn.poll());
+		// notify listeners that we've received data
+		_currentState = State.RECEIVED;
+		notify(new NodeSimulatableEvent(this, -1, "Got data.", data, null));
+		_currentState = State.IDLE;
 	}
 
 	@Override
@@ -96,11 +105,19 @@ public class Node extends AbstractSimulatable implements INode, ISimulatable {
 
 	@Override
 	public void send(IData data, IConnection connection) {
-		connection.receive(this, data);		
+		connection.receive(this, data);
+		// notify listeners that we sent data.
+		_currentState = State.SENT;
+		notify(new NodeSimulatableEvent(this, -1, "Sent data.", null, data));
+		_currentState = State.IDLE;
 	}
 
 	@Override
 	public void handleTickEvent(ISimulatorEvent o) {
+		// notify that we've gotten a tick
+		_currentState = State.GOT_TICK;
+		notify(new NodeSimulatableEvent(this, o.getTime(), "Got tick.", null, null));
+		
 		// here is where we would do something, like perhaps move some data along a connection
 		// send outbound data across links
 		if( !_bufferOut.isEmpty() ) {
@@ -108,8 +125,32 @@ public class Node extends AbstractSimulatable implements INode, ISimulatable {
 		}
 		
 		// call Simulatable's to distribute the fact that we've handled it
-		super.notify(new NodeSimulatableEvent(this, o.getTime(), "Handled tick.", null, null));
+		_currentState = State.HANDLED_TICK;
+		notify(new NodeSimulatableEvent(this, o.getTime(), "Handled tick.", null, null));
+		_currentState = State.IDLE;
 	}
 
+	@Override
+	public void notify(ISimulatableEvent e) {
+		// copy the set and enumerate over that so that listeners can unregister themselves
+		// as a part of their computation
+		Set<ISimulatableListener> _listenersCopy = new HashSet<ISimulatableListener>(_listeners);
+		for( ISimulatableListener listener : _listenersCopy ) {
+			switch(_currentState) {
+				case GOT_TICK: listener.tickReceivedUpdate(e); break;
+				case HANDLED_TICK: listener.tickHandledUpdate(e); break;
+				case SENT:
+					if (listener instanceof NodeSimulatableListener) {
+						((NodeSimulatableListener)listener).sendUpdate((NodeSimulatableEvent)e);
+					}
+					break;
+				case RECEIVED: 
+					if (listener instanceof NodeSimulatableListener) {
+						((NodeSimulatableListener)listener).receiveUpdate((NodeSimulatableEvent)e);
+					}
+					break;
+			}
+		}
+	}
 }
 

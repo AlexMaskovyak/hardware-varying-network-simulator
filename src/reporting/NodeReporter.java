@@ -2,47 +2,66 @@ package reporting;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 
-import network.AbstractNodeSimulatableEventListener;
+import simulation.ISimulatableEvent;
+
 import network.INode;
+import network.INodeSimulatableListener;
 import network.Node;
 import network.NodeSimulatableEvent;
+import network.NodeSimulatableListener;
 
-public class NodeReporter extends AbstractNodeSimulatableEventListener {
+public class NodeReporter extends NodeSimulatableListener implements INodeSimulatableListener {
 
 	protected INode _node;
 	protected static String _outputPath = "";
-	protected PrintWriter _out;
 	
 	public NodeReporter(INode node) throws Exception {
-		this(node, 
-				new PrintWriter( 
-					new BufferedWriter( 
-						new FileWriter( 
-							new File( 
-								String.format(
-									"%s%s%s", 
-									_outputPath, 
-									File.separator, 
-									node.getId() ) ) ) ) ) );		
+		this(
+			node, 
+			new FileOutputStream(
+				new File(String.format("%s%s%s", _outputPath, File.separator, node.getId()))));
 	}
 	
-	public NodeReporter(INode node, PrintWriter out) {
+	public NodeReporter(INode node, OutputStream out) {
+		super(out);
 		_node = node;
-		_out = out;
 	}
 	
 	@Override
-	public void tickUpdate(NodeSimulatableEvent e) {
-		_out.write(
-			String.format( "%d %d %d\n", 
-					e.getEventTime(), 
-					(e.getDataReceived() == null ) ? 0 : e.getDataReceived().length, 
-					(e.getDataSent() == null ) ? 0 : e.getDataSent().length) );
-		_out.flush();
+	public void tickHandledUpdate(ISimulatableEvent e) {
+		if(e instanceof NodeSimulatableEvent) {
+			NodeSimulatableEvent ne = (NodeSimulatableEvent)e;
+			
+			_out.write(
+					String.format( "%d %d %d\n", 
+							e.getEventTime(), 
+							(ne.getDataReceived() == null ) ? 0 : ne.getDataReceived().getID(), 
+							(ne.getDataSent() == null ) ? 0 : ne.getDataSent().getID()) );
+			_out.flush();
+		}
+	}
+
+	@Override
+	public void receiveUpdate(NodeSimulatableEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void sendUpdate(NodeSimulatableEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void tickReceivedUpdate(ISimulatableEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	

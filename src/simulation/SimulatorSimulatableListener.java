@@ -27,7 +27,13 @@ public class SimulatorSimulatableListener implements ISimulatableListener {
 	}
 	
 	@Override
-	public void tickUpdate(ISimulatableEvent e) {
+	public void tickReceivedUpdate(ISimulatableEvent e) {
+		// the Simulator doesn't care if the node has gotten the tick since we all live on the same
+		// system, it only cares if the tick has been handled
+	}
+
+	@Override
+	public void tickHandledUpdate(ISimulatableEvent e) {
 		_delegate.signalDone(e.getSimulatable());
 	}
 	

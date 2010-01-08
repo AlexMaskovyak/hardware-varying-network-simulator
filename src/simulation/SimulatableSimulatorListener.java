@@ -31,6 +31,7 @@ public class SimulatableSimulatorListener implements ISimulatorListener {
 		return _delegate;
 	}
 	
+	@Override
 	public boolean equals(Object o) {
 		if(o instanceof SimulatableSimulatorListener) {
 			return equals((SimulatableSimulatorListener)o);
@@ -42,6 +43,7 @@ public class SimulatableSimulatorListener implements ISimulatorListener {
 		return (getDelegate() == listener.getDelegate());
 	}
 	
+	@Override
 	public int hashCode() {
 		return _delegate.hashCode();
 	}

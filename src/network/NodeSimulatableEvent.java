@@ -7,8 +7,8 @@ import simulation.SimulatableEvent;
 public class NodeSimulatableEvent extends SimulatableEvent implements ISimulatableEvent {
 
 	protected String _event;
-	protected IData[] _dataReceived;
-	protected IData[] _dataSent;
+	protected IData _dataReceived;
+	protected IData _dataSent;
 	
 	/**
 	 * Default constructor.
@@ -16,9 +16,11 @@ public class NodeSimulatableEvent extends SimulatableEvent implements ISimulatab
 	 * @param time during which this event occurred.
 	 * @param event description of the event.
 	 */
-	public NodeSimulatableEvent(ISimulatable source, int time, String event, IData[] dataReceived, IData[] dataSent) {
+	public NodeSimulatableEvent(ISimulatable source, int time, String event, IData dataReceived, IData dataSent) {
 		super(source, time);
 		_event = event;
+		_dataReceived = dataReceived;
+		_dataSent = dataSent;
 	}
 
 	/**
@@ -33,7 +35,7 @@ public class NodeSimulatableEvent extends SimulatableEvent implements ISimulatab
 	 * Data received during this event, null if not applicable.
 	 * @return data received.
 	 */
-	public IData[] getDataReceived() {
+	public IData getDataReceived() {
 		return _dataReceived;
 	}
 	
@@ -41,7 +43,7 @@ public class NodeSimulatableEvent extends SimulatableEvent implements ISimulatab
 	 * Data send during this event, null if not applicable.
 	 * @return data sent.
 	 */
-	public IData[] getDataSent() {
+	public IData getDataSent() {
 		return _dataSent;
 	}
 	

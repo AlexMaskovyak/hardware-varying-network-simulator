@@ -22,11 +22,9 @@ public class DiscreteScheduledEventSimulator extends Simulator implements ISimul
 	}
 	
 	public void schedule(IDiscreteScheduledEvent event) {
-		System.out.println("got event....getting lock");
 		_lock.lock();
 		try {
 			_queue.offer(event);
-			System.out.println("Got event!");
 			_eventsAddedCondition.signalAll();
 		} finally {
 			_lock.unlock();
@@ -38,9 +36,7 @@ public class DiscreteScheduledEventSimulator extends Simulator implements ISimul
 		_lock.lock();
 		try {
 			while(_state != State.STOPPED ) {
-				System.out.println("1");
-				while( _queue.isEmpty() ) { System.out.println("await"); _eventsAddedCondition.await(); } 
-				System.out.println("2");
+				while( _queue.isEmpty() ) { _eventsAddedCondition.await(); } 
 				while( !_queue.isEmpty() ) {
 					IDiscreteScheduledEvent event = _queue.poll();
 					_currentTime = event.getTime();
