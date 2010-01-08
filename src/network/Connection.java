@@ -59,6 +59,13 @@ public class Connection extends AbstractSimulatable implements IConnection, ISim
 	}
 	
 	@Override
+	public INode[] getConnectedNodes() {
+		INode[] result = new INode[_nodes.size()];
+		result = _nodes.toArray(result);
+		return result;
+	}
+	
+	@Override
 	public void receive(IData data) {
 		_bufferIn.offer(data);
 		System.out.printf("Connection got %d\n", data.getID());
