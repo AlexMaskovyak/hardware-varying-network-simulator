@@ -1,6 +1,7 @@
 import reporting.NodeReporter;
 import simulation.DiscreteScheduledEventSimulator;
 import simulation.IDiscreteScheduledEvent;
+import simulation.IDiscreteScheduledEventSimulator;
 import simulation.ISimulatable;
 import simulation.ISimulatableEvent;
 import simulation.ISimulatableListener;
@@ -31,13 +32,13 @@ public class DriverForDiscreteEvent {
 		//}
 		
 		System.out.println("done");
-		ISimulator sim = new DiscreteScheduledEventSimulator();
-		INode n = new Node();
-		INode n2 = new Node();
+		IDiscreteScheduledEventSimulator sim = new DiscreteScheduledEventSimulator();
+		ISimulatable n = new Node();
+		ISimulatable n2 = new Node();
 		IConnection c = new Connection();
-		n.registerConnection(c);
-		n2.registerConnection(c);
-		((ISimulatable)n).addListener(new ISimulatableListener() { 
+		((INode)n).registerConnection(c);
+		((INode)n2).registerConnection(c);
+		n.addListener(new ISimulatableListener() { 
 			@Override
 			public void tickHandledUpdate(ISimulatableEvent e) {
 			}
@@ -46,7 +47,7 @@ public class DriverForDiscreteEvent {
 			public void tickReceivedUpdate(ISimulatableEvent e) {
 				System.out.printf("Got tick #%d! %s\n", e.getEventTime(), ((INode)e.getSimulatable()).getId());				
 			} } );
-		((ISimulatable)n2).addListener(new ISimulatableListener() { 
+		n2.addListener(new ISimulatableListener() { 
 			@Override
 			public void tickHandledUpdate(ISimulatableEvent e) {
 			}
@@ -55,21 +56,24 @@ public class DriverForDiscreteEvent {
 			public void tickReceivedUpdate(ISimulatableEvent e) {
 				System.out.printf("Got tick #%d! %s\n", e.getEventTime(), ((INode)e.getSimulatable()).getId());
 			} } );
-		((ISimulatable)n).addListener(new NodeReporter(n));
+		n.addListener(new NodeReporter((INode)n));
 		sim.registerSimulatable((ISimulatable)n);
 		sim.registerSimulatable((ISimulatable)n2);
 
 		Thread t = new Thread((Runnable)sim);
-		((DiscreteScheduledEventSimulator)sim).schedule(new DiscreteEventTest(n, 1, new Data(1, null)));
-		((DiscreteScheduledEventSimulator)sim).schedule(new DiscreteEventTest(n, 2, new Data(33, null)));
+		sim.schedule(new DiscreteEventTest2((INode)n, sim, 1, new Data(1, null)));
+		sim.schedule(new DiscreteEventTest((INode)n, 2, new Data(33, null)));
 		t.start();
 		//t.join();	
 		System.out.println("what");
 		System.out.flush();
-		((DiscreteScheduledEventSimulator)sim).schedule(new DiscreteEventTest(n, 3, new Data(66, null)));
-		sim.stop();
+		sim.schedule(new DiscreteEventTest((INode)n, 3, new Data(66, null)));
+		Thread.sleep(5000);
+		sim.pause();
 		sim.start();
-		((DiscreteScheduledEventSimulator)sim).run();
+		//sim.stop();
+		//sim.start();
+		//((DiscreteScheduledEventSimulator)sim).run();
 		//sim.unregisterSimulatable((ISimulatable)n);
 		//sim.start();
 		//sim.simulate(5);
@@ -97,5 +101,32 @@ class DiscreteEventTest implements IDiscreteScheduledEvent {
 	public int getTime() {
 		return _time;
 	}
+}
+
+class DiscreteEventTest2 implements IDiscreteScheduledEvent {
+
+	protected INode _node;
+	protected int _time;
+	protected IData _data;
+	protected IDiscreteScheduledEventSimulator _sim;
 	
+	public DiscreteEventTest2(INode node, IDiscreteScheduledEventSimulator sim, int time, IData data) {
+		_node = node;
+		_time = time;
+		_data = data;
+		_sim = sim;
+	}
+	
+	@Override
+	public void execute() {
+		_node.receive(_data);
+		_time = _sim.getTime();
+		_time++;
+		_sim.schedule(this);
+	}
+
+	@Override
+	public int getTime() {
+		return _time;
+	}
 }

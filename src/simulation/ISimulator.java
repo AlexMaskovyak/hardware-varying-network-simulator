@@ -78,4 +78,10 @@ public interface ISimulator {
 	 * Proceeds with the next simulation time event.  Updates time.
 	 */
 	public void step();
+	
+	/**
+	 * Obtains the current simulation time.
+	 * @return
+	 */
+	public int getTime();
 }

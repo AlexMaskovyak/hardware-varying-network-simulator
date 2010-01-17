@@ -252,4 +252,9 @@ public class Simulator implements ISimulator, Runnable {
 		start();
 		simulate(10);
 	}
+
+	@Override
+	public int getTime() {
+		return _currentTime;
+	}
 }

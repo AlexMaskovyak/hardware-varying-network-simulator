@@ -4,7 +4,7 @@ import java.util.Comparator;
 import java.util.PriorityQueue;
 import java.util.concurrent.locks.Condition;
 
-public class DiscreteScheduledEventSimulator extends Simulator implements ISimulator {
+public class DiscreteScheduledEventSimulator extends Simulator implements ISimulator, IDiscreteScheduledEventSimulator {
 
 	protected PriorityQueue<IDiscreteScheduledEvent> _queue;
 	protected final Condition _eventsAddedCondition = _lock.newCondition();
@@ -21,23 +21,32 @@ public class DiscreteScheduledEventSimulator extends Simulator implements ISimul
 					new DiscreteScheduleEventComparator<IDiscreteScheduledEvent>());
 	}
 	
+	/* (non-Javadoc)
+	 * @see simulation.IDiscretedScheduledEventSimulator#schedule(simulation.IDiscreteScheduledEvent)
+	 */
 	public void schedule(IDiscreteScheduledEvent event) {
 		_lock.lock();
 		try {
-			_queue.offer(event);
-			_eventsAddedCondition.signalAll();
+			if ( event.getTime() >= getTime() ) {
+				_queue.offer(event);
+				_eventsAddedCondition.signalAll();
+			}
 		} finally {
 			_lock.unlock();
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see simulation.IDiscretedScheduledEventSimulator#run()
+	 */
 	@Override
 	public void run() {
 		_lock.lock();
 		try {
-			while(_state != State.STOPPED ) {
-				while( _queue.isEmpty() ) { _eventsAddedCondition.await(); } 
+			while( _state != State.STOPPED ) {
+				while( _queue.isEmpty() ) { _eventsAddedCondition.await(); }
 				while( !_queue.isEmpty() ) {
+					while( _state == State.PAUSED ) { _startedCondition.await(); }
 					IDiscreteScheduledEvent event = _queue.poll();
 					_currentTime = event.getTime();
 					event.execute();
@@ -45,11 +54,9 @@ public class DiscreteScheduledEventSimulator extends Simulator implements ISimul
 					fireEvent();
 				}
 			}
-			System.out.println("3");
 		} catch (Exception e) { e.printStackTrace(); } 
 		finally {
 			_lock.unlock();
 		}
-		System.out.println("4");
 	}
 }
