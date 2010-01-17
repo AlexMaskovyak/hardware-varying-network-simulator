@@ -26,6 +26,7 @@ public class Node extends AbstractSimulatable implements INode, ISimulatable {
 	protected enum State { RECEIVED, SENT, GOT_TICK, HANDLED_TICK, IDLE };
 	
 	protected Set<IConnection> _connections;
+	protected RoutingTable _routingTable;
 	
 	protected Queue<IData> _bufferIn;
 	protected Queue<IData> _bufferOut;
@@ -59,6 +60,7 @@ public class Node extends AbstractSimulatable implements INode, ISimulatable {
 		_bufferIn = new LinkedList<IData>();
 		_bufferOut = new LinkedList<IData>();
 		_currentState = State.IDLE;
+		_routingTable = new RoutingTable();
 	}
 	
 	@Override

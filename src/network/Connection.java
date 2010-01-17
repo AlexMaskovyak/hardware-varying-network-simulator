@@ -23,6 +23,9 @@ public class Connection extends AbstractSimulatable implements IConnection, ISim
 	/** information ready to go out. */
 	protected Queue<IData> _bufferOut;
 	
+	/** */
+	protected boolean _active;
+	
 	/**
 	 * Default constructor.
 	 */
@@ -38,7 +41,8 @@ public class Connection extends AbstractSimulatable implements IConnection, ISim
 		_listeners = new HashSet<ISimulatableListener>();
 		_nodes = new HashSet<INode>();
 		_bufferIn = new LinkedList<IData>();
-		_bufferOut = new LinkedList<IData>();		
+		_bufferOut = new LinkedList<IData>();	
+		_active = true;
 	}
 	
 	@Override

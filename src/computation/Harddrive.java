@@ -1,10 +1,12 @@
 package computation;
 
+import java.util.Iterator;
+
 import network.IData;
 import simulation.AbstractSimulatable;
 import simulation.ISimulatable;
 
-public class Harddrive extends AbstractSimulatable implements IHardware, ISimulatable {
+public class Harddrive<T extends IData> extends AbstractSimulatable implements IHardware, ISimulatable, Iterable<T> {
 
 	protected int _capacity;
 	protected int _speed;
@@ -37,5 +39,11 @@ public class Harddrive extends AbstractSimulatable implements IHardware, ISimula
 	public void send(IData data) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public Iterator<T> iterator() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
