@@ -43,13 +43,13 @@ public class NodeSimulatableListener implements ISimulatableListener, INodeSimul
 
 	@Override
 	public void receiveUpdate(NodeSimulatableEvent e) {
-		_out.printf("%s received data: %d.\n", ((INode)e.getSimulatable()).getId(), e.getDataReceived().getID());
+		_out.printf("%s received packet: %d.\n", ((INode)e.getSimulatable()).getId(), e.getPacket().getSequence());
 		_out.flush();
 	}
 
 	@Override
 	public void sendUpdate(NodeSimulatableEvent e) {
-		_out.printf("%s sent data: %d.\n", ((INode)e.getSimulatable()).getId(), e.getDataSent().getID());
+		_out.printf("%s sent data: %d.\n", ((INode)e.getSimulatable()).getId(), e.getPacket().getSequence());
 		_out.flush();
 	}	
 }

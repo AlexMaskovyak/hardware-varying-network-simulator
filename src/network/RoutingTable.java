@@ -2,6 +2,11 @@ package network;
 
 import java.util.HashMap;
 
+/**
+ * 
+ * @author Alex Maskovyak
+ *
+ */
 public class RoutingTable extends HashMap<IAddress, IAddress>{
 
 	public RoutingTable() {}
