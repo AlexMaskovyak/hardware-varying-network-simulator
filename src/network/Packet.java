@@ -15,6 +15,11 @@ public class Packet<T> {
 	protected Address _destination;
 	/** receiving protocol handler should register with this protocol. */
 	protected String _protocol;
+	/** time to live */
+	protected int _ttl;
+	/** number of this packet */
+	protected int _sequence;
+	
 	
 	/**
 	 * Default cosntructor.
@@ -22,12 +27,15 @@ public class Packet<T> {
 	 * @param source address which created this packet.
 	 * @param destination address which is to receive this packet.
 	 * @param protocol which defines the type of handler.
+	 * @param ttl time to live, max hops before being trashed.
 	 */
-	public Packet(T content, Address source, Address destination, String protocol) {
+	public Packet(T content, Address source, Address destination, String protocol, int ttl, int sequence) {
 		_content = content;
 		_source = source;
 		_destination = destination;
 		_protocol = protocol;
+		_ttl = ttl;
+		_sequence = sequence;
 	}
 	
 	
@@ -45,5 +53,13 @@ public class Packet<T> {
 	
 	public String getProtocol() {
 		return _protocol;
+	}
+	
+	public int getTTL() {
+		return _ttl;
+	}
+	
+	public int getSequence() {
+		return _sequence;
 	}
 }

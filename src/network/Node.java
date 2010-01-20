@@ -85,7 +85,7 @@ public class Node extends AbstractSimulatable implements INode, ISimulatable {
 		_bufferOut.offer(_bufferIn.poll());
 		// notify listeners that we've received data
 		_currentState = State.RECEIVED;
-		notify(new NodeSimulatableEvent(this, -1, "Got data.", data, null));
+		notify(new NodeSimulatableEvent(this, -1, "Got data.", null));
 		_currentState = State.IDLE;
 	}
 
@@ -110,7 +110,7 @@ public class Node extends AbstractSimulatable implements INode, ISimulatable {
 		connection.receive(this, data);
 		// notify listeners that we sent data.
 		_currentState = State.SENT;
-		notify(new NodeSimulatableEvent(this, -1, "Sent data.", null, data));
+		notify(new NodeSimulatableEvent(this, -1, "Sent data.", null));
 		_currentState = State.IDLE;
 	}
 
@@ -118,7 +118,7 @@ public class Node extends AbstractSimulatable implements INode, ISimulatable {
 	public void handleTickEvent(ISimulatorEvent o) {
 		// notify that we've gotten a tick
 		_currentState = State.GOT_TICK;
-		notify(new NodeSimulatableEvent(this, o.getTime(), "Got tick.", null, null));
+		notify(new NodeSimulatableEvent(this, o.getTime(), "Got tick.", null));
 		
 		// here is where we would do something, like perhaps move some data along a connection
 		// send outbound data across links
@@ -128,7 +128,7 @@ public class Node extends AbstractSimulatable implements INode, ISimulatable {
 		
 		// call Simulatable's to distribute the fact that we've handled it
 		_currentState = State.HANDLED_TICK;
-		notify(new NodeSimulatableEvent(this, o.getTime(), "Handled tick.", null, null));
+		notify(new NodeSimulatableEvent(this, o.getTime(), "Handled tick.", null));
 		_currentState = State.IDLE;
 	}
 
