@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 
 /**
@@ -42,9 +43,7 @@ public class SparseRoutesMap<T extends Comparable<T>>
 			connections = new HashMap<T, Integer>();
 			_directConnections.put(start, connections);
 		}
-		if( !connections.containsKey(start) ) {
-			connections.put(end, cost);
-		}
+		connections.put(end, cost);
 	}
 
 	/*
@@ -55,6 +54,45 @@ public class SparseRoutesMap<T extends Comparable<T>>
 	public void addBiDirectRoute(T node1, T node2, int cost) {
 		addDirectRoute(node1, node2, cost);
 		addDirectRoute(node2, node1, cost);
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see routing.IRoutesMap#remove(java.lang.Object)
+	 */
+	@Override
+	public void remove(T node) {
+		// remove links from this node
+		_directConnections.remove( node );
+		Collection<Map<T, Integer>> costMaps = _directConnections.values();
+		for( Map<T, Integer> costMap : costMaps ) {
+			costMap.remove( node );
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see routing.IRoutesMap#removeBiDirectRoute(java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public void removeBiDirectRoute(T start, T end) {
+		removeDirectRoute(start, end);
+		removeDirectRoute(end, start);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see routing.IRoutesMap#removeDirectRoute(java.lang.Object, java.lang.Object)
+	 */
+	@Override
+	public void removeDirectRoute(T start, T end) {
+		Map<T, Integer> connections = _directConnections.get(start);
+		if( connections == null ) {
+			// do nothing...actually this shouldn't ever happen unless someone
+			// is using this improperly
+			return;
+		}
+		connections.remove(end);
 	}
 	
 	/*

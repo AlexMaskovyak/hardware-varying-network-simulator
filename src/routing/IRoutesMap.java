@@ -27,6 +27,27 @@ public interface IRoutesMap<T> {
 	public void addBiDirectRoute(T node1, T node2, int cost);
 	
 	/**
+	 * Removes all segments containing the specified node.
+	 * @param node to remove.
+	 */
+	public void remove(T node);
+	
+	/**
+	 * Removes a segment from the graph.
+	 * @param start of the segment.
+	 * @param end of the segment.
+	 */
+	public void removeDirectRoute(T start, T end);
+	
+	/**
+	 * Removes both segments from a graph, the one from start to end, and from
+	 * end to start.
+	 * @param start node.
+	 * @param end node.
+	 */
+	public void removeBiDirectRoute(T start, T end);
+	
+	/**
 	 * Get the value of a segment.
 	 * @param start node of the segment.
 	 * @param end node of the segment.

@@ -56,6 +56,23 @@ public class CentralRouter {
 	}
 	
 	/**
+	 * Removes an address from consideration.
+	 * @param address to remove.
+	 */
+	public void remove(IAddress address) {
+		_graphOfNetwork.remove(address);
+	}
+	
+	/**
+	 * Removes a connection to the CentralRouter's knowledge-base.
+	 * @param a1 address of first node.
+	 * @param a2 address of second node.
+	 */
+	public void removeBiDirectionalRoute(IAddress a1, IAddress a2) {
+		_graphOfNetwork.removeBiDirectRoute(a1, a2);
+	}
+	
+	/**
 	 * Obtains the next hop for this item.
 	 * @param a1 starting address.
 	 * @param a2 destination address.
@@ -91,7 +108,7 @@ public class CentralRouter {
     	
     	//System.out.println( next );
     	
-    	IAddress next = router.getNextHop(n0, n1);
+    	IAddress next = router.getNextHop(n0, n2);
     	
     	System.out.println( ">>>> next: " + next );
     	
