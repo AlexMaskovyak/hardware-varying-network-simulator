@@ -3,23 +3,36 @@ package simulation;
 import java.util.Comparator;
 
 /**
- * For use with the DiscreteScheduleEventSimulator.  This will schedule events to occur at clock ticks.
+ * For use with the DiscreteScheduleEventSimulator.
  * @author Alex Maskovyak
  *
  */
-public interface IDiscreteScheduledEvent {
+public interface IDiscreteScheduledEvent<T> 
+		extends ISimulatableEvent, ISimulatorEvent {
 
-	public void execute();
+	/** destination to receive the event. */
+	public ISimulatable getDestination();
 	
-	public int getTime();
+	/** operate upon the destination...as in, give them a message. */
+	public T getMessage();
 }
 
-class DiscreteScheduleEventComparator<T extends IDiscreteScheduledEvent> implements Comparator<T> {
+/**
+ * Comparator for Discrete Scheduled Event sorting.
+ * @author Alex Maskovyak
+ *
+ * @param <T>
+ */
+class DiscreteScheduleEventComparator<T extends IDiscreteScheduledEvent> 
+		implements Comparator<T> {
 
+	/*
+	 * (non-Javadoc)
+	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+	 */
 	public int compare(IDiscreteScheduledEvent arg0, IDiscreteScheduledEvent arg1) {
-		if( arg0.getTime() < arg1.getTime() ) { return -1; }
-		if( arg0.getTime() > arg1.getTime() ) { return 1; }
+		if( arg0.getEventTime() < arg1.getEventTime() ) { return -1; }
+		if( arg0.getEventTime() > arg1.getEventTime() ) { return 1; }
 		return 0;
 	}
-	
 }

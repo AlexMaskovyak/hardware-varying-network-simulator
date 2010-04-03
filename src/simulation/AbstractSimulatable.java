@@ -4,52 +4,87 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Implements the ISimulatable interface, providing listener support for subclasses.
+ * Implements the ISimulatable interface, providing listener support for 
+ * subclasses.
  * 
  * @author Alex Maskovyak
  *
  */
-public abstract class AbstractSimulatable implements ISimulatable {
-
-	/** listeners to be informed of events. */
-	protected Set<ISimulatableListener> _listeners;
+public abstract class AbstractSimulatable 
+		implements ISimulatable {
 	
-	/**
-	 * Default constructor.
-	 */
+// Fields
+	
+	/** listeners to be informed of events. */
+	protected Set<ISimulatableListener> _listeners;	
+	
+// Construction
+	
+	/** Default constructor. */
 	public AbstractSimulatable() {
 		init();
 	}
 	
-	/**
-	 * Wraps all object instantiation code for the constructor for easier override-ability.  
-	 */
+	/** Externalize instantiation. */
 	protected void init() {
 		_listeners = new HashSet<ISimulatableListener>();
 	}
+
+// Listener handling
 	
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.ISimulatable#addListener(simulation.ISimulatableListener)
+	 */
 	@Override
 	public void addListener(ISimulatableListener listener) {
 		_listeners.add(listener);
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.ISimulatable#removeListener(simulation.ISimulatableListener)
+	 */
 	@Override
 	public void removeListener(ISimulatableListener listener) {
 		_listeners.remove(listener);
 	}
-	
-	@Override
-	public void handleTickEvent(ISimulatorEvent e) {
-		notify(new SimulatableEvent(this, e.getTime()));
-	}
-	
+
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.ISimulatable#notify(simulation.ISimulatableEvent)
+	 */
 	@Override
 	public void notify(ISimulatableEvent e) {
-		// copy the set and enumerate over that so that listeners can unregister themselves
-		// as a part of their computation
+		// copy the set and enumerate over that so that listeners can unregister 
+		// themselves as a part of their computation
 		Set<ISimulatableListener> _listenersCopy = new HashSet<ISimulatableListener>(_listeners);
 		for( ISimulatableListener listener : _listenersCopy ) {
 			listener.tickHandledUpdate(e);
 		}
+	}
+		
+// Event handling
+	
+	@Override
+	public abstract void handleEvent(IDiscreteScheduledEvent e);
+	
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.ISimulatable#handleTickEvent(simulation.ISimulatorEvent)
+	 */
+	@Override
+	public void handleTickEvent(ISimulatorEvent e) {
+		e.getSimulator().signalDone(this);
+	}
+	
+	/*
+	 * By default we can perform operations.
+	 * (non-Javadoc)
+	 * @see simulation.ISimulatable#canPerformOperation()
+	 */
+	@Override
+	public boolean canPerformOperation() {
+		return true;
 	}
 }

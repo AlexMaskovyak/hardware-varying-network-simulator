@@ -11,24 +11,24 @@ public class SimulatableEvent implements ISimulatableEvent {
 	/** source of this event. */
 	protected ISimulatable _source;
 	/** Simulator time of this event. */
-	protected int _time;
+	protected double _time;
 	
 	/**
 	 * Default constructor.
 	 * @param source of this event.
 	 */
-	public SimulatableEvent(ISimulatable source, int time) {
+	public SimulatableEvent(ISimulatable source, double time) {
 		_source = source;
 		_time = time;
 	}
 	
 	@Override
-	public ISimulatable getSimulatable() {
+	public ISimulatable getSource() {
 		return _source;
 	}
 
 	@Override
-	public int getEventTime() {
+	public double getEventTime() {
 		return _time;
 	}
 

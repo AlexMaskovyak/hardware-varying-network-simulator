@@ -1,7 +1,5 @@
 package computation;
 
-import simulation.ISimulatable;
-
 /**
  * ComputerNode with explicitely assignable hardware components.  CPU, Harddrive, Cache, etc.
  * @author Alex Maskovyak

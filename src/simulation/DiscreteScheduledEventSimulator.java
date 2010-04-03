@@ -1,19 +1,29 @@
 package simulation;
 
-import java.util.Comparator;
 import java.util.PriorityQueue;
 import java.util.concurrent.locks.Condition;
 
-public class DiscreteScheduledEventSimulator extends Simulator implements ISimulator, IDiscreteScheduledEventSimulator {
+/**
+ * The work-horse of the Discrete Event Simulator.
+ * @author Alex Maskovyak
+ *
+ */
+public class DiscreteScheduledEventSimulator 
+		extends Simulator 
+		implements ISimulator, IDiscreteScheduledEventSimulator {
 
+	/** queue of events. */
 	protected PriorityQueue<IDiscreteScheduledEvent> _queue;
+	/** lock protecting the addition, subtraction, retrieval of events. */
 	protected final Condition _eventsAddedCondition = _lock.newCondition();
 	
+	/** Default constructor */
 	public DiscreteScheduledEventSimulator() {
 		super();
 	}
 	
-	public void init() {
+	/** Externalize instantiation. */
+	protected void init() {
 		super.init();
 		_queue = 
 			new PriorityQueue<IDiscreteScheduledEvent>(
@@ -27,10 +37,10 @@ public class DiscreteScheduledEventSimulator extends Simulator implements ISimul
 	public void schedule(IDiscreteScheduledEvent event) {
 		_lock.lock();
 		try {
-			if ( event.getTime() >= getTime() ) {
-				_queue.offer(event);
-				_eventsAddedCondition.signalAll();
-			}
+			// ensure that this isn't from the past
+			if ( event.getEventTime() <= getTime() ) { return; }
+			_queue.offer(event);
+			_eventsAddedCondition.signalAll();
 		} finally {
 			_lock.unlock();
 		}
@@ -44,15 +54,13 @@ public class DiscreteScheduledEventSimulator extends Simulator implements ISimul
 		_lock.lock();
 		try {
 			while( _state != State.STOPPED ) {
+				// await on events being added
 				while( _queue.isEmpty() ) { _eventsAddedCondition.await(); }
-				while( !_queue.isEmpty() ) {
-					while( _state == State.PAUSED ) { _startedCondition.await(); }
-					IDiscreteScheduledEvent event = _queue.poll();
-					_currentTime = event.getTime();
-					event.execute();
-					_state = State.TICK;
-					fireEvent();
-				}
+				while( _state == State.PAUSED ) { _startedCondition.await(); }
+
+				IDiscreteScheduledEvent event = _queue.poll();		// get event
+				_currentTime = event.getEventTime();				// update time
+				event.getDestination().handleEvent(event);			// get destination and deliver
 			}
 		} catch (Exception e) { e.printStackTrace(); } 
 		finally {

@@ -1,7 +1,8 @@
 package simulation;
 
 /**
- * Discrete event simulator which delivers time events to registered simulatables.
+ * Discrete event simulator which delivers time events to registered 
+ * simulatables.
  * 
  * @author Alex Maskovyak
  *
@@ -9,6 +10,7 @@ package simulation;
 public interface ISimulator {
 
 /// listener management
+	
 	/**
 	 * Adds an event listener.
 	 * @param simulatorListener to add.
@@ -21,7 +23,13 @@ public interface ISimulator {
 	 */
 	public void removeListener(ISimulatorListener simulatorListener);
 
+	/**
+	 * Fires the provided event for all listeners to receive.
+	 * @param o event that has occurred.
+	 */
+	public void notifyListeners(ISimulatorEvent o);
 	
+
 /// simulatable management
 	
 	/**
@@ -32,22 +40,21 @@ public interface ISimulator {
 	
 	/**
 	 * Unregisters a simulatable with this simulator.
-	 * @param simulatable to remove from the simulator and to exclude from future simulations.
+	 * @param simulatable to remove from the simulator and to exclude from 
+	 * future simulations.
 	 */
 	public void unregisterSimulatable(ISimulatable simulatable);
-
+	
 	/**
-	 * Alerts the simulator that a simulatable has completed all operations possible for its time event.
+	 * Alerts the simulator that a simulatable has completed all operations 
+	 * possible for its time event.
 	 * @param simulatable alerting the simulator.
 	 */
 	public void signalDone(ISimulatable simulatable);
+
 	
-	/**
-	 * Fires the provided event for all listeners to receive.
-	 * @param o event that has occurred.
-	 */
-	public void notify(ISimulatorEvent o);
-	
+/// simulation operation	
+
 	/**
 	 * Simulate the specified number of steps for all simulatables.
 	 * @param time steps to simulate.
@@ -65,7 +72,8 @@ public interface ISimulator {
 	public void pause();
 	
 	/**
-	 * Places the Simulator into the resumed state, allowing the simulator to continue simulating from the point at which it was paused.
+	 * Places the Simulator into the resumed state, allowing the simulator to 
+	 * continue simulating from the point at which it was paused.
 	 */
 	public void resume();
 	
@@ -81,7 +89,7 @@ public interface ISimulator {
 	
 	/**
 	 * Obtains the current simulation time.
-	 * @return
+	 * @return current simulator time.
 	 */
-	public int getTime();
+	public double getTime();
 }

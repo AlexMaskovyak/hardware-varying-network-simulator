@@ -7,7 +7,7 @@ import simulation.SimulatableEvent;
 public class NodeSimulatableEvent extends SimulatableEvent implements ISimulatableEvent {
 
 	protected String _event;
-	protected Packet _packet;
+	protected IPacket _packet;
 	
 	/**
 	 * Default constructor.
@@ -15,7 +15,7 @@ public class NodeSimulatableEvent extends SimulatableEvent implements ISimulatab
 	 * @param time during which this event occurred.
 	 * @param event description of the event.
 	 */
-	public NodeSimulatableEvent(ISimulatable source, int time, String event, Packet packet) {
+	public NodeSimulatableEvent(ISimulatable source, double time, String event, IPacket packet) {
 		super(source, time);
 		_event = event;
 		_packet = packet;
@@ -33,7 +33,7 @@ public class NodeSimulatableEvent extends SimulatableEvent implements ISimulatab
 	 * Packet that caused this event.
 	 * @return Packet that was sent or received.
 	 */
-	public Packet getPacket() {
+	public IPacket getPacket() {
 		return _packet;
 	}
 	
@@ -42,6 +42,6 @@ public class NodeSimulatableEvent extends SimulatableEvent implements ISimulatab
 	 * @return Node associated with this event.
 	 */
 	public Node getNode() {
-		return (Node)super.getSimulatable();
+		return (Node)super.getSource();
 	}
 }

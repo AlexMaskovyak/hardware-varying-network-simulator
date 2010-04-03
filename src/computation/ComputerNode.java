@@ -6,6 +6,7 @@ import network.INode;
 import network.Node;
 
 
+import routing.IAddress;
 import simulation.ISimulatable;
 
 /**
@@ -19,19 +20,23 @@ public class ComputerNode extends Node implements IComputer, INode, ISimulatable
 	/** installed algorithm. */
 	protected IAlgorithm _algorithm;
 	
+	public ComputerNode() {
+		this(null);
+	}
+	
 	/**
 	 * Default constructor.
 	 */
-	public ComputerNode() {
-		super();
+	public ComputerNode(IAddress address) {
+		this(address, null);
 	}
 	
 	/**
 	 * Constructor, installs an algorithm.
 	 * @param algorithm to install.
 	 */
-	public ComputerNode(IAlgorithm algorithm) {
-		super();
+	public ComputerNode(IAddress address, IAlgorithm algorithm) {
+		super(address);
 		install(algorithm);
 	}
 	
@@ -59,5 +64,9 @@ public class ComputerNode extends Node implements IComputer, INode, ISimulatable
 	public void uninstall() {
 		_algorithm = null;
 	}
-
+	
+	@Override
+	public INode createNew(IAddress address) {
+		return new ComputerNode(address);
+	}
 }

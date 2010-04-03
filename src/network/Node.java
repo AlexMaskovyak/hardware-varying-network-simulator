@@ -1,54 +1,64 @@
 package network;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.Set;
-import java.util.UUID;
 
+import routing.IAddress;
+import simulation.AbstractDiscreteScheduledEvent;
+import simulation.IDiscreteScheduledEvent;
+import simulation.IDiscreteScheduledEventSimulator;
 import simulation.ISimulatable;
 import simulation.ISimulatableEvent;
 import simulation.ISimulatableListener;
 import simulation.ISimulatorEvent;
 import simulation.AbstractSimulatable;
 
-import network.IConnection;
-import network.IData;
 import network.INode;
 
 
 /**
- * Basic simulatable network component.  Serves as an information source and sink.  Can be "physically" connected to a IConnection.
+ * Basic simulatable network component.  Serves as an information source and 
+ * sink.  Can be "physically" connected to a IConnectionMedium through its
+ * adaptor.
  * @author Alex Maskovyak
  *
  */
-public class Node extends AbstractSimulatable implements INode, ISimulatable {
+public class Node 
+		extends AbstractSimulatable 
+		implements INode, ISimulatable, Comparable<INode> {
 
+/// Fields	
+	
+	/** holds possible Node states, used for communication with listeners. */
 	protected enum State { RECEIVED, SENT, GOT_TICK, HANDLED_TICK, IDLE };
-	
-	protected Set<IConnection> _connections;
-	protected RoutingTable _routingTable;
-	
-	protected Queue<IData> _bufferIn;
-	protected Queue<IData> _bufferOut;
-	
-	protected String _id;
-	
+	/** the current state of this node. */
 	protected State _currentState; 
+	
+	/** address of this Node. */
+	protected IAddress _address;
+	/** manages all of our connections. */
+	protected ConnectionAdaptorManager _manager;
+	/** handles packets that come to this Node. */
+	protected IProtocolHandler _handler;
+
+/// Construction.
 	
 	/**
 	 * Default constructor.
 	 */
 	public Node() {
-		this(UUID.randomUUID().toString());
+		super();
 	}
 	
 	/**
 	 * Constructor allowing id specification.
-	 * @param id to assign this node.
+	 * @param address to assign this node.
 	 */
-	public Node(String id) {
+	public Node(IAddress address) {
 		super();
-		_id = id;
+		_address = address;
+		_manager.setAddress(address);
+		_manager.install(_handler, AbstractProtocolHandler.DEFAULT_PROTOCAL);
 	}
 	
 	/**
@@ -56,82 +66,136 @@ public class Node extends AbstractSimulatable implements INode, ISimulatable {
 	 */
 	protected void init() {
 		super.init();
-		_connections = new HashSet<IConnection>();
-		_bufferIn = new LinkedList<IData>();
-		_bufferOut = new LinkedList<IData>();
 		_currentState = State.IDLE;
-		_routingTable = new RoutingTable();
-	}
-	
-	@Override
-	public String getId() {
-		return _id;
-	}
-	
-	@Override
-	public void registerConnection(IConnection connect) {
-		_connections.add(connect);
-		connect.connect(this);
+		_manager = new ConnectionAdaptorManager();
+		_handler = new NodePacketHandler(this);
 	}
 
-	public void unregisterConnection(IConnection connect) {
-		_connections.remove(connect);
-		connect.disconnect(this);
+	
+/// INode
+	
+	/*
+	 * (non-Javadoc)
+	 * @see network.INode#getAddress()
+	 */
+	@Override
+	public IAddress getAddress() {
+		return _address;
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * @see network.INode#receive(network.IPacket)
+	 */
 	@Override
-	public void receive(IData data) {
-		_bufferIn.offer(data);
-		_bufferOut.offer(_bufferIn.poll());
+	public void receive(IPacket packet) {
 		// notify listeners that we've received data
 		_currentState = State.RECEIVED;
-		notify(new NodeSimulatableEvent(this, -1, "Got data.", null));
+		notify(new NodeSimulatableEvent(this, -1, "Got data.", packet));
+		
 		_currentState = State.IDLE;
 	}
-
-	@Override
-	public void receive(IData data, IConnection connection) {
-		receive(data);
-	}
 	
-	public void send() {
-		send(_bufferOut.poll());
-	}
-	
+	/*
+	 * (non-Javadoc)
+	 * @see network.INode#send(network.Data, network.IAddress)
+	 */
 	@Override
-	public void send(IData data) {
-		for( IConnection connection : _connections ) {
-			send(data, connection);
-		}
-	}
-
-	@Override
-	public void send(IData data, IConnection connection) {
-		connection.receive(this, data);
+	public void send(Data data, IAddress address) {
 		// notify listeners that we sent data.
 		_currentState = State.SENT;
-		notify(new NodeSimulatableEvent(this, -1, "Sent data.", null));
+		IPacket<Data> packet = new Packet<Data>(data, getAddress(), address, "algorithm", 5, 5);
+		// send it down the stack
+		_manager.receive(packet);
+		notify(new NodeSimulatableEvent(this, -1, "Sent data.", packet));
 		_currentState = State.IDLE;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see network.INode#addAdaptor(network.IConnectionAdaptor)
+	 */
+	@Override
+	public void addAdaptor(IConnectionAdaptor adaptor) {
+		_manager.addConnectionAdaptor(adaptor);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see network.INode#removeAdaptor(network.IConnectionAdaptor)
+	 */
+	@Override
+	public void removeAdaptor(IConnectionAdaptor adaptor) {
+		_manager.removeConnectionAdaptor(adaptor);
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see network.INode#getAdaptors()
+	 */
+	@Override
+	public Collection<IConnectionAdaptor> getAdaptors() {
+		return _manager.getConnectionAdaptors();
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see network.INode#createNew(network.IAddress)
+	 */
+	@Override
+	public INode createNew(IAddress address) {
+		return new Node(address);
+	}
+
+/// ISimulatable
+	
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.AbstractSimulatable#handleEvent(simulation.IDiscreteScheduledEvent)
+	 */
+	@Override
+	public void handleEvent(final IDiscreteScheduledEvent e) {
+		// TODO Auto-generated method stub
+		System.out.printf("%s is handling an event.", getAddress());
+		((IDiscreteScheduledEventSimulator)e.getSimulator()).
+			schedule( new AbstractDiscreteScheduledEvent(this, _manager, e.getEventTime() + .000001, e.getSimulator() ) {
+
+				@Override
+				public Object getMessage() {
+					return e.getMessage();
+				}
+				
+			});
+		//(IData) e.getMessage();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.AbstractSimulatable#handleTickEvent(simulation.ISimulatorEvent)
+	 */
 	@Override
 	public void handleTickEvent(ISimulatorEvent o) {
 		// notify that we've gotten a tick
 		_currentState = State.GOT_TICK;
-		notify(new NodeSimulatableEvent(this, o.getTime(), "Got tick.", null));
+		notify(new NodeSimulatableEvent(this, o.getEventTime(), "Got tick.", null));
 		
 		// here is where we would do something, like perhaps move some data along a connection
 		// send outbound data across links
-		if( !_bufferOut.isEmpty() ) {
-			send();
-		}
+//		if( !_bufferOut.isEmpty() ) {/
+//			send();
+//		}
 		
 		// call Simulatable's to distribute the fact that we've handled it
 		_currentState = State.HANDLED_TICK;
-		notify(new NodeSimulatableEvent(this, o.getTime(), "Handled tick.", null));
+		notify(new NodeSimulatableEvent(this, o.getEventTime(), "Handled tick.", null));
+		super.handleTickEvent(o);
 		_currentState = State.IDLE;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.AbstractSimulatable#notify(simulation.ISimulatableEvent)
+	 */
 	@Override
 	public void notify(ISimulatableEvent e) {
 		// copy the set and enumerate over that so that listeners can unregister themselves
@@ -152,6 +216,75 @@ public class Node extends AbstractSimulatable implements INode, ISimulatable {
 					}
 					break;
 			}
+		}
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.AbstractSimulatable#canPerformOperation()
+	 */
+	@Override
+	public boolean canPerformOperation() {
+		return true;
+	}
+	
+	
+/// Comparable
+	
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Comparable#compareTo(java.lang.Object)
+	 */
+	@Override
+	public int compareTo(INode node) {
+		return getAddress().compareTo(node.getAddress());
+	}
+
+
+/// PacketHandling
+	
+	/**
+	 * PacketHandler which bridges the gap between the true protocals and the
+	 * INode itself.
+	 * @author Alex Maskovyak
+	 *
+	 */
+	private class NodePacketHandler extends AbstractProtocolHandler<IPacket> {
+
+		/** node to have handle this packet. */
+		protected INode _node;
+		
+		/**
+		 * Default constructor.
+		 * @param node which is the handle the last part of the chain.
+		 */
+		public NodePacketHandler(INode node) {
+			_node = node;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see network.AbstractPacketHandler#getProtocal()
+		 */
+		@Override
+		public String getProtocal() {
+			return null;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see simulation.AbstractSimulatable#handleEvent(simulation.IDiscreteScheduledEvent)
+		 */
+		@Override
+		public void handleEvent(IDiscreteScheduledEvent e) {}
+
+		/*
+		 * (non-Javadoc)
+		 * @see network.AbstractProtocolHandler#handle(java.lang.Object)
+		 */
+		@Override
+		public void handle( IPacket packetlikeObject ) {
+			_node.receive( packetlikeObject );
 		}
 	}
 }

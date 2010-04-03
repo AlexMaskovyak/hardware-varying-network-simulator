@@ -19,29 +19,46 @@ import network.NodeSimulatableEvent;
 import network.NodeSimulatableListener;
 
 /**
- * Aggregates multiple events to create lines in a data file for the activity if a Node in the network.
+ * Aggregates multiple events to create lines in a data file for the activity if
+ * a Node in the network.
  * @author Alex Maskovyak
  *
  */
-public class NodeReporter extends NodeSimulatableListener implements INodeSimulatableListener {
+public class NodeReporter 
+		extends NodeSimulatableListener 
+		implements INodeSimulatableListener {
 
+/// Fields
+	
+	/** node we are installed upon. */
 	protected INode _node;
-	protected static String _outputPath = "";
 	protected int _dataReceived;
 	protected int _dataSent;
+
+/// Construction
 	
 	/**
 	 * Default constructor.
 	 * @param node
 	 * @throws Exception
 	 */
-	public NodeReporter(INode node) throws Exception {
+	public NodeReporter(INode node, String outputPath) throws Exception {
 		this(
 			node, 
 			new FileOutputStream(
-				new File(String.format("%s%s%s", _outputPath, File.separator, node.getId()))));
+				new File(
+					String.format(
+						"%s%s%s.txt", 
+						outputPath, 
+						File.separator, 
+						node.getAddress()))));
 	}
 	
+	/**
+	 * Constructor.
+	 * @param node onto which we are installed.
+	 * @param out stream to report information.
+	 */
 	public NodeReporter(INode node, OutputStream out) {
 		super(out);
 		_node = node;
@@ -55,7 +72,7 @@ public class NodeReporter extends NodeSimulatableListener implements INodeSimula
 			NodeSimulatableEvent ne = (NodeSimulatableEvent)e;
 			
 			_out.write(
-					String.format( "%d %d %d\n", 
+					String.format( "%f %d %d\r\n", 
 							e.getEventTime(), 
 							_dataReceived, 
 							_dataSent ));

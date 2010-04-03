@@ -1,5 +1,11 @@
 package cellTests;
 
+/**
+ * Cell class abstracts out the producer/consumer synchronization problem.
+ * @author Alex Maskovyak (influenced by Axel Schreiner)
+ *
+ * @param <T>
+ */
 public class Cell<T> {
 
 	/** value to be passed. */

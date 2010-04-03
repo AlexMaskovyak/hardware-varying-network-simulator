@@ -1,7 +1,5 @@
 package simulation;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -12,14 +10,29 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author Alex Maskovyak
  *
  */
-public class Simulator implements ISimulator, Runnable {
+public class Simulator 
+		extends AbstractSimulator
+		implements ISimulator, Runnable {
 
 	/**
 	 * States of operation a simulator can enter.
 	 * @author Alex Maskovyak
 	 */
-	protected enum State { REGISTERED_SIMULATABLE, UNREGISTERED_SIMULATABLE, INITIALIZED, STARTED, PAUSED, RESUMED, STEPPED, STOPPED, TICK, SIMULATED };
+	protected enum State { 
+		REGISTERED_SIMULATABLE, 
+		UNREGISTERED_SIMULATABLE, 
+		INITIALIZED, 
+		STARTED, 
+		PAUSED, 
+		RESUMED, 
+		STEPPED, 
+		STOPPED, 
+		TICK, 
+		SIMULATED };
 
+	/** current state of the simulator. */
+	protected State _state;
+		
 	/** provides protection for multi-threaded operation. */
 	protected final Lock _lock = new ReentrantLock();
 	/** occurs when all simulatables have reported "done" */
@@ -28,69 +41,31 @@ public class Simulator implements ISimulator, Runnable {
 	protected final Condition _startedCondition = _lock.newCondition();
 	
 	
-	/** listeners of state change. */
-	protected Set<ISimulatorListener> _listeners;
-	/** simulatable objects to receive tick events. */
-	protected Set<ISimulatable> _simulatables;
-	/** current state of the simulator. */
-	protected State _state;
-	
 	/** number of simulatables done. */
 	protected int _simulatablesDoneCount;
 	
-	/** latest time that has occurred. */
-	protected int _currentTime;
-	
-	
-	/**
-	 * Default constructor.
-	 */
+	/** Default constructor. */
 	public Simulator() {
-		init();
+		super();
 	}
-	
-	/**
-	 * Wraps all object instantiation code for the constructor for easier override-ability.
-	 */
+
+	/** Externalize instantiation. */
 	protected void init() {
-		_listeners = new HashSet<ISimulatorListener>();
-		_simulatables = new HashSet<ISimulatable>();
-		_state = State.INITIALIZED;
-		_simulatablesDoneCount = 0;
+		super.init();
 	}
 	
-/// listener management
-	
-	@Override
-	public void addListener(ISimulatorListener simulatorListener) {
-		_lock.lock();
-		try {
-			_listeners.add(simulatorListener);
-		} finally {
-			_lock.unlock();
-		}
-	}
-
-	@Override
-	public void removeListener(ISimulatorListener simulatorListener) {
-		_lock.lock();
-		try {
-			_listeners.remove(simulatorListener);
-		} finally {
-			_lock.unlock();
-		}
-	}
-	
-
 /// simulatable management
 
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.ISimulator#registerSimulatable(simulation.ISimulatable)
+	 */
 	@Override
 	public void registerSimulatable(ISimulatable simulatable) {
 		_lock.lock();
 		try {
 			_simulatables.add(simulatable);
 			_listeners.add(new SimulatableSimulatorListener(simulatable));
-			simulatable.addListener(new SimulatorSimulatableListener(this));
 			
 			State _temp = _state;
 			_state = State.REGISTERED_SIMULATABLE;
@@ -102,13 +77,16 @@ public class Simulator implements ISimulator, Runnable {
 		}
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.ISimulator#unregisterSimulatable(simulation.ISimulatable)
+	 */
 	@Override
 	public void unregisterSimulatable(ISimulatable simulatable) {
 		_lock.lock();
 		try {
 			_simulatables.remove(simulatable);
 			_listeners.remove(new SimulatableSimulatorListener(simulatable));
-			simulatable.removeListener(new SimulatorSimulatableListener(this));
 			
 			State _temp = _state;
 			_state = State.UNREGISTERED_SIMULATABLE;
@@ -120,6 +98,10 @@ public class Simulator implements ISimulator, Runnable {
 		}
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.AbstractSimulator#signalDone(simulation.ISimulatable)
+	 */
 	@Override
 	public void signalDone(ISimulatable simulatable) {
 		_lock.lock();
@@ -135,12 +117,20 @@ public class Simulator implements ISimulator, Runnable {
 		}
 	}
 	
+	/**
+	 * Short-cut to notifying listeners and simulatables about events after we
+	 * undergo a state-change.
+	 */
 	public void fireEvent() {
-		notify(new SimulatorEvent(this, _currentTime));
+		notifyListeners(new SimulatorEvent(this, getTime()));
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.ISimulator#notifyListeners(simulation.ISimulatorEvent)
+	 */
 	@Override
-	public void notify(ISimulatorEvent o) {
+	public void notifyListeners(ISimulatorEvent o) {
 		_lock.lock();
 		try {
 			for(ISimulatorListener listener : _listeners) {
@@ -161,7 +151,11 @@ public class Simulator implements ISimulator, Runnable {
 	}
 
 /// simulator operation control
-	
+
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.AbstractSimulator#start()
+	 */
 	@Override
 	public void start() {
 		_lock.lock();
@@ -176,6 +170,10 @@ public class Simulator implements ISimulator, Runnable {
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.AbstractSimulator#stop()
+	 */
 	@Override
 	public void stop() {
 		_lock.lock();
@@ -187,7 +185,10 @@ public class Simulator implements ISimulator, Runnable {
 		}
 	}
 	
-	
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.AbstractSimulator#pause()
+	 */
 	@Override
 	public void pause() {
 		_lock.lock();
@@ -199,6 +200,11 @@ public class Simulator implements ISimulator, Runnable {
 		}
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.AbstractSimulator#resume()
+	 */
+	@Override
 	public void resume() {
 		_lock.lock();
 		try {
@@ -212,8 +218,13 @@ public class Simulator implements ISimulator, Runnable {
 		}
 	}
 	
+
 /// simulator primary operation
-	
+
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.AbstractSimulator#step()
+	 */
 	@Override
 	public void step() {
 		_lock.lock();
@@ -231,6 +242,10 @@ public class Simulator implements ISimulator, Runnable {
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.AbstractSimulator#simulate(int)
+	 */
 	@Override
 	public void simulate(int time) {
 		_lock.lock();
@@ -247,14 +262,13 @@ public class Simulator implements ISimulator, Runnable {
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Runnable#run()
+	 */
 	@Override
 	public void run() {
 		start();
 		simulate(10);
-	}
-
-	@Override
-	public int getTime() {
-		return _currentTime;
 	}
 }

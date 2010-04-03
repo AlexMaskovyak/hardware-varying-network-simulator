@@ -21,10 +21,23 @@ public interface ISimulatable extends EventListener {
 	public void removeListener(ISimulatableListener listener);
 	
 	/**
+	 * Tests whether this ISimulatable can currently perform an operation or 
+	 * not.
+	 * @return true if an operation can be performed, false otherwise.
+	 */
+	public boolean canPerformOperation();
+	
+	/**
 	 * Signals for operations to occur.
 	 * @param e ISimulatorEvent describing the tick event that occurred.
 	 */
 	public void handleTickEvent(ISimulatorEvent e);
+	
+	/**
+	 * Signals an event which may/may not trigger a response.
+	 * @param e ISimulatableEvent which has occurred.
+	 */
+	public void handleEvent(IDiscreteScheduledEvent e);
 	
 	/**
 	 * Notifies all listeners that an event has occurred.
