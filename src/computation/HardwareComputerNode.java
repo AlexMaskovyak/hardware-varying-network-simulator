@@ -1,20 +1,21 @@
 package computation;
 
 import network.INode;
+import routing.IAddress;
 import simulation.ISimulatable;
-import simulation.ISimulatableListener;
 import simulation.ISimulatorEvent;
-import simulation.SimulatableEvent;
 
-public class HardwareComputerNode extends ComputerNode implements IComputer, IHardwareComputer, INode, ISimulatable {
+public class HardwareComputerNode 
+		extends ComputerNode 
+		implements IComputer, IHardwareComputer, INode, ISimulatable {
 
 	protected CPU _cpu;
 	protected Cache _cache;
 	protected Harddrive _harddrive;
 	protected Memory _memory;
 
-	public HardwareComputerNode() {
-		super();
+	public HardwareComputerNode(IAddress address, IAlgorithm algorithm) {
+		super(address, algorithm);
 	}
 	
 	protected void init() {

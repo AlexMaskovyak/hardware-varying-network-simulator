@@ -1,18 +1,20 @@
 package network;
 
+import routing.IAddress;
+
 /**
  * Basic unit of transmission on the network.
  * @author Alex Maskovyak
  *
  */
-public class Packet<T> {
+public class Packet<T> implements IPacket<T> {
 
 	/** content of this packet.  Could possibly be another packet. */
 	protected T _content;
 	/** source of this packet. */
-	protected Address _source;
+	protected IAddress _source;
 	/** destination for this packet. */
-	protected Address _destination;
+	protected IAddress _destination;
 	/** receiving protocol handler should register with this protocol. */
 	protected String _protocol;
 	/** time to live */
@@ -22,14 +24,14 @@ public class Packet<T> {
 	
 	
 	/**
-	 * Default cosntructor.
+	 * Default constructor.
 	 * @param content to store in this packet.
 	 * @param source address which created this packet.
 	 * @param destination address which is to receive this packet.
 	 * @param protocol which defines the type of handler.
 	 * @param ttl time to live, max hops before being trashed.
 	 */
-	public Packet(T content, Address source, Address destination, String protocol, int ttl, int sequence) {
+	public Packet(T content, IAddress source, IAddress destination, String protocol, int ttl, int sequence) {
 		_content = content;
 		_source = source;
 		_destination = destination;
@@ -39,27 +41,59 @@ public class Packet<T> {
 	}
 	
 	
+	/* (non-Javadoc)
+	 * @see network.IPacket#getContent()
+	 */
 	public T getContent() {
 		return _content;
 	}
 	
-	public Address getSource() {
+	/* (non-Javadoc)
+	 * @see network.IPacket#getSource()
+	 */
+	public IAddress getSource() {
 		return _source;
 	}
 	
-	public Address getDestination() {
+	/* (non-Javadoc)
+	 * @see network.IPacket#getDestination()
+	 */
+	public IAddress getDestination() {
 		return _destination;
 	}
 	
+	/* (non-Javadoc)
+	 * @see network.IPacket#getProtocol()
+	 */
 	public String getProtocol() {
 		return _protocol;
 	}
 	
+	/* (non-Javadoc)
+	 * @see network.IPacket#getTTL()
+	 */
 	public int getTTL() {
 		return _ttl;
 	}
 	
+	/* (non-Javadoc)
+	 * @see network.IPacket#getSequence()
+	 */
 	public int getSequence() {
 		return _sequence;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	public String toString() {
+		return String.format("[ SRC:%s DST:%s PRT:%s TTL:%s SEQ:%s CONT:%S ]", 
+				getSource(), 
+				getDestination(), 
+				getProtocol(),
+				getTTL(),
+				getSequence(),
+				getContent());
 	}
 }

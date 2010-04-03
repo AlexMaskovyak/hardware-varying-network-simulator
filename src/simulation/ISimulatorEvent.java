@@ -18,5 +18,5 @@ public interface ISimulatorEvent {
 	 * Obtains the numeric designation for this time event.
 	 * @return the discrete time which identifies this event.
 	 */
-	public int getTime();
+	public double getEventTime();
 }

@@ -1,64 +1,246 @@
 package network;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+
+import routing.IAddress;
+import routing.IRoutingTable;
+import routing.RoutingTable;
+import simulation.IDiscreteScheduledEvent;
+import simulation.ISimulatable;
+import simulation.ISimulatableEvent;
+import simulation.ISimulatableListener;
+import simulation.ISimulatorEvent;
+
 /**
- * Allows for the transmission of information to Connections.
+ * Allows for the transmission of information to ConnectionAdaptors.
  * @author Alex Maskovyak
  *
  */
-public class ConnectionAdaptor {
+public class ConnectionAdaptor 
+		extends AbstractProtocolHandler<IPacket<IPacket>>
+		implements IConnectionAdaptor<IPacket<IPacket>>, ISimulatable {
 
+// Fields
+	
 	/** allows for selection of next hop for a packet. */
-	protected RoutingTable _table;
+	protected IRoutingTable _table;
 	/** address of this connection. */
 	protected IAddress _address;
-	/** one up the chain of packethandling... */
-	protected PacketHandler _packetHandler;
+	/** manager in charge of us. */
+	protected ConnectionAdaptorManager _manager;
+	/** node we're connected to. */
+	protected INode _node;
+	/** connection medium. */
+	protected IConnectionMedium _medium;
+	/** the protocal we should be installed to another handler as... */
+	protected static String DEFAULT_PROTOCAL = "DEFAULT";
+
+	/** operation limit */
+	protected int _operationLimit;
+	/** current operation count. */
+	protected int _operationCount;
+
 	
+// Construction. 
 	
 	/**
-	 * Default constructor.
-	 * @param address of this adaptor.
+	 * Constructor.
+	 * @param node onto which this ConnectionAdaptor is installed.
+	 * @param connection onto which we are to be connected for transmission.
+	 * @param manager which is to manage this adaptor.
+	 * @param address associated with this adapator.
 	 */
-	public ConnectionAdaptor(IAddress address) {
-		_address = address;
+	public ConnectionAdaptor() {
+		super();
+		_operationCount = 0;
 	}
 
 	/**
 	 * Capture all constructor instantiations.
 	 */
 	protected void init() {
-		_table = new RoutingTable();		
+		super.init();
+		_address = null;
+		_manager = null;
+		_node = null;
+		_medium = null;
+		_table = new RoutingTable();
+		_protocalMappings = new HashMap<String, IProtocolHandler>();
+	}
+
+
+// Field accessors
+	
+	/**
+	 * Obtains the node we are attached.
+	 * @return node to which we are attached.
+	 */
+	public INode getNode() {
+		return _node;
 	}
 	
 	/**
-	 * Obtains this adaptor's address.
-	 * @return address of this adaptor.
+	 * Sets the node to which we are attached.
+	 * @param node to which to attach.
 	 */
+	public void setNode(INode node) {
+		_node = node;
+	}
+	
+	
+// IConnectionAdaptor
+	
+	/* (non-Javadoc)
+	 * @see network.IConnectionAdaptor#getAddress()
+	 */
+	@Override
 	public IAddress getAddress() {
 		return _address;
 	}
 	
-	/**
-	 * Installs this for a particular Node to a Connection.
-	 * @param node
-	 * @param connection
+	/*
+	 * (non-Javadoc)
+	 * @see network.IConnectionAdaptor#setAddress(network.IAddress)
 	 */
-	public void install(INode node, IConnection connection) {
-		
+	@Override
+	public void setAddress(IAddress address) {
+		_address = address;
+		_table = new RoutingTable( address );
 	}
 	
-	
-	
-	/**
-	 * Receive a packet.
-	 * @param packet
+	/*
+	 * (non-Javadoc)
+	 * @see network.IConnectionAdaptor#connect(network.IConnectionMedium)
 	 */
-	public void receive(Packet packet) {
+	@Override
+	public void connect(IConnectionMedium medium) {
+		_medium = medium;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see network.IConnectionAdaptor#disconnect(network.IConnectionMedium)
+	 */
+	@Override
+	public void disconnect(IConnectionMedium medium) {
+		_medium = null;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see network.IConnectionAdaptor#getConnectedMedium()
+	 */
+	@Override
+	public IConnectionMedium getConnectedMedium() {
+		return _medium;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see network.IConnectionAdaptor#send(network.IPacket)
+	 */
+	@Override
+	public void send(IPacket<IPacket> packet) {
+		if( _medium != null ) { _medium.receive(this, packet); }
+	}
+	
+	/* (non-Javadoc)
+	 * @see network.IConnectionAdaptor#receive(network.IPacket)
+	 */
+	@Override
+	public void receive(IPacket<IPacket> packet) {
 		// is this for us?
 		if( getAddress().equals( packet.getDestination() ) ) {
-			_packetHandler.handle(packet);
-		} else {
-			//_table.ge
+			IProtocolHandler ph = _protocalMappings.get( packet.getProtocol() );
+			ph.handle(packet.getContent());
+		} else if ( getAddress().equals( packet.getSource() ) ) {
+			// we're sending it
+			send( packet );
 		}
+		// there is no route discovery currently
+		// everyone has a universal view, otherwise we might update our table in
+		// this method
+	}
+	
+// IPacketHandler
+	
+	/*
+	 * (non-Javadoc)
+	 * @see network.AbstractPacketHandler#handle(network.IPacket)
+	 */
+	@Override
+	public void handle(IPacket<IPacket> packetLikeObject) {
+		receive(packetLikeObject);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see network.AbstractPacketHandler#getProtocal()
+	 */
+	@Override
+	public String getProtocal() {
+		return ConnectionAdaptorManager.PROTOCAL;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.ISimulatable#handleEvent(simulation.IDiscreteScheduledEvent)
+	 */
+	@Override
+	public void handleEvent(IDiscreteScheduledEvent e) {
+		if( canPerformOperation() ) {
+			e.getMessage();
+			++_operationCount;
+		}
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.ISimulatable#handleTickEvent(simulation.ISimulatorEvent)
+	 */
+	@Override
+	public void handleTickEvent(ISimulatorEvent e) {
+		_operationCount = 0;
+		e.getSimulator().signalDone(this);
+	}
+	
+	/*
+	 * By default we can perform operations.
+	 * (non-Javadoc)
+	 * @see simulation.ISimulatable#canPerformOperation()
+	 */
+	@Override
+	public boolean canPerformOperation() {
+		return _operationCount > 0;
+	}
+
+	
+// Equals
+	
+	/**
+	 * Allow equivalence testing with other IConnectionAdaptors.
+	 */
+	public boolean equals(IConnectionAdaptor adaptor) {
+		return (adaptor instanceof ConnectionAdaptor)
+			? equals((ConnectionAdaptor)adaptor)
+			: false;
+	}
+	
+	/**
+	 * Naively adaptors are equal if they 
+	 * @param adaptor
+	 * @return
+	 */
+	public boolean equals(ConnectionAdaptor adaptor) {
+		return 
+			(this == adaptor) // reference equals
+			|| 
+			( getNode() == adaptor.getNode() ) 					// same node
+			&& ( getAddress().equals( adaptor.getAddress() )	// equal address
+			&& ( getConnectedMedium() == adaptor.getConnectedMedium() ) ); // same medium
 	}
 }

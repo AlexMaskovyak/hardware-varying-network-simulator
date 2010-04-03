@@ -2,6 +2,7 @@ package computation;
 
 import network.IData;
 import simulation.AbstractSimulatable;
+import simulation.IDiscreteScheduledEvent;
 import simulation.ISimulatable;
 
 public class CPU extends AbstractSimulatable implements IHardware, ISimulatable {
@@ -24,6 +25,12 @@ public class CPU extends AbstractSimulatable implements IHardware, ISimulatable 
 
 	@Override
 	public void send(IData data) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void handleEvent(IDiscreteScheduledEvent e) {
 		// TODO Auto-generated method stub
 		
 	}

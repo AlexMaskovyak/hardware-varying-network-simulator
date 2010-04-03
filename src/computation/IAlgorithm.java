@@ -22,4 +22,10 @@ public interface IAlgorithm {
 	 * Reads back information previously placed on the network.
 	 */
 	public void read();
+	
+	/**
+	 * Obtains the protocal for this algorithm.
+	 * @return protocal this algorithm is associated with.
+	 */
+	public String getProtocal();
 }
