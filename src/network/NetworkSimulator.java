@@ -3,6 +3,8 @@ package network;
 import java.io.InvalidObjectException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -159,6 +161,33 @@ public class NetworkSimulator
 			throws InvalidObjectException {
 		connect( node, medium );
 		connect( node2, medium );
+	}
+	
+	/**
+	 * Connects a node to several other nodes with ConnectionMediums generated
+	 * between them.
+	 * @param node to connect to the others.
+	 * @param nodes which will be connected to the first specified node.
+	 * @return all nodes and connection mediums.
+	 */
+	public Collection<ISimulatable> connect( INode node, INode...nodes  ) {
+		return connect( node, Arrays.asList( nodes ) );
+	}
+	
+	/**
+	 * Connects a node to several other nodes with ConnectionMediums generated
+	 * between them.
+	 * @param node to connect to the others.
+	 * @param nodes which will be connected to the first specified node.
+	 * @return all nodes and connection mediums.
+	 */
+	public Collection<ISimulatable> connect( INode node, Collection<INode> nodes ) {
+		Collection<ISimulatable> result = new ArrayList<ISimulatable>();
+		for( INode nodeInCollection : nodes ) {
+			try { result.add( (ISimulatable)connect( node, nodeInCollection ) ); }
+			catch( Exception e ) { /* cannot fail. */ }
+		}
+		return result;
 	}
 	
 	/**
