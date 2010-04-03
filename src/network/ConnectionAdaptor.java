@@ -71,25 +71,6 @@ public class ConnectionAdaptor
 		_table = new RoutingTable();
 		_protocalMappings = new HashMap<String, IProtocolHandler>();
 	}
-
-
-// Field accessors
-	
-	/**
-	 * Obtains the node we are attached.
-	 * @return node to which we are attached.
-	 */
-	public INode getNode() {
-		return _node;
-	}
-	
-	/**
-	 * Sets the node to which we are attached.
-	 * @param node to which to attach.
-	 */
-	public void setNode(INode node) {
-		_node = node;
-	}
 	
 	
 // IConnectionAdaptor
@@ -110,6 +91,22 @@ public class ConnectionAdaptor
 	public void setAddress(IAddress address) {
 		_address = address;
 		_table = new RoutingTable( address );
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see network.IConnectionAdaptor#getConnectedNode()
+	 */
+	public INode getConnectedNode() {
+		return _node;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see network.IConnectionAdaptor#setConnectedNode(network.INode)
+	 */
+	public void setConnectedNode(INode node) {
+		_node = node;
 	}
 	
 	/*
@@ -239,7 +236,7 @@ public class ConnectionAdaptor
 		return 
 			(this == adaptor) // reference equals
 			|| 
-			( getNode() == adaptor.getNode() ) 					// same node
+			( getConnectedNode() == adaptor.getConnectedNode() ) // same node
 			&& ( getAddress().equals( adaptor.getAddress() )	// equal address
 			&& ( getConnectedMedium() == adaptor.getConnectedMedium() ) ); // same medium
 	}
