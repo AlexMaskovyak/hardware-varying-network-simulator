@@ -88,4 +88,24 @@ class DenseRoutesMap<T>
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public void remove(T node) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void removeBiDirectRoute(T start, T end) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void removeDirectRoute(T start, T end) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	
 }

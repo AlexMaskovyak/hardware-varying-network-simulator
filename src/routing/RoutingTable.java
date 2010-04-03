@@ -77,7 +77,7 @@ public class RoutingTable extends HashMap<IAddress, IAddress> implements IRoutin
     	
     	//System.out.println( next );
     	
-    	IAddress next = table0.getNextHop(n1);
+    	IAddress next = table0.getNextHop(n2);
     	
     	System.out.println( ">>>> next: " + next );
     	

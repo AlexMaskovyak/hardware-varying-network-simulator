@@ -1,48 +1,40 @@
 package routing;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
 
+import network.Address;
 import network.INode;
 import network.Node;
 
 /**
- * An implementation of Dijkstra's shortest path algorithm. It computes the shortest path (in distance)
- * to all cities in the map. The output of the algorithm is the shortest distance from the start T 
- * to every other T, and the shortest path from the start T to every other.
+ * An implementation of Dijkstra's shortest path algorithm. It computes the 
+ * shortest path (in distance) to nodes in a RoutesMap.  The output of the 
+ * algorithm is the shortest distance from the start T to every other T, and the
+ * shortest path from the start T to every other.
  * <p>
  * Upon calling
  * {@link #execute(T, T)}, 
  * the results of the algorithm are made available by calling
  * {@link #getPredecessor(T)}
  * and 
- * {@link #getShortestDistance(T)}.
+ * {@link #getShortestDistance(T)}
+ * and
+ * {@link #getShortestPath(T)}
+ * and
+ * {@link #getNextHop(source, dest)}
  * 
- * To get the shortest path between the T <var>destination</var> and
- * the source T after running the algorithm, one would do:
- * <pre>
- * ArrayList&lt;T&gt; l = new ArrayList&lt;T&gt;();
- *
- * for (T T = destination; T != null; T = engine.getPredecessor(T))
- * {
- *     l.add(T);
- * }
- *
- * Collections.reverse(l);
- *
- * return l;
- * </pre>
+ * @see #execute(T source, T dest)
  * 
- * @see #execute(T, T)
- * 
- * @author Renaud Waldura &lt;renaud+tw@waldura.com&gt;
- * @version $Id: DijkstraEngine.java 2379 2007-08-23 19:06:29Z renaud $
+ * @author Alex Maskovyak modified from Renaud Waldura
  */
-
 public class DijkstraEngine<T extends Comparable<T>> {
     
 	/** Infinity value for distances. */
@@ -70,7 +62,8 @@ public class DijkstraEngine<T extends Comparable<T>> {
     private final IRoutesMap<T> map;
     
     /** working set of items, kept ordered by shortest distance. */
-    private final PriorityQueue<T> unsettledNodes = new PriorityQueue<T>(INITIAL_CAPAT, shortestDistanceComparator);
+    private final PriorityQueue<T> unsettledNodes = 
+    	new PriorityQueue<T>(INITIAL_CAPAT, shortestDistanceComparator);
     
     /** set of cities for which the shortest distance to the source has been 
      * found. */
@@ -213,6 +206,25 @@ public class DijkstraEngine<T extends Comparable<T>> {
     }
     
     /**
+     * Get the shortest path to a destination.
+     * @param source from which to begin.
+     * @param destination to which to go.
+     * @return shortest path to destination.
+     */
+    public List<T> getShortestPath(T source, T destination) {
+    	 List<T> path = new ArrayList<T>();
+    	 
+    	 for(T node = destination; node != null; node = getPredecessor(node)) {
+    		 path.add( node );
+    	 }
+
+    	 if( !path.contains( source )) { path.clear(); }	// not viable
+    	 
+    	 Collections.reverse( path);
+    	 return path;
+    }
+    
+    /**
      * @return the node leading to the given node on the shortest path, or
      * <code>null</code> if there is no route to the destination.
      */
@@ -226,47 +238,87 @@ public class DijkstraEngine<T extends Comparable<T>> {
      * @return next hop.
      */
     public T getNextHop(T source, T dest) {
-    	T temp = dest;
-    	T nextHop = temp;
-    	while( temp != null && !temp.equals( source ) ) {
-    		nextHop = temp;
-    		temp = getPredecessor(temp);
+    	if( source == dest ) { return dest; }	// shortcut
+    	
+    	List<T> path = getShortestPath( source, dest );
+    	
+    	int pathSize = path.size();
+    	switch( pathSize ) {
+    		case 0 : return null;
+    		case 1 : return path.get( 0 );
+    		default : return path.get( path.indexOf( source ) + 1 );
     	}
-    	return nextHop;
     }
     
+    /**
+     * Sets a predecessor.
+     * @param a node who has a predecessor.
+     * @param b node a's predecessor.
+     */
     private void setPredecessor(T a, T b) {
         predecessors.put(a, b);
     }
 
     public static void main(String... args) {
-    	Node a = new Node();
-    	Node b = new Node();
-    	Node c = new Node();
-    	Node d = new Node();
-    	Node e = new Node();
+    	Node a1 = new Node(new Address(1));
+    	Node b2 = new Node(new Address(2));
+    	Node c3 = new Node(new Address(3));
+    	Node d4 = new Node(new Address(4));
+    	Node e5 = new Node(new Address(5));
     	
     	
     	IRoutesMap<INode> map = new SparseRoutesMap<INode>();
     	DijkstraEngine<INode> engine = new DijkstraEngine<INode>(map);
     	
-    	map.addDirectRoute(a, b, 5);
-    	map.addDirectRoute(b, c, 4);
-    	map.addDirectRoute(c, b, 2);
-    	map.addDirectRoute(c, d, 7);
-    	map.addDirectRoute(d, a, 3);
-    	map.addDirectRoute(d, e, 5);
-    	map.addDirectRoute(e, c, 5);
+    	map.addDirectRoute(a1, b2, 5);
+    	map.addDirectRoute(b2, c3, 4);
+    	map.addDirectRoute(c3, b2, 2);
+    	map.addDirectRoute(c3, d4, 7);
+    	map.addDirectRoute(d4, e5, 5);
+    	map.addDirectRoute(d4, a1, 3);
+    	map.addDirectRoute(e5, c3, 5);
     	///map.addDirectRoute(start, end, cost)
-    	engine.execute(a, d);
+    	
+    	Node start = d4;
+    	Node end = b2;
+    	engine.execute(start, end);
     	Node current;
     	
-    	System.out.println( a.getAddress() );
+    	List<INode> nodes = engine.getShortestPath(start, end);
+    	for( INode node : nodes ) {
+    		System.out.printf( "%s-", node.getAddress() );
+    	}
+    	
+    	
+    	System.out.printf( "\nnext: %s\n", engine.getNextHop(start, end).getAddress() );
+    	
+    	map.removeDirectRoute(d4, a1);
+    	
+    	engine.execute(start, end);
+    	
+    	nodes = engine.getShortestPath(start, end);
+    	for( INode node : nodes ) {
+    		System.out.printf( "%s-", node.getAddress() );
+    	}
+    	System.out.printf( "\nnext: %s\n", engine.getNextHop(start, end).getAddress() );
+    	
+    	map.remove( c3 );
+    	
+    	engine.execute(start, end);
+    	
+    	nodes = engine.getShortestPath(start, end);
+    	for( INode node : nodes ) {
+    		System.out.printf( "%s-", node.getAddress() );
+    	}
+    	
+    	System.out.printf( "\nnext: %s\n", engine.getNextHop(start, end).getAddress() );
+    	
+    	/*System.out.println( a.getAddress() );
     	System.out.println( b.getAddress() );
     	System.out.println( c.getAddress() );
 
     	System.out.println( d.getAddress() );
     	System.out.println( engine.getPredecessor(d).getAddress() );
-    	System.out.println( engine.getShortestDistance(d));
+    	System.out.println( engine.getShortestDistance(d));*/
     }
 }
