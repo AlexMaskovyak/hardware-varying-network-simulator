@@ -4,7 +4,6 @@ import java.io.InvalidObjectException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -73,8 +72,7 @@ public class NetworkSimulator
 		registerSimulatable((ISimulatable)medium);
 		return medium;
 	}
-
-
+	
 /// Mass factories.
 
 	/**
@@ -131,6 +129,54 @@ public class NetworkSimulator
 	public List<ISimulatable> createMeshOfConnectedNodes( int number ) {
 		return connectAsMesh( createNodes( number ) ); // create > connect them
 	}
+	
+
+/// Anti-factories.
+	
+	/**
+	 * Remove the ISimulatable and any associated simulatables from this 
+	 * network and simulator.
+	 * @param simulatable to remove.
+	 */
+	public void remove( ISimulatable simulatable ) {
+		// delegate
+		if( simulatable instanceof INode ) {
+			remove( (INode)simulatable );
+		} else if ( simulatable instanceof IConnectionMedium ) {
+			remove( (IConnectionMedium)simulatable );
+		} else if ( simulatable instanceof IConnectionAdaptor ) {
+			remove( (IConnectionAdaptor)simulatable );
+		}
+	}
+
+	/**
+	 * Removes the node and associated adaptors from the simulator.
+	 * @param node to remove.
+	 */
+	public void remove( INode node) {
+		disconnect( node );
+		unregisterSimulatable( (ISimulatable)node );
+	}
+	
+	/**
+	 * Removes the medium from the simulator and disconnects associated 
+	 * adaptors.
+	 * @param medium to remove.
+	 */
+	public void remove( IConnectionMedium medium ) {
+		disconnect( medium );
+		unregisterSimulatable( (ISimulatable) medium );
+	}
+	
+	/**
+	 * Removes the connection adaptor from the simulator.
+	 * @param adaptor to remove.
+	 */
+	public void remove( IConnectionAdaptor adaptor ) {
+		disconnect( adaptor );
+		unregisterSimulatable( (ISimulatable) adaptor );
+	}
+	
 	
 /// Connecting Support
 	
@@ -297,17 +343,162 @@ public class NetworkSimulator
 	}
 
 	
+/// Disconnect Helpers
+	
+	/**
+	 * Disconnects several nodes from the network.  Note: the nodes themselves
+	 * will stay remain registered with the simulator!
+	 * @param nodes to disconnect.
+	 */
+	public void disconnectNodes( INode... nodes ) {
+		disconnectNodes( Arrays.asList( nodes ) );
+	}
+	
+	/**
+	 * Disconnects several nodes from the network.  Note: the nodes themselves
+	 * will stay remain registered with the simulator!
+	 * @param nodes to disconnect.
+	 */
+	public void disconnectNodes( Collection<INode> nodes ) {
+		for( INode node : nodes ) {
+			disconnect( node );
+		}
+	}
+	
+	/**
+	 * Disconnects a node from the network, basically removes its adaptors, and
+	 * updates the routing information.  Note: the node itself will remain
+	 * registered with the simulator!  See {@link #remove(INode)} for actual
+	 * removal from the simulation environment.
+	 * @param node to disconnect.
+	 */
+	public void disconnect( INode node ) {
+		Collection<IConnectionAdaptor> adaptors = node.getAdaptors();
+		IConnectionMedium medium = null;
+		// disconnect
+		for( IConnectionAdaptor adaptor : adaptors ) {
+			disconnect( adaptor );
+			unregisterSimulatable( (ISimulatable)adaptor );	// adaptors should not exist if not connected
+		}
+	}
+	
+	/**
+	 * Disconnects a node from another node.  Disconnects the adaptors that 
+	 * connect to a medium shared between the two.
+	 * @param node1 to disconnect from node2.
+	 * @param node2 to disconnect from node1.
+	 */
+	public void disconnect( INode node1, INode node2 ) {
+		Collection<IConnectionAdaptor> adaptors1 = node1.getAdaptors();
+		Collection<IConnectionAdaptor> adaptors2 = node2.getAdaptors();
+		
+		// O(n^2) search to find those adaptors with common mediums
+		for( IConnectionAdaptor adaptor1 : adaptors1 ) {
+			for( IConnectionAdaptor adaptor2 : adaptors2 ) {
+				// do they connect to the same medium?
+				// this is a direct link!
+				if( adaptor1.getConnectedMedium() == adaptor2.getConnectedMedium() ) {
+					disconnect( adaptor1 );
+					disconnect( adaptor2 );
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Disconnects a node from a medium.  Removes any adaptors to that medium.
+	 * @param node to disconnect from the medium.
+	 * @param medium to disconnect from the node.
+	 */
+	public void disconnect( INode node, IConnectionMedium medium ) {
+		Collection<IConnectionAdaptor> nodeAdaptors = node.getAdaptors();
+		Collection<IConnectionAdaptor> mediumAdaptors = 
+			Arrays.asList( medium.getConnectedAdaptors() );
+		
+		// disconnect the adaptor held in common
+		nodeAdaptors.retainAll(mediumAdaptors);	// retain the common ones
+		disconnectAdaptors( nodeAdaptors );		// disconnect the commons (should be one)
+	}
+	
+	/**
+	 * Disconnects a medium from adaptors.
+	 * @param medium to disconnect.
+	 */
+	public void disconnect( IConnectionMedium medium ) {
+		// queue it up
+		Queue<IConnectionAdaptor> queue = 
+			new LinkedList<IConnectionAdaptor>( 
+				Arrays.asList( medium.getConnectedAdaptors() ) );
+		
+		// take each node out in turn and disconnects it from the medium
+		while( !queue.isEmpty() ) {
+			IConnectionAdaptor adaptor = queue.poll();
+			
+			adaptor.disconnect( medium );		// disconnect medium
+			medium.disconnect( adaptor );		// disconnect adaptor
+			
+			// tell the router that this one no longer has a bi-directional 
+			// route to the others
+			for( IConnectionAdaptor other : queue ) {
+				_router.removeBiDirectionalRoute( 
+					adaptor.getAddress(), 
+					other.getAddress() );
+			}
+		}
+	}
+	
+	/**
+	 * Disconnects all adaptors from their connected Nodes and mediums.  
+	 * Typically this will not be called by an outside user.  
+	 * @param adaptors to disconnect.
+	 */
+	public void disconnectAdaptors( Collection<IConnectionAdaptor> adaptors ) {
+		for( IConnectionAdaptor adaptor : adaptors ) {
+			disconnect( adaptor );
+		}
+	}
+	
+	/**
+	 * Disconnects an adaptor from a Node and the medium.  Typically this will
+	 * not be called by an outside user.  Usual use is as a helper for 
+	 * {@link #disconnect(INode)}.
+	 * @param adaptor to disconnect.
+	 */
+	public void disconnect( IConnectionAdaptor adaptor ) {
+		// deal with the node
+		INode node = adaptor.getConnectedNode();
+		node.removeAdaptor( adaptor );
+		adaptor.setConnectedNode( null );
+		
+		// deal with the medium
+		IConnectionMedium medium = adaptor.getConnectedMedium();
+		medium.disconnect( adaptor );
+		adaptor.disconnect( medium );
+		
+		// perform central router disconnect
+		for( IConnectionAdaptor mediumAdaptor: medium.getConnectedAdaptors() ) {
+			_router.removeBiDirectionalRoute( 
+				adaptor.getAddress(), 
+				mediumAdaptor.getAddress() );
+		}
+	}
+
+	
 /// Internal Support
 	
 	/**
 	 * Safe connecting for use inside of the factory methods themselves where we
-	 * can be guaranteed that no outside simulatables are being introduced.
+	 * can be guaranteed that no outside simulatables are being introduced.  
+	 * This method is the final delegate for all connection operations!  There
+	 * would have to be a good reason not to call this method when implementing
+	 * an additional one.
 	 * @param node which is to be connected to the specified medium.
 	 * @param medium which is to be connected to the specified node.
 	 */
 	protected void internalConnect( INode node, IConnectionMedium medium ) {
 		IConnectionAdaptor[] existingAdapators = medium.getConnectedAdaptors();
 		IConnectionAdaptor newAdaptor = createAdaptor();
+		newAdaptor.setConnectedNode( node );
 		node.addAdaptor( newAdaptor );
 		newAdaptor.setAddress( node.getAddress() );
 		

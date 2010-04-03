@@ -45,10 +45,10 @@ public class DriverNetworkSimulator {
 		System.out.println("starting");
 		
 		NetworkSimulator sim = new ComputerNetworkSimulator();
-		List<ISimulatable> simulatables = sim.createSeriesOfConnectedNodes(5);
-		INode n0 = (INode) simulatables.get(1);
-		System.out.println(simulatables.size());
-		/*INode n0 = sim.createNode(); //  new Node(new Address(1));
+		//List<ISimulatable> simulatables = sim.createSeriesOfConnectedNodes(5);
+		//INode n0 = (INode) simulatables.get(1);
+	//	System.out.println(simulatables.size());
+		INode n0 = sim.createNode(); //  new Node(new Address(1));
 		INode n1 = sim.createNode();
 		IConnectionMedium medium = sim.createConnectionMedium();
 		sim.connect(n0, medium);
@@ -66,11 +66,14 @@ public class DriverNetworkSimulator {
 		
 		INode n4 = sim.createNode();
 		IConnectionMedium medium4 = sim.createConnectionMedium();
-		sim.connect(n2, medium4);
+		sim.connect(n3, medium4);
 		sim.connect(n4, medium4);
 		
+		//sim.disconnect( medium4 );
+		//sim.disconnect( n4, n3 );
+		
 		((ISimulatable)n0).addListener(new NodeSimulatableListener(System.out));
-		((ISimulatable)n1).addListener(new NodeSimulatableListener(System.out));*/
+		((ISimulatable)n1).addListener(new NodeSimulatableListener(System.out));
 		
 		Thread t = new Thread((Runnable)sim);
 		t.start();
