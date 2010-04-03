@@ -44,6 +44,18 @@ public interface IConnectionAdaptor<T> extends IProtocolHandler<T> {
 	public abstract IConnectionMedium getConnectedMedium();
 	
 	/**
+	 * Retrieves the node to which this adaptor is connected.
+	 * @return node to which we are connected.
+	 */
+	public abstract INode getConnectedNode();
+	
+	/**
+	 * Sets the node to which this adaptor is connected.
+	 * @param node to which  we are connected.
+	 */
+	public abstract void setConnectedNode(INode node);
+	
+	/**
 	 * Receive a packet.  If it is for us, the move it up the protocal stack.
 	 * If it is from us, send it out!
 	 * @param packet to inspect.
