@@ -6,8 +6,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import messages.ConnectionAdaptorManagerMessage;
+import messages.ConnectionAdaptorManagerInMessage;
+import messages.ConnectionAdaptorManagerOutMessage;
 import messages.ConnectionAdaptorMessage;
+import messages.NodeInMessage;
+import messages.NodeOutMessage;
 
 import routing.CentralRouter;
 import routing.IAddress;
@@ -66,7 +69,6 @@ public class ConnectionAdaptorManager
 		super.init();
 		_adaptors = new HashSet<IConnectionAdaptor>();
 		_table = new RoutingTable();
-		_protocalMappings = new HashMap<String, IProtocolHandler>();
 	}
 
 /// Accessors / Mutators
@@ -170,7 +172,21 @@ public class ConnectionAdaptorManager
 	 * @param packet to deliver up the stack from below.
 	 */
 	public void receiveFromBelow(IPacket<IPacket> packet) {
-		super.getHandler(packet.getProtocol()).handle(packet);
+		AbstractProtocolHandler handler = super.getHandler( packet.getProtocol() );
+		if( handler instanceof Node ) {
+			System.out.println("CAM GIVE TO NOD!");
+			getSimulator().schedule(
+				new DefaultDiscreteScheduledEvent<NodeInMessage>(
+					(ISimulatable)this, 
+					(ISimulatable)handler, 
+					getSimulator().getTime() + .00001, 
+					getSimulator(), 
+					new NodeInMessage(
+						(IData)packet.getContent(), packet.getProtocol())));
+		}
+		//(handler)
+		//handler.handle( packet );
+		//super.getHandler(packet.getProtocol()).handle(packet);
 	}
 
 /// ISimulatable
@@ -179,10 +195,17 @@ public class ConnectionAdaptorManager
 	@Override
 	public void handleEvent(IDiscreteScheduledEvent e) {
 		IMessage message = e.getMessage();
-		if( message instanceof ConnectionAdaptorManagerMessage ) {
-			IPacket packet = ((ConnectionAdaptorManagerMessage)message).getPacket();
+		if( message instanceof ConnectionAdaptorManagerInMessage ) {
+			IPacket packet = ((ConnectionAdaptorManagerInMessage)message).getPacket();
 			System.out.printf("%s CAM handle %s\n", getAddress(), packet );
-			handle(((ConnectionAdaptorManagerMessage)message).getPacket());
+			handle(((ConnectionAdaptorManagerInMessage)message).getPacket());
+		} else if ( message instanceof ConnectionAdaptorManagerOutMessage ) {
+			ConnectionAdaptorManagerOutMessage caMessage = 
+				(ConnectionAdaptorManagerOutMessage)message;
+			Object data = caMessage.getData();
+			IAddress destination = caMessage.getDestination();
+			System.out.printf("%s CAM handle %s\n", getAddress(), data );
+			//new Packet(data, getAddress(), destination, );
 		}
 	}
 	

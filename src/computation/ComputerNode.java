@@ -3,6 +3,7 @@ package computation;
 import javax.management.OperationsException;
 
 import network.INode;
+import network.IProtocolHandler;
 import network.Node;
 
 
@@ -15,20 +16,29 @@ import simulation.ISimulatable;
  * @author Alex Maskovyak
  *
  */
-public class ComputerNode extends Node implements IComputer, INode, ISimulatable {
+public class ComputerNode 
+		extends Node 
+		implements IComputer, INode, ISimulatable {
 
-	/** installed algorithm. */
-	protected IAlgorithm _algorithm;
+/// Fields
 	
+	/** installed algorithm. */
+	protected AbstractAlgorithm _algorithm;
+
+	
+/// Construction.
+	
+	/** Default constructor. */
 	public ComputerNode() {
 		this(null);
 	}
-	
+
 	/**
-	 * Default constructor.
+	 * Constructor.
+	 * @param address to set for this node.
 	 */
-	public ComputerNode(IAddress address) {
-		this(address, null);
+	public ComputerNode( IAddress address ) {
+		super( address );
 	}
 	
 	/**
@@ -40,17 +50,33 @@ public class ComputerNode extends Node implements IComputer, INode, ISimulatable
 		install(algorithm);
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * @see network.Node#init()
+	 */
 	@Override
 	protected void init() {
 		super.init();
 		_algorithm = null;
 	}
+
+/// IComputer
 	
+	/*
+	 * (non-Javadoc)
+	 * @see computation.IComputer#install(computation.IAlgorithm)
+	 */
 	@Override
 	public void install(IAlgorithm algorithm) {
-		_algorithm = algorithm;
+		_algorithm = (AbstractAlgorithm) algorithm;
+		IProtocolHandler handler = (IProtocolHandler)algorithm;
+		this.install(handler, handler.getProtocal());
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see computation.IComputer#start()
+	 */
 	@Override
 	public void start() throws OperationsException {
 		if( _algorithm == null ) {
@@ -60,6 +86,10 @@ public class ComputerNode extends Node implements IComputer, INode, ISimulatable
 		_algorithm.read();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see computation.IComputer#uninstall()
+	 */
 	@Override
 	public void uninstall() {
 		_algorithm = null;

@@ -49,7 +49,7 @@ public interface INode
 	 * @param data to send to connected items.
 	 * @param address to which to send data.
 	 */
-	public void send(Data data, IAddress address);	
+	public void send(Object data, IAddress address);	
 	
 	/**
 	 * Factory method to allow for a "base" node to create new versions of 

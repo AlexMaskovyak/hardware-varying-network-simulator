@@ -5,7 +5,8 @@ package computation;
  * @author Alex Maskovyak
  *
  */
-public interface IHardwareComputer extends IComputer {
+public interface IHardwareComputer 
+		extends IComputer {
 
 	/**
 	 * Obtains the CPU installed.

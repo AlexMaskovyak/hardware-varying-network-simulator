@@ -74,7 +74,6 @@ public class ConnectionAdaptor
 		_node = null;
 		_medium = null;
 		_table = new RoutingTable();
-		_protocalMappings = new HashMap<String, IProtocolHandler>();
 	}
 	
 	

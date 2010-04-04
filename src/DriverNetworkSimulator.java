@@ -13,7 +13,7 @@ import simulation.ISimulatableEvent;
 import simulation.ISimulatableListener;
 import simulation.ISimulator;
 import simulation.Simulator;
-import messages.NodeMessage;
+import messages.NodeOutMessage;
 import network.Address;
 import network.ConnectionMedium;
 import network.Data;
@@ -46,10 +46,10 @@ public class DriverNetworkSimulator {
 		System.out.println("starting");
 		
 		NetworkSimulator sim = new ComputerNetworkSimulator();
-		//List<ISimulatable> simulatables = sim.createSeriesOfConnectedNodes(5);
-		//INode n0 = (INode) simulatables.get(1);
+		List<ISimulatable> simulatables = sim.createRingOfConnectedNodes(5);
+		INode n0 = (INode) simulatables.get(1);
 	//	System.out.println(simulatables.size());
-		INode n0 = sim.createNode(); //  new Node(new Address(1));
+		/*INode n0 = sim.createNode(); //  new Node(new Address(1));
 		INode n1 = sim.createNode();
 		IConnectionMedium medium = sim.createConnectionMedium();
 		sim.connect(n0, medium);
@@ -74,12 +74,12 @@ public class DriverNetworkSimulator {
 		//sim.disconnect( n4, n3 );
 		
 		((ISimulatable)n0).addListener(new NodeSimulatableListener(System.out));
-		((ISimulatable)n1).addListener(new NodeSimulatableListener(System.out));
+		((ISimulatable)n1).addListener(new NodeSimulatableListener(System.out));*/
 		
 		Thread t = new Thread((Runnable)sim);
 		t.start();
 		//t.join();
-		sim.schedule(new DefaultDiscreteScheduledEvent<NodeMessage>(null, (ISimulatable)n0, 3, sim, new NodeMessage( new Data(1, new byte[] {0, 0, 0} ), new Address(2) ) ) );
+		sim.schedule(new DefaultDiscreteScheduledEvent<NodeOutMessage>(null, (ISimulatable)n0, 3, sim, new NodeOutMessage( new Data(1, new byte[] {0, 0, 0} ), new Address(4) ) ) );
 		//sim.schedule(new DefaultDiscreteScheduledEvent<NodeMessage>(null, (ISimulatable)n4, 1, sim, new NodeMessage( new Data(1, new byte[] {0, 0, 0} ), new Address(0) ) ) );
 		//sim.schedule(new DefaultDiscreteScheduledEvent<NodeMessage>(null, (ISimulatable)n0, -100, sim, new NodeMessage( new Data(1, new byte[] {0, 0, 0} ), new Address(4) ) ) );
 		//sim.start();

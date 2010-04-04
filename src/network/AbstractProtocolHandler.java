@@ -17,7 +17,7 @@ public abstract class AbstractProtocolHandler<T>
 		implements IProtocolHandler<T> {
 
 	/** protocals installed on this adaptor. */
-	protected Map<String, IProtocolHandler> _protocalMappings;
+	protected Map<String, AbstractProtocolHandler> _protocalMappings;
 	/** universal accept protocal, if no other protocal is present check this. */ 
 	public static String DEFAULT_PROTOCAL = "UNIVERSAL_HANDLER";
 	
@@ -29,16 +29,20 @@ public abstract class AbstractProtocolHandler<T>
 	
 	/** Externalize instantiation. */
 	protected void init() {
-		_protocalMappings = new HashMap<String, IProtocolHandler>();
+		super.init();
+		_protocalMappings = new HashMap<String, AbstractProtocolHandler>();
 	}
 	
 	@Override
 	public abstract void handle(T packetLikeObject);	
 	
 	@Override
-	public IProtocolHandler getHandler(String protocal) {
+	public AbstractProtocolHandler getHandler(String protocal) {
 		IProtocolHandler result = _protocalMappings.get(protocal);
-		return (result != null) ? result : _protocalMappings.get(AbstractProtocolHandler.DEFAULT_PROTOCAL);
+		return (AbstractProtocolHandler) 
+			((result != null)
+			? result 
+			: _protocalMappings.get(AbstractProtocolHandler.DEFAULT_PROTOCAL));
 	}
 	
 	@Override
@@ -46,7 +50,9 @@ public abstract class AbstractProtocolHandler<T>
 	
 	@Override
 	public void install(IProtocolHandler handler, String protocal) {
-		_protocalMappings.put(protocal, handler);
+		if( handler instanceof AbstractProtocolHandler ) {
+			_protocalMappings.put(protocal, (AbstractProtocolHandler)handler);
+		}
 	}
 
 	@Override

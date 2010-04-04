@@ -5,6 +5,7 @@ import java.util.Set;
 
 import routing.IAddress;
 import simulation.DefaultDiscreteScheduledEvent;
+import simulation.DiscreteScheduledEventSimulator;
 import simulation.IDiscreteScheduledEvent;
 import simulation.IDiscreteScheduledEventSimulator;
 import simulation.ISimulatable;
@@ -15,8 +16,11 @@ import simulation.ISimulatorEvent;
 import simulation.AbstractSimulatable;
 import simulation.IDiscreteScheduledEvent.IMessage;
 
-import messages.ConnectionAdaptorManagerMessage;
-import messages.NodeMessage;
+import messages.AlgorithmMessage;
+import messages.ConnectionAdaptorManagerInMessage;
+import messages.ConnectionAdaptorManagerOutMessage;
+import messages.NodeInMessage;
+import messages.NodeOutMessage;
 import network.INode;
 
 
@@ -28,7 +32,7 @@ import network.INode;
  *
  */
 public class Node 
-		extends AbstractSimulatable 
+		extends AbstractProtocolHandler<IPacket> 
 		implements INode, ISimulatable, Comparable<INode> {
 
 /// Fields	
@@ -42,8 +46,6 @@ public class Node
 	protected IAddress _address;
 	/** manages all of our connections. */
 	protected ConnectionAdaptorManager _manager;
-	/** handles packets that come to this Node. */
-	protected IProtocolHandler _handler;
 
 /// Construction.
 	
@@ -62,7 +64,7 @@ public class Node
 		super();
 		_address = address;
 		_manager.setAddress(address);
-		_manager.install(_handler, AbstractProtocolHandler.DEFAULT_PROTOCAL);
+		_manager.install(this, AbstractProtocolHandler.DEFAULT_PROTOCAL);
 	}
 	
 	/**
@@ -72,7 +74,6 @@ public class Node
 		super.init();
 		_currentState = State.IDLE;
 		_manager = new ConnectionAdaptorManager();
-		_handler = new NodePacketHandler(this);
 	}
 
 	
@@ -107,11 +108,19 @@ public class Node
 	 * @see network.INode#send(network.Data, network.IAddress)
 	 */
 	@Override
-	public void send(Data data, IAddress address) {
+	public void send(Object data, IAddress address) {
 		// notify listeners that we sent data.
 		_currentState = State.SENT;
-		IPacket<Data> packet = new Packet<Data>(data, getAddress(), address, "algorithm", 5, 5);
+		IPacket<Object> packet = new Packet<Object>(data, getAddress(), address, "algorithm", 5, 5);
 		// send it down the stack
+		
+		getSimulator().schedule(
+			new DefaultDiscreteScheduledEvent(
+				this,
+				_manager,
+				getSimulator().getTime(),
+				getSimulator(),
+				new ConnectionAdaptorManagerOutMessage(data, address)));
 		_manager.receive(packet);
 		
 		notify(new NodeSimulatableEvent(this, -1, "Sent data.", packet));
@@ -175,27 +184,39 @@ public class Node
 	@Override
 	public void handleEvent(IDiscreteScheduledEvent e) {
 		IMessage message = e.getMessage();
-		if( message instanceof NodeMessage ) {
-			if( !doit ) { return; } 
-			doit = false;
-			NodeMessage nodeMessage = ((NodeMessage)message);
+		if( message instanceof NodeOutMessage ) {
+			//if( !doit ) { return; } 
+			//doit = false;
+			NodeOutMessage nodeMessage = ((NodeOutMessage)message);
 			IAddress destination = nodeMessage.getAddress();
 			IData data = nodeMessage.getData();
-			System.out.println( destination );
 			getSimulator().schedule( 
-				new DefaultDiscreteScheduledEvent<ConnectionAdaptorManagerMessage>(
+				new DefaultDiscreteScheduledEvent<ConnectionAdaptorManagerInMessage>(
 					this, 
 					_manager, 
 					e.getEventTime() + .00001, 
 					e.getSimulator(), 
-					new ConnectionAdaptorManagerMessage(
+					new ConnectionAdaptorManagerInMessage(
 						new Packet(
 							data, 
 							getAddress(),
 							destination,
-							ConnectionAdaptorManager.PROTOCAL,
+							"DISTR_ALGORITHM",
 							-1,
 							-1 ) ) ));
+		} else if( message instanceof NodeInMessage ) {
+			System.out.println("GOT node in");
+			NodeInMessage nodeMessage = ((NodeInMessage)message);
+			String protocol = nodeMessage.getProtocol();
+			IData data = nodeMessage.getData();
+			AbstractProtocolHandler handler = getHandler( protocol );
+			getSimulator().schedule(
+				new DefaultDiscreteScheduledEvent<AlgorithmMessage>(
+					this, 
+					handler, 
+					getSimulator().getTime() + .0001, 
+					getSimulator(),
+					new AlgorithmMessage(data)));
 		}
 	}
 
@@ -270,51 +291,22 @@ public class Node
 		return getAddress().compareTo(node.getAddress());
 	}
 
-
-/// PacketHandling
-	
-	/**
-	 * PacketHandler which bridges the gap between the true protocals and the
-	 * INode itself.
-	 * @author Alex Maskovyak
-	 *
+// IProtocolHandler
+	/*
+	 * (non-Javadoc)
+	 * @see network.AbstractProtocolHandler#getProtocal()
 	 */
-	private class NodePacketHandler extends AbstractProtocolHandler<IPacket> {
+	@Override
+	public String getProtocal() {
+		return null;
+	}
 
-		/** node to have handle this packet. */
-		protected INode _node;
-		
-		/**
-		 * Default constructor.
-		 * @param node which is the handle the last part of the chain.
-		 */
-		public NodePacketHandler(INode node) {
-			_node = node;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see network.AbstractPacketHandler#getProtocal()
-		 */
-		@Override
-		public String getProtocal() {
-			return null;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * @see simulation.AbstractSimulatable#handleEvent(simulation.IDiscreteScheduledEvent)
-		 */
-		@Override
-		public void handleEvent(IDiscreteScheduledEvent e) {}
-
-		/*
-		 * (non-Javadoc)
-		 * @see network.AbstractProtocolHandler#handle(java.lang.Object)
-		 */
-		@Override
-		public void handle( IPacket packetlikeObject ) {
-			_node.receive( packetlikeObject );
-		}
+	/*
+	 * (non-Javadoc)
+	 * @see network.AbstractProtocolHandler#handle(java.lang.Object)
+	 */
+	@Override
+	public void handle(IPacket packetLikeObject) {
+		receive( packetLikeObject );
 	}
 }

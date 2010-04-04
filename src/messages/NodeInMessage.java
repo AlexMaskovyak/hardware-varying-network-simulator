@@ -9,20 +9,20 @@ import simulation.IDiscreteScheduledEvent.IMessage;
  * @author Alex Maskovyak
  *
  */
-public class NodeMessage implements IMessage {
+public class NodeInMessage implements IMessage {
 	
 	/** data to handle. */
 	protected IData _data;
 	/** address to send to. */
-	protected IAddress _address;
+	protected String _protocol;
 	
 	/**
 	 * Default constructor.
 	 * @param packet for ConnectionAdaptorManager to handle.
 	 */
-	public NodeMessage( IData data, IAddress address ) {
+	public NodeInMessage( IData data, String protocol ) {
 		_data = data;
-		_address = address;
+		_protocol = protocol;
 	}
 	
 	/**
@@ -34,10 +34,10 @@ public class NodeMessage implements IMessage {
 	}
 	
 	/**
-	 * Get the destination.
-	 * @return destination for this data.
+	 * Get the protocol.
+	 * @return destination for the data.
 	 */
-	public IAddress getAddress() {
-		return _address;
+	public String getProtocol() {
+		return _protocol;
 	}
 }
