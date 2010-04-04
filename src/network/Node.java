@@ -4,15 +4,19 @@ import java.util.HashSet;
 import java.util.Set;
 
 import routing.IAddress;
-import simulation.AbstractDiscreteScheduledEvent;
+import simulation.DefaultDiscreteScheduledEvent;
 import simulation.IDiscreteScheduledEvent;
 import simulation.IDiscreteScheduledEventSimulator;
 import simulation.ISimulatable;
 import simulation.ISimulatableEvent;
 import simulation.ISimulatableListener;
+import simulation.ISimulator;
 import simulation.ISimulatorEvent;
 import simulation.AbstractSimulatable;
+import simulation.IDiscreteScheduledEvent.IMessage;
 
+import messages.ConnectionAdaptorManagerMessage;
+import messages.NodeMessage;
 import network.INode;
 
 
@@ -89,6 +93,8 @@ public class Node
 	 */
 	@Override
 	public void receive(IPacket packet) {
+		System.out.printf("%s Node Receives from below %s\n", getAddress(), packet);
+		
 		// notify listeners that we've received data
 		_currentState = State.RECEIVED;
 		notify(new NodeSimulatableEvent(this, -1, "Got data.", packet));
@@ -107,6 +113,7 @@ public class Node
 		IPacket<Data> packet = new Packet<Data>(data, getAddress(), address, "algorithm", 5, 5);
 		// send it down the stack
 		_manager.receive(packet);
+		
 		notify(new NodeSimulatableEvent(this, -1, "Sent data.", packet));
 		_currentState = State.IDLE;
 	}
@@ -147,26 +154,49 @@ public class Node
 		return new Node(address);
 	}
 
+
 /// ISimulatable
+
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.AbstractSimulatable#setSimulator(simulation.ISimulator)
+	 */
+	public void setSimulator(ISimulator simulator) {
+		super.setSimulator( simulator );
+		_manager.setSimulator( simulator );
+	}
+	
+	boolean doit = true;
 	
 	/*
 	 * (non-Javadoc)
 	 * @see simulation.AbstractSimulatable#handleEvent(simulation.IDiscreteScheduledEvent)
 	 */
 	@Override
-	public void handleEvent(final IDiscreteScheduledEvent e) {
-		// TODO Auto-generated method stub
-		System.out.printf("%s is handling an event.", getAddress());
-		((IDiscreteScheduledEventSimulator)e.getSimulator()).
-			schedule( new AbstractDiscreteScheduledEvent(this, _manager, e.getEventTime() + .000001, e.getSimulator() ) {
-
-				@Override
-				public Object getMessage() {
-					return e.getMessage();
-				}
-				
-			});
-		//(IData) e.getMessage();
+	public void handleEvent(IDiscreteScheduledEvent e) {
+		IMessage message = e.getMessage();
+		if( message instanceof NodeMessage ) {
+			if( !doit ) { return; } 
+			doit = false;
+			NodeMessage nodeMessage = ((NodeMessage)message);
+			IAddress destination = nodeMessage.getAddress();
+			IData data = nodeMessage.getData();
+			System.out.println( destination );
+			getSimulator().schedule( 
+				new DefaultDiscreteScheduledEvent<ConnectionAdaptorManagerMessage>(
+					this, 
+					_manager, 
+					e.getEventTime() + .00001, 
+					e.getSimulator(), 
+					new ConnectionAdaptorManagerMessage(
+						new Packet(
+							data, 
+							getAddress(),
+							destination,
+							ConnectionAdaptorManager.PROTOCAL,
+							-1,
+							-1 ) ) ));
+		}
 	}
 
 	/*
@@ -288,4 +318,3 @@ public class Node
 		}
 	}
 }
-

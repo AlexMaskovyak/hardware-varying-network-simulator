@@ -17,6 +17,8 @@ public abstract class AbstractSimulatable
 	
 	/** listeners to be informed of events. */
 	protected Set<ISimulatableListener> _listeners;	
+	/** simulator to which we are registered. */
+	protected IDiscreteScheduledEventSimulator _simulator;
 	
 // Construction
 	
@@ -63,7 +65,25 @@ public abstract class AbstractSimulatable
 			listener.tickHandledUpdate(e);
 		}
 	}
-		
+
+// Field accessor/mutator
+	
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.ISimulatable#setSimulator(simulation.ISimulator)
+	 */
+	public void setSimulator(ISimulator simulator) {
+		_simulator = (IDiscreteScheduledEventSimulator) simulator;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.ISimulatable#getSimulator()
+	 */
+	public IDiscreteScheduledEventSimulator getSimulator() {
+		return _simulator;
+	}
+	
 // Event handling
 	
 	@Override

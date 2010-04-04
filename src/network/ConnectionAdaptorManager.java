@@ -6,15 +6,21 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import messages.ConnectionAdaptorManagerMessage;
+import messages.ConnectionAdaptorMessage;
+
 import routing.CentralRouter;
 import routing.IAddress;
 import routing.IRoutingTable;
 import routing.RoutingTable;
+import simulation.DefaultDiscreteScheduledEvent;
+import simulation.DiscreteScheduledEventSimulator;
 import simulation.IDiscreteScheduledEvent;
 import simulation.ISimulatable;
 import simulation.ISimulatableEvent;
 import simulation.ISimulatableListener;
 import simulation.ISimulatorEvent;
+import simulation.IDiscreteScheduledEvent.IMessage;
 
 /**
  * Manages the ConnectionAdaptors for a node.  Installed as a 
@@ -121,8 +127,8 @@ public class ConnectionAdaptorManager
 	 * @param packet to receive.
 	 */
 	public void receive(IPacket packet) {
-		System.out.printf("ConnectionAdaptorManager %s received packet for %s\n", getAddress(), packet.getDestination());
 		if( getAddress().equals( packet.getDestination() ) ) {
+			System.out.printf("%s CAM pass it up %s.\n", getAddress(), packet);
 			// pass it up
 			receiveFromBelow(packet);
 		} else if ( getAddress().equals( packet.getSource() ) ) {
@@ -148,7 +154,13 @@ public class ConnectionAdaptorManager
 		// create new packet
 		IPacket outgoing = new Packet<IPacket>(packet, getAddress(), nextHop, ConnectionAdaptorManager.PROTOCAL, 5, 0);
 		for( IConnectionAdaptor ca : _adaptors ) {
-			ca.receive(outgoing);
+			getSimulator().schedule(
+				new DefaultDiscreteScheduledEvent<ConnectionAdaptorMessage>(
+					(ISimulatable)this,
+					(ISimulatable)ca, 
+					getSimulator().getTime() + .00001,
+					getSimulator(),
+					new ConnectionAdaptorMessage(outgoing)));
 		}
 	}
 	
@@ -158,7 +170,6 @@ public class ConnectionAdaptorManager
 	 * @param packet to deliver up the stack from below.
 	 */
 	public void receiveFromBelow(IPacket<IPacket> packet) {
-		System.out.printf("%s Receives from below %s\n", getAddress(), packet);
 		super.getHandler(packet.getProtocol()).handle(packet);
 	}
 
@@ -167,8 +178,12 @@ public class ConnectionAdaptorManager
 	
 	@Override
 	public void handleEvent(IDiscreteScheduledEvent e) {
-		System.out.println("CAM handle event.");
-		
+		IMessage message = e.getMessage();
+		if( message instanceof ConnectionAdaptorManagerMessage ) {
+			IPacket packet = ((ConnectionAdaptorManagerMessage)message).getPacket();
+			System.out.printf("%s CAM handle %s\n", getAddress(), packet );
+			handle(((ConnectionAdaptorManagerMessage)message).getPacket());
+		}
 	}
 	
 /// IPacketHandler

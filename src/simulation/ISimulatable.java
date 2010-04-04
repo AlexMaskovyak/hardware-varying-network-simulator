@@ -40,6 +40,18 @@ public interface ISimulatable extends EventListener {
 	public void handleEvent(IDiscreteScheduledEvent e);
 	
 	/**
+	 * Obtains the simulator to which we are registered.
+	 * @return simulator to which we are registered.
+	 */
+	public ISimulator getSimulator();
+	
+	/**
+	 * Sets the simulator to which we are registered.
+	 * @param simulator to which we are registered.
+	 */
+	public void setSimulator(ISimulator simulator);
+	
+	/**
 	 * Notifies all listeners that an event has occurred.
 	 * @param e ISimulatableEvent to disseminate.
 	 */

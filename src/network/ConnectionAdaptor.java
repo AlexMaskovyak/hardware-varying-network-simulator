@@ -6,14 +6,19 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import messages.ConnectionAdaptorMessage;
+import messages.ConnectionMediumMessage;
+
 import routing.IAddress;
 import routing.IRoutingTable;
 import routing.RoutingTable;
+import simulation.DefaultDiscreteScheduledEvent;
 import simulation.IDiscreteScheduledEvent;
 import simulation.ISimulatable;
 import simulation.ISimulatableEvent;
 import simulation.ISimulatableListener;
 import simulation.ISimulatorEvent;
+import simulation.IDiscreteScheduledEvent.IMessage;
 
 /**
  * Allows for the transmission of information to ConnectionAdaptors.
@@ -142,7 +147,15 @@ public class ConnectionAdaptor
 	 */
 	@Override
 	public void send(IPacket<IPacket> packet) {
-		if( _medium != null ) { _medium.receive(this, packet); }
+		if( _medium != null ) { 
+			getSimulator().schedule(
+				new DefaultDiscreteScheduledEvent<ConnectionMediumMessage>(
+					(ISimulatable)this, 
+					(ISimulatable)_medium, 
+					getSimulator().getTime() + .00001, 
+					getSimulator(), 
+					new ConnectionMediumMessage( packet ) ) );
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -189,9 +202,11 @@ public class ConnectionAdaptor
 	 */
 	@Override
 	public void handleEvent(IDiscreteScheduledEvent e) {
-		if( canPerformOperation() ) {
-			e.getMessage();
-			++_operationCount;
+		IMessage message = e.getMessage();
+		if( message instanceof ConnectionAdaptorMessage ) {
+			ConnectionAdaptorMessage caMessage = ((ConnectionAdaptorMessage)message);
+			System.out.printf( "%S CA handles event %s\n", getAddress(), caMessage.getPacket() );
+			handle( caMessage.getPacket() );
 		}
 	}
 	

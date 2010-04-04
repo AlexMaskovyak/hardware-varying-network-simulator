@@ -65,6 +65,7 @@ public class Simulator
 		_lock.lock();
 		try {
 			_simulatables.add(simulatable);
+			simulatable.setSimulator( this );
 			_listeners.add(new SimulatableSimulatorListener(simulatable));
 			
 			State _temp = _state;
@@ -86,6 +87,7 @@ public class Simulator
 		_lock.lock();
 		try {
 			_simulatables.remove(simulatable);
+			simulatable.setSimulator( null );
 			_listeners.remove(new SimulatableSimulatorListener(simulatable));
 			
 			State _temp = _state;
