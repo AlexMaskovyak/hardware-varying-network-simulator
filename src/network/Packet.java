@@ -30,6 +30,7 @@ public class Packet<T> implements IPacket<T> {
 	 * @param destination address which is to receive this packet.
 	 * @param protocol which defines the type of handler.
 	 * @param ttl time to live, max hops before being trashed.
+	 * @param sequence number in a series of packets.
 	 */
 	public Packet(T content, IAddress source, IAddress destination, String protocol, int ttl, int sequence) {
 		_content = content;

@@ -5,7 +5,7 @@ package simulation;
  * @author Alex Maskovyak
  *
  */
-public abstract class AbstractDiscreteScheduledEvent<T>
+public class DefaultDiscreteScheduledEvent<T extends IDiscreteScheduledEvent.IMessage>
 		implements IDiscreteScheduledEvent<T> {
 
 /// Fields
@@ -18,7 +18,8 @@ public abstract class AbstractDiscreteScheduledEvent<T>
 	protected double _eventTime;
 	/** simulator. */
 	protected ISimulator _simulator;
-
+	/** message to give. */
+	protected T _message;
 	
 /// Construction
 	
@@ -28,17 +29,20 @@ public abstract class AbstractDiscreteScheduledEvent<T>
 	 * @param destination to receive and handle this event.
 	 * @param eventTime during which this event occurs.
 	 * @param simulator responsible for queueing and assigning this event.
+	 * @param message to deliver.
 	 */
-	public AbstractDiscreteScheduledEvent( 
+	public DefaultDiscreteScheduledEvent( 
 			ISimulatable source, 
 			ISimulatable destination, 
 			double eventTime, 
-			ISimulator simulator ) {
+			ISimulator simulator,
+			T message ) {
 		// assign
 		_source = source;
 		_destination = destination;
 		_eventTime = eventTime;
 		_simulator = simulator;
+		_message = message;
 		// create
 		init();
 	}
@@ -54,7 +58,9 @@ public abstract class AbstractDiscreteScheduledEvent<T>
 	 * @see simulation.IDiscreteScheduledEvent#execute()
 	 */
 	@Override
-	public abstract T getMessage();
+	public T getMessage() {
+		return _message;
+	}
 	
 	/*
 	 * (non-Javadoc)
@@ -83,4 +89,16 @@ public abstract class AbstractDiscreteScheduledEvent<T>
 	 */
 	@Override
 	public ISimulator getSimulator() { return _simulator; }
+
+	
+/// Utility
+	
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return String.format("[]");
+	}
 }

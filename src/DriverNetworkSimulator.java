@@ -6,13 +6,14 @@ import computation.ComputerNetworkSimulator;
 
 import reporting.NodeReporter;
 import routing.IAddress;
-import simulation.AbstractDiscreteScheduledEvent;
+import simulation.DefaultDiscreteScheduledEvent;
 import simulation.IDiscreteScheduledEvent;
 import simulation.ISimulatable;
 import simulation.ISimulatableEvent;
 import simulation.ISimulatableListener;
 import simulation.ISimulator;
 import simulation.Simulator;
+import messages.NodeMessage;
 import network.Address;
 import network.ConnectionMedium;
 import network.Data;
@@ -78,16 +79,18 @@ public class DriverNetworkSimulator {
 		Thread t = new Thread((Runnable)sim);
 		t.start();
 		//t.join();
-		sim.schedule(new DiscretePacketEventTest(null, (ISimulatable)n0, 3, sim, new Data(1, new byte[] {0, 0, 0} ) ) );
+		sim.schedule(new DefaultDiscreteScheduledEvent<NodeMessage>(null, (ISimulatable)n0, 3, sim, new NodeMessage( new Data(1, new byte[] {0, 0, 0} ), new Address(2) ) ) );
+		//sim.schedule(new DefaultDiscreteScheduledEvent<NodeMessage>(null, (ISimulatable)n4, 1, sim, new NodeMessage( new Data(1, new byte[] {0, 0, 0} ), new Address(0) ) ) );
+		//sim.schedule(new DefaultDiscreteScheduledEvent<NodeMessage>(null, (ISimulatable)n0, -100, sim, new NodeMessage( new Data(1, new byte[] {0, 0, 0} ), new Address(4) ) ) );
 		//sim.start();
 		//sim.simulate(5);
 		//n0.send(new Data(15, new byte[] {0} ), n4.getAddress());
-		n0.send(new Data(15, new byte[] {0} ), new Address(4));
+		//n0.send(new Data(15, new byte[] {0} ), new Address(4));
 	}
 }
 
 class DiscretePacketEventTest 
-		extends AbstractDiscreteScheduledEvent
+		extends DefaultDiscreteScheduledEvent
 		implements IDiscreteScheduledEvent {
 
 /// Fields
@@ -109,7 +112,7 @@ class DiscretePacketEventTest
 			double eventTime, 
 			ISimulator simulator,
 			IData data) {
-		super(destination, destination, eventTime, simulator);
+		super(destination, destination, eventTime, simulator, new IMessage() {});
 		_data = data;
 	}
 
@@ -120,7 +123,7 @@ class DiscretePacketEventTest
 	 * @see simulation.AbstractDiscreteScheduledEvent#getMessage()
 	 */
 	@Override
-	public Object getMessage() {
-		return _data;
+	public IMessage getMessage() {
+		return new IMessage() {};//_data;
 	}
 }

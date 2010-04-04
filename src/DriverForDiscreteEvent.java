@@ -108,8 +108,8 @@ class DiscreteEventTest implements IDiscreteScheduledEvent {
 	}
 	
 	@Override
-	public void getMessage() {
-		_node.receive(createPacket());
+	public IMessage getMessage() {
+		return new IMessage() {};
 	}
 
 	@Override
@@ -154,10 +154,11 @@ class DiscreteEventTest2 implements IDiscreteScheduledEvent {
 	}
 	
 	@Override
-	public void getMessage() {
+	public IMessage getMessage() {
 		_node.receive(createPacket());
 		_time = _sim.getTime();
 		_time++;
+		return new IMessage() {};
 		//_sim.schedule(this);
 	}
 

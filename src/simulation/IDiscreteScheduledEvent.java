@@ -7,7 +7,7 @@ import java.util.Comparator;
  * @author Alex Maskovyak
  *
  */
-public interface IDiscreteScheduledEvent<T> 
+public interface IDiscreteScheduledEvent<T extends IDiscreteScheduledEvent.IMessage> 
 		extends ISimulatableEvent, ISimulatorEvent {
 
 	/** destination to receive the event. */
@@ -15,6 +15,9 @@ public interface IDiscreteScheduledEvent<T>
 	
 	/** operate upon the destination...as in, give them a message. */
 	public T getMessage();
+	
+	/** labels a message, every simulatable should expect this. */
+	public interface IMessage {}
 }
 
 /**

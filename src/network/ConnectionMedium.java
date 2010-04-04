@@ -3,11 +3,16 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import messages.ConnectionAdaptorMessage;
+import messages.ConnectionMediumMessage;
+
+import simulation.DefaultDiscreteScheduledEvent;
 import simulation.IDiscreteScheduledEvent;
 import simulation.ISimulatable;
 import simulation.ISimulatableListener;
 import simulation.ISimulatorEvent;
 import simulation.AbstractSimulatable;
+import simulation.IDiscreteScheduledEvent.IMessage;
 
 /**
  * Bidirectional, multicast connection.
@@ -90,7 +95,7 @@ public class ConnectionMedium
 	 */
 	@Override
 	public void receive(IPacket packet) {
-		System.out.printf("Connection got %d\n", packet.getSequence());
+		send(null, packet);
 	}
 	
 /// ISimulatable
@@ -121,8 +126,13 @@ public class ConnectionMedium
 	 */
 	@Override
 	public void handleEvent(IDiscreteScheduledEvent e) {
-		// TODO Auto-generated method stub
-		
+		IMessage message = e.getMessage();
+		if( message instanceof ConnectionMediumMessage ) {
+			ConnectionMediumMessage cmMessage = (ConnectionMediumMessage)message;
+			IPacket packet = cmMessage.getPacket();
+			System.out.printf( "Medium is handling event with %s\n", packet );
+			receive(packet);
+		}
 	}
 
 	/*
@@ -141,8 +151,15 @@ public class ConnectionMedium
 	@Override
 	public void send(IConnectionAdaptor sender, IPacket packet) {
 		for( IConnectionAdaptor ca : _adaptors ) {
-			if( ca != sender ) {
-				ca.receive(packet);
+			if( !ca.getAddress().equals( packet.getSource() ) ) {
+				System.out.printf("CM sends to %s, %s\n", ca.getAddress(), packet);
+				getSimulator().schedule(
+					new DefaultDiscreteScheduledEvent<IMessage>(
+						(ISimulatable)this, 
+						(ISimulatable)ca, 
+						getSimulator().getTime() + .1, 
+						getSimulator(), 
+						new ConnectionAdaptorMessage( packet )));
 			}
 		}
 	}
