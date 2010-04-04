@@ -2,6 +2,7 @@ package computation;
 
 import java.util.Iterator;
 
+import messages.AlgorithmMessage;
 import network.AbstractProtocolHandler;
 import network.IData;
 
@@ -11,6 +12,7 @@ import simulation.ISimulatable;
 import simulation.ISimulatableEvent;
 import simulation.ISimulatableListener;
 import simulation.ISimulatorEvent;
+import simulation.IDiscreteScheduledEvent.IMessage;
 
 /**
  * Distributes data to random ComputerNodes on the network and then reads back 
@@ -19,7 +21,7 @@ import simulation.ISimulatorEvent;
  *
  */
 public class RandomDistributionAlgorithm 
-		extends AbstractProtocolHandler
+		extends AbstractAlgorithm
 		implements IAlgorithm, ISimulatable {
 
 	/**
@@ -35,10 +37,8 @@ public class RandomDistributionAlgorithm
 	 * 
 	 * @param data
 	 */
-	public RandomDistributionAlgorithm(
-			Iterable<IData> data, 
-			IHardwareComputer computer) {
-		_data = data;
+	public RandomDistributionAlgorithm( IHardwareComputer computer) {
+		//_data = data;
 		_computer = computer;
 	}
 	
@@ -72,13 +72,15 @@ public class RandomDistributionAlgorithm
 
 	@Override
 	public void handleEvent(IDiscreteScheduledEvent e) {
-		// TODO Auto-generated method stub
+		IMessage message = e.getMessage();
+		if( message instanceof AlgorithmMessage ) {
+			System.out.println("DISTR GOT INFO!");			
+		}
+	}
+
+	public void handle(IData data) {
 		
 	}
 
-	@Override
-	public void handle(T packet) {
-		// TODO Auto-generated method stub
-		
-	}
+
 }

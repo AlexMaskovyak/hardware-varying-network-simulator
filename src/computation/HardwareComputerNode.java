@@ -14,6 +14,23 @@ public class HardwareComputerNode
 	protected Harddrive _harddrive;
 	protected Memory _memory;
 
+	/** Default constructor. */
+	public HardwareComputerNode() {
+		this(null);
+	}
+
+	/**
+	 * Constructor.
+	 * @param address to set for this node.
+	 */
+	public HardwareComputerNode( IAddress address ) {
+		super( address );
+	}
+	
+	/**
+	 * Constructor, installs an algorithm.
+	 * @param algorithm to install.
+	 */
 	public HardwareComputerNode(IAddress address, IAlgorithm algorithm) {
 		super(address, algorithm);
 	}
@@ -73,5 +90,10 @@ public class HardwareComputerNode
 		// flow should be: node gets info in buffer > mainmemory > cpu > harddrive
 		
 		super.handleTickEvent(o);
+	}
+	
+	@Override
+	public INode createNew(IAddress address) {
+		return new HardwareComputerNode(address);
 	}
 }

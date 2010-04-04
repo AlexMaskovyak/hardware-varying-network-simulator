@@ -2,6 +2,7 @@ package timing;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -9,6 +10,7 @@ import java.util.UUID;
 
 import network.Address;
 import network.Data;
+import network.IConnectionAdaptor;
 import network.IConnectionMedium;
 import network.IData;
 import network.INode;
@@ -202,7 +204,6 @@ class TestTimeScalableSimulatable
 		
 	}
 
-	@Override
 	public void registerConnection(IConnectionMedium connection) {
 		// TODO Auto-generated method stub
 		
@@ -213,13 +214,11 @@ class TestTimeScalableSimulatable
 		
 	}
 
-	@Override
 	public void unregisterConnection(IConnectionMedium connection) {
 		// TODO Auto-generated method stub
 		
 	}
 
-	@Override
 	public void send(Data data, IAddress address) {
 		// TODO Auto-generated method stub
 		
@@ -235,5 +234,29 @@ class TestTimeScalableSimulatable
 	public INode createNew(IAddress address) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void addAdaptor(IConnectionAdaptor adaptor) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public Collection<IConnectionAdaptor> getAdaptors() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void removeAdaptor(IConnectionAdaptor adaptor) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void send(Object data, IAddress address) {
+		// TODO Auto-generated method stub
+		
 	}
 }

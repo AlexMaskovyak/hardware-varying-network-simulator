@@ -5,7 +5,9 @@ import simulation.AbstractSimulatable;
 import simulation.IDiscreteScheduledEvent;
 import simulation.ISimulatable;
 
-public class CPU extends AbstractSimulatable implements IHardware, ISimulatable {
+public class CPU 
+		extends AbstractSimulatable 
+		implements IHardware, ISimulatable {
 
 	protected int _speed;
 	
@@ -31,6 +33,24 @@ public class CPU extends AbstractSimulatable implements IHardware, ISimulatable 
 
 	@Override
 	public void handleEvent(IDiscreteScheduledEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public int getBandwidth() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int getSpeed() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void setBandwitdh(int bandwidth) {
 		// TODO Auto-generated method stub
 		
 	}

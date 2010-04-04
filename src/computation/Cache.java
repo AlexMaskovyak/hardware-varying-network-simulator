@@ -5,7 +5,9 @@ import simulation.AbstractSimulatable;
 import simulation.IDiscreteScheduledEvent;
 import simulation.ISimulatable;
 
-public class Cache extends AbstractSimulatable implements IHardware {
+public class Cache 
+		extends AbstractSimulatable 
+		implements IHardware {
 	
 	protected int _capacity;
 	protected int _speed;
@@ -42,6 +44,18 @@ public class Cache extends AbstractSimulatable implements IHardware {
 
 	@Override
 	public void handleEvent(IDiscreteScheduledEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public int getBandwidth() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void setBandwitdh(int bandwidth) {
 		// TODO Auto-generated method stub
 		
 	}

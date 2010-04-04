@@ -1,5 +1,6 @@
 package computation;
 
+import network.INode;
 import network.NetworkSimulator;
 import simulation.ISimulator;
 
@@ -17,6 +18,13 @@ public class ComputerNetworkSimulator extends NetworkSimulator implements
 	 */
 	protected void init() {
 		super.init();
-		_baseline = new ComputerNode();
+		_baseline = new HardwareComputerNode();
+	}
+	
+	@Override
+	public INode createNode() {
+		HardwareComputerNode result = (HardwareComputerNode) super.createNode();
+		result.install( new RandomDistributionAlgorithm( result ) );
+		return result;
 	}
 }

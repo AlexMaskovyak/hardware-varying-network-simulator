@@ -18,46 +18,87 @@ public class Harddrive<T extends IData>
 		extends AbstractSimulatable 
 		implements IHardware, ISimulatable, Iterable<T> {
 
+/// Fields
+	
 	/** capacity of this device. */
 	protected int _capacity;
+	/** speed of the device () */
 	protected int _speed;
-	
-	public Harddrive() { super(); }
-	
-	public int getCapacity() {
-		return _capacity;
-	}
-	
-	public void setCapacity(int capacity) {
-		_capacity = capacity;
-	}
-	
-	public int getSpeed() {
-		return _speed;
-	}
-	
-	public void setSpeed(int speed) {
-		_speed = speed;
-	}
 
+	
+/// Construction
+
+	/** Default constructor.*/
+	public Harddrive() { super(); }
+
+	
+/// Accessors/Mutators
+	
+	/**
+	 * Obtains this harddrive's capacity in number of pieces of data that can be
+	 * stored.
+	 * @return number of pieces of data this harddrive can store.
+	 */
+	public int getCapacity() { return _capacity; }
+	
+	/**
+	 * Sets the capacity in number of pieces of data that can be stored.
+	 * @param capacity in number of pieces of data this harddrive can store.
+	 */
+	public void setCapacity(int capacity) { _capacity = capacity; }
+
+
+/// IHardware
+	
+	/*
+	 * (non-Javadoc)
+	 * @see computation.IHardware#getSpeed()
+	 */
+	public int getSpeed() { return _speed; }
+	
+	/*
+	 * (non-Javadoc)
+	 * @see computation.IHardware#setSpeed(int)
+	 */
+	public void setSpeed(int speed) { _speed = speed; }
+
+	/*
+	 * (non-Javadoc)
+	 * @see computation.IHardware#receive(network.IData)
+	 */
 	@Override
 	public void receive(IData data) {
 		// TODO Auto-generated method stub
 		
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see computation.IHardware#send(network.IData)
+	 */
 	@Override
 	public void send(IData data) {
 		// TODO Auto-generated method stub
 		
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Iterable#iterator()
+	 */
 	@Override
 	public Iterator<T> iterator() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	
+/// ISimulatable
+	
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.AbstractSimulatable#handleEvent(simulation.IDiscreteScheduledEvent)
+	 */
 	@Override
 	public void handleEvent(IDiscreteScheduledEvent e) {
 		// TODO Auto-generated method stub

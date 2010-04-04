@@ -1,0 +1,94 @@
+package computation;
+
+import simulation.IDiscreteScheduledEvent;
+import network.AbstractProtocolHandler;
+
+/**
+ * Abstract algorithm is a protocol handler which can be chained/installed on 
+ * the protocol stack.
+ * @author Alex Maskovyak
+ *
+ */
+public class AbstractAlgorithm
+		extends AbstractProtocolHandler
+		implements IAlgorithm {
+
+/// Fields
+	
+	/** computer to use. */
+	protected IHardwareComputer _computer;
+	
+	
+/// Construction.
+	
+	/** Default constructor. */
+	public AbstractAlgorithm() {
+		super();
+	}
+	
+	
+/// IProtocol
+	
+	/*
+	 * (non-Javadoc)
+	 * @see network.AbstractProtocolHandler#getProtocal()
+	 */
+	@Override
+	public String getProtocal() {
+		return "ALGORITHM";
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see network.AbstractProtocolHandler#handle(java.lang.Object)
+	 */
+	@Override
+	public void handle(Object packetLikeObject) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+/// ISimulatable
+	
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.AbstractSimulatable#handleEvent(simulation.IDiscreteScheduledEvent)
+	 */
+	@Override
+	public void handleEvent(IDiscreteScheduledEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+
+/// IAlgorithm
+	
+	/*
+	 * (non-Javadoc)
+	 * @see computation.IAlgorithm#distribute()
+	 */
+	@Override
+	public void distribute() {
+		System.out.println("DISTRIBUTE!");
+		
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see computation.IAlgorithm#install(computation.IComputer)
+	 */
+	@Override
+	public void install(IComputer computer) {
+		_computer = (IHardwareComputer)computer;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see computation.IAlgorithm#read()
+	 */
+	@Override
+	public void read() {
+		
+	}
+
+}
