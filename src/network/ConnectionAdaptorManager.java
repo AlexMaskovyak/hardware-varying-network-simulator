@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import messages.ConnectionAdaptorManagerInMessage;
+import messages.ConnectionAdaptorManagerMessage;
 import messages.ConnectionAdaptorManagerOutMessage;
 import messages.ConnectionAdaptorMessage;
 import messages.NodeInMessage;
@@ -195,18 +195,18 @@ public class ConnectionAdaptorManager
 	@Override
 	public void handleEvent(IDiscreteScheduledEvent e) {
 		IMessage message = e.getMessage();
-		if( message instanceof ConnectionAdaptorManagerInMessage ) {
-			IPacket packet = ((ConnectionAdaptorManagerInMessage)message).getPacket();
+		if( message instanceof ConnectionAdaptorManagerMessage ) {
+			IPacket packet = ((ConnectionAdaptorManagerMessage)message).getPacket();
 			System.out.printf("%s CAM handle %s\n", getAddress(), packet );
-			handle(((ConnectionAdaptorManagerInMessage)message).getPacket());
-		} else if ( message instanceof ConnectionAdaptorManagerOutMessage ) {
+			handle(((ConnectionAdaptorManagerMessage)message).getPacket());
+		} /*else if ( message instanceof ConnectionAdaptorManagerOutMessage ) {
 			ConnectionAdaptorManagerOutMessage caMessage = 
 				(ConnectionAdaptorManagerOutMessage)message;
 			Object data = caMessage.getData();
 			IAddress destination = caMessage.getDestination();
 			System.out.printf("%s CAM handle %s\n", getAddress(), data );
 			//new Packet(data, getAddress(), destination, );
-		}
+		}*/
 	}
 	
 /// IPacketHandler
@@ -225,7 +225,7 @@ public class ConnectionAdaptorManager
 	 * @see network.AbstractPacketHandler#getProtocal()
 	 */
 	@Override
-	public String getProtocal() {
+	public String getProtocol() {
 		return ConnectionAdaptorManager.PROTOCAL;
 	}
 

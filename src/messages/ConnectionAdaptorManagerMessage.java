@@ -8,7 +8,7 @@ import simulation.IDiscreteScheduledEvent.IMessage;
  * @author Alex Maskovyak
  *
  */
-public class ConnectionAdaptorManagerInMessage implements IMessage {
+public class ConnectionAdaptorManagerMessage implements IMessage {
 	
 	/** packet to handle. */
 	protected IPacket<IPacket> _packet;
@@ -17,7 +17,7 @@ public class ConnectionAdaptorManagerInMessage implements IMessage {
 	 * Default constructor.
 	 * @param packet for ConnectionAdaptorManager to handle.
 	 */
-	public ConnectionAdaptorManagerInMessage( IPacket packet ) {
+	public ConnectionAdaptorManagerMessage( IPacket packet ) {
 		_packet = packet;
 	}
 	

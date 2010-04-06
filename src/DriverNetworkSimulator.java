@@ -3,6 +3,7 @@ import java.util.List;
 import java.util.Set;
 
 import computation.ComputerNetworkSimulator;
+import computation.HardwareComputerNode;
 
 import reporting.NodeReporter;
 import routing.IAddress;
@@ -77,9 +78,12 @@ public class DriverNetworkSimulator {
 		((ISimulatable)n1).addListener(new NodeSimulatableListener(System.out));*/
 		
 		Thread t = new Thread((Runnable)sim);
+		//sim.start();
 		t.start();
 		//t.join();
-		sim.schedule(new DefaultDiscreteScheduledEvent<NodeOutMessage>(null, (ISimulatable)n0, 3, sim, new NodeOutMessage( new Data(1, new byte[] {0, 0, 0} ), new Address(4) ) ) );
+		//sim.schedule(new DefaultDiscreteScheduledEvent<NodeOutMessage>(null, (ISimulatable)n0, 3, sim, new NodeOutMessage( new Data(1, new byte[] {0, 0, 0} ), new Address(4) ) ) );
+		HardwareComputerNode c = (HardwareComputerNode)n0;
+		c.start();
 		//sim.schedule(new DefaultDiscreteScheduledEvent<NodeMessage>(null, (ISimulatable)n4, 1, sim, new NodeMessage( new Data(1, new byte[] {0, 0, 0} ), new Address(0) ) ) );
 		//sim.schedule(new DefaultDiscreteScheduledEvent<NodeMessage>(null, (ISimulatable)n0, -100, sim, new NodeMessage( new Data(1, new byte[] {0, 0, 0} ), new Address(4) ) ) );
 		//sim.start();

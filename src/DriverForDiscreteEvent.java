@@ -137,6 +137,12 @@ class DiscreteEventTest implements IDiscreteScheduledEvent {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public int getPriority() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }
 
 class DiscreteEventTest2 implements IDiscreteScheduledEvent {
@@ -187,5 +193,11 @@ class DiscreteEventTest2 implements IDiscreteScheduledEvent {
 	public ISimulator getSimulator() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public int getPriority() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }

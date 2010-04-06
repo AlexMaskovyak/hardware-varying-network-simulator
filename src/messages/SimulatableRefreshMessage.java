@@ -3,15 +3,11 @@ package messages;
 import simulation.IDiscreteScheduledEvent.IMessage;
 
 /**
- *  Messages designed for Harddrive.
+ * Messages for Simulatables to renew themselves.
  * @author Alex Maskovyak
  *
  */
-public class HarddriveMessage 
+public class SimulatableRefreshMessage 
 		implements IMessage {
 
-	
-	public HarddriveMessage() {
-		
-	}
 }

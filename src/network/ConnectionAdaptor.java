@@ -191,7 +191,7 @@ public class ConnectionAdaptor
 	 * @see network.AbstractPacketHandler#getProtocal()
 	 */
 	@Override
-	public String getProtocal() {
+	public String getProtocol() {
 		return ConnectionAdaptorManager.PROTOCAL;
 	}
 

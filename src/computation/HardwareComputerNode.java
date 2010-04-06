@@ -2,7 +2,9 @@ package computation;
 
 import network.INode;
 import routing.IAddress;
+import simulation.DiscreteScheduledEventSimulator;
 import simulation.ISimulatable;
+import simulation.ISimulator;
 import simulation.ISimulatorEvent;
 
 public class HardwareComputerNode 
@@ -39,7 +41,7 @@ public class HardwareComputerNode
 		super.init();
 		_cpu = null;
 		_cache = null;
-		_harddrive = null;
+		setHarddrive( new Harddrive() );
 		_memory = null;
 	}
 	
@@ -95,5 +97,13 @@ public class HardwareComputerNode
 	@Override
 	public INode createNew(IAddress address) {
 		return new HardwareComputerNode(address);
+	}
+	
+	@Override
+	public void setSimulator(ISimulator simulator) {
+		super.setSimulator( simulator );
+		if( getHarddrive() != null ) {
+			getHarddrive().setSimulator( simulator );
+		}
 	}
 }
