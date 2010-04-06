@@ -9,7 +9,7 @@ import network.AbstractProtocolHandler;
  * @author Alex Maskovyak
  *
  */
-public class AbstractAlgorithm
+public abstract class AbstractAlgorithm
 		extends AbstractProtocolHandler
 		implements IAlgorithm {
 
@@ -43,22 +43,7 @@ public class AbstractAlgorithm
 	 * @see network.AbstractProtocolHandler#handle(java.lang.Object)
 	 */
 	@Override
-	public void handle(Object packetLikeObject) {
-		// TODO Auto-generated method stub
-		
-	}
-	
-/// ISimulatable
-	
-	/*
-	 * (non-Javadoc)
-	 * @see simulation.AbstractSimulatable#handleEvent(simulation.IDiscreteScheduledEvent)
-	 */
-	@Override
-	public void handleEvent(IDiscreteScheduledEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
+	public abstract void handle(Object packetLikeObject);
 	
 
 /// IAlgorithm
@@ -88,6 +73,6 @@ public class AbstractAlgorithm
 	 */
 	@Override
 	public void read() {
-		
+		System.out.println("READ");
 	}
 }

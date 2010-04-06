@@ -1,4 +1,9 @@
+import computation.HardwareComputerNode;
+import computation.IAlgorithm;
+import computation.RandomDistributionAlgorithm;
+
 import reporting.NodeReporter;
+import simulation.DefaultDiscreteScheduledEvent;
 import simulation.DiscreteScheduledEventSimulator;
 import simulation.IDiscreteScheduledEvent;
 import simulation.IDiscreteScheduledEventSimulator;
@@ -6,7 +11,10 @@ import simulation.ISimulatable;
 import simulation.ISimulatableEvent;
 import simulation.ISimulatableListener;
 import simulation.ISimulator;
+import simulation.PerformanceRestrictedSimulatable;
 import simulation.Simulator;
+import simulation.IDiscreteScheduledEvent.IMessage;
+import messages.AlgorithmDoWorkMessage;
 import network.Address;
 import network.ConnectionAdaptor;
 import network.ConnectionMedium;
@@ -39,7 +47,23 @@ public class DriverForDiscreteEvent {
 		
 		System.out.println("done");
 		IDiscreteScheduledEventSimulator sim = new DiscreteScheduledEventSimulator();
-		ISimulatable n = new Node(new Address(0));
+		PerformanceRestrictedSimulatable prs = new RandomDistributionAlgorithm();
+		sim.registerSimulatable( prs );
+		sim.schedule(
+			new DefaultDiscreteScheduledEvent<IMessage>(
+				null, 
+				prs, 
+				1, 
+				sim, 
+				new AlgorithmDoWorkMessage()));
+		
+		Thread t = new Thread( (Runnable)sim );
+		t.start();
+		
+		//HardwareComputerNode hcn = new HardwareComputerNode(new Address(0));
+		System.out.println();
+		//hcn.install( (IAlgorithm)prs );
+		/*ISimulatable n = new Node(new Address(0));
 		ISimulatable n2 = new Node(new Address(1));
 		IConnectionMedium c = new ConnectionMedium();
 		IConnectionAdaptor a = new ConnectionAdaptor();
@@ -86,7 +110,7 @@ public class DriverForDiscreteEvent {
 		sim.pause();
 		//sim.start();
 		sim.run();
-		sim.stop();
+		sim.stop();*/
 		//sim.start();
 		//((DiscreteScheduledEventSimulator)sim).run();
 		//sim.unregisterSimulatable((ISimulatable)n);

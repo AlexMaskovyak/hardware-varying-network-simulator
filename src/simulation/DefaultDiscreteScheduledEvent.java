@@ -139,6 +139,9 @@ public class DefaultDiscreteScheduledEvent<T extends IDiscreteScheduledEvent.IMe
 	 */
 	@Override
 	public String toString() {
-		return String.format("[]");
+		return String.format("[ %s %s %f ]", 
+			getSource(), 
+			getDestination(), 
+			getEventTime() );
 	}
 }

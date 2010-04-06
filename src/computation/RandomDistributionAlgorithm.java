@@ -2,10 +2,12 @@ package computation;
 
 import java.util.Iterator;
 
-import messages.AlgorithmDoDistributeMessage;
+import messages.AlgorithmDoWorkMessage;
+import messages.AlgorithmRequestMessage;
 import messages.AlgorithmResponseMessage;
 import messages.AlgorithmStoreMessage;
 import messages.HarddriveRequestMessage;
+import messages.HarddriveStoreMessage;
 import messages.NodeInMessage;
 import messages.NodeOutMessage;
 import network.AbstractProtocolHandler;
@@ -29,7 +31,7 @@ import simulation.IDiscreteScheduledEvent.IMessage;
  *
  */
 public class RandomDistributionAlgorithm 
-		extends PerformanceRestrictedSimulatable
+		extends AbstractAlgorithm
 		implements IAlgorithm, ISimulatable {
 
 /// Custom values
@@ -39,7 +41,6 @@ public class RandomDistributionAlgorithm
 	 * then request data from interested parties.  Clients are responsible only
 	 * for storing data and then retrieving it for an interested party.
 	 * @author Alex Maskovyak
-	 *
 	 */
 	protected enum Role { SERVER, CLIENT }
 	
@@ -55,28 +56,33 @@ public class RandomDistributionAlgorithm
 	 */
 	protected enum Client_State { AWAIT }
 
+	
 /// Fields
 	
 	/** reference to the computer we are running upon. */
 	protected IHardwareComputer _computer;
-	/** are we the server of files? */
-	protected boolean _isServer;
 	/** data to send */
 	protected IData _data;
 	
 	
-	/** state of the server. */
-	protected Server_State _state;
-
+	/** state of the server, if we are a server. */
+	protected Server_State _serverState;
+	/** role in the algorithm. */
+	protected Role _role;
+	
 	
 /// Construction
 	
-	/**
-	 * 
-	 * @param data
+	/** Default constructor. */
+	public RandomDistributionAlgorithm() {
+		super();
+	}
+	
+	/** Constructor.
+	 * @param computer which we are installed  upon.
 	 */
-	public RandomDistributionAlgorithm( 
-			IHardwareComputer computer ) {
+	public RandomDistributionAlgorithm( IHardwareComputer computer ) {
+		super();
 		_computer = computer;
 	}
 	
@@ -86,73 +92,95 @@ public class RandomDistributionAlgorithm
 	 */
 	@Override
 	protected void init() {
-		_state = Server_State.IDLE;
+		super.init();
+		_serverState = Server_State.IDLE;
+		_role = Role.CLIENT;
 	}
-
-
-/// IAlgorithm
 	
-	@Override
-	public void install(IComputer computer) {
-		// TODO Auto-generated method stub
-		
-	}
 
+/// Accesors
 	
 	/**
-	 * Distribute here queues up a distribute event to kick-start operation.
-	 * 
-	 * @see computation.IAlgorithm#distribute()
+	 * Get the computer on which we are loaded.
+	 * @return computer on which we are loaded.
 	 */
-	@Override
-	public void distribute() {
-		_state = Server_State.DISTRIBUTE;
-		
-		
-		// schedule distribution
-		getSimulator().schedule(
-			new DefaultDiscreteScheduledEvent<AlgorithmDoDistributeMessage>(
-				this, 
-				this, 
-				getSimulator().getTime() + .0001, 
-				getSimulator(), 
-				new AlgorithmDoDistributeMessage()));
+	public IHardwareComputer getComputer() {
+		return _computer;
 	}
-
 	
-	@Override
-	public void read() {
-		//boolean 
-		//while
-	}
-
+	
+/// IProtocolHandler
+	
+	/*
+	 * (non-Javadoc)
+	 * @see computation.AbstractAlgorithm#getProtocol()
+	 */
 	@Override
 	public String getProtocol() {
 		return "DISTR_ALGORITHM";
 	}
 
-	boolean doit = true;
+	/*
+	 * (non-Javadoc)
+	 * @see computation.AbstractAlgorithm#handle(java.lang.Object)
+	 */
+	@Override
+	public void handle(Object packetLikeObject) {
+		handleEvent( (IDiscreteScheduledEvent) packetLikeObject );
+	}
+
+	
+/// IAlgorithm
+		
+	/**
+	 * Distribute here queues up a distribute event to kick-start disribution 
+	 * operations.
+	 * @see computation.IAlgorithm#distribute()
+	 */
+	@Override
+	public void distribute() {
+		_role = Role.SERVER;						// distributors are servers	
+		_serverState = Server_State.DISTRIBUTE;		// inside distribution
+		sendDoWork();								// kick-start us.
+	}
+	
+
+	/**
+	 * Read, queues up a read event to kick-start read-back operations.
+	 * (non-Javadoc)
+	 * @see computation.AbstractAlgorithm#read()
+	 */
+	@Override
+	public void read() {
+		_serverState = Server_State.READ;			// inside read
+		sendDoWork();								// kick-start us
+	}
+
+	
+/// ISimulatable
+	
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.PerformanceRestrictedSimulatable#handleEvent(simulation.IDiscreteScheduledEvent)
+	 */
 	@Override
 	public void handleEvent(IDiscreteScheduledEvent e) {
 		super.handleEvent( e );
 	}
 
+
+/// Distribution Algorithm's methods
+	
 	/**
 	 * This override implements functionality for client and server.
 	 * @see simulation.PerformanceRestrictedSimulatable#subclassHandle(simulation.IDiscreteScheduledEvent)
 	 */
 	protected void subclassHandle( IDiscreteScheduledEvent e) {
-		IMessage message = e.getMessage();
-		switch( _state ) {
-			case DISTRIBUTE:
-				if( message instanceof AlgorithmDoDistributeMessage ) {
-					
-				} else if( message instanceof AlgorithmResponseMessage ) {
-					
-				}
-				break;
-			case READ:
-				break;
+		System.out.println( "subclass handle" );
+		if( _role == Role.SERVER ) {
+			serverHandle( e );
+		} else {
+			clientHandle( e );
 		}
 	}
 	
@@ -162,8 +190,43 @@ public class RandomDistributionAlgorithm
 	 */
 	protected void clientHandle( IDiscreteScheduledEvent e ) {
 		IMessage message = e.getMessage();
+		// store information into memory
 		if( message instanceof AlgorithmStoreMessage ) {
-			
+			AlgorithmStoreMessage aMessage = (AlgorithmStoreMessage)message;
+			getSimulator().schedule(
+				new DefaultDiscreteScheduledEvent<HarddriveStoreMessage>(
+					this, 
+					getComputer().getHarddrive(), 
+					e.getEventTime() + getTransitTime(), 
+					getSimulator(), 
+					new HarddriveStoreMessage(
+						aMessage.getIndex(), 
+						aMessage.getData())));
+		} 
+		// previously stored information is requested
+		else if( message instanceof AlgorithmRequestMessage ) {
+			AlgorithmRequestMessage aMessage = (AlgorithmRequestMessage)message;
+			getSimulator().schedule(
+				new DefaultDiscreteScheduledEvent<HarddriveRequestMessage>(
+					this, 
+					getComputer().getHarddrive(), 
+					e.getEventTime() + getTransitTime(), 
+					getSimulator(), 
+					new HarddriveRequestMessage(
+						aMessage.getIndex(),
+						-1)));
+		} 
+		// information requested from memory has arrived
+		else if( message instanceof AlgorithmResponseMessage ) {
+			AlgorithmResponseMessage aMessage = (AlgorithmResponseMessage)message;
+			getSimulator().schedule(
+				new DefaultDiscreteScheduledEvent<IMessage>(
+					this, 
+					(ISimulatable)getComputer(), 
+					e.getEventTime() + getTransitTime(), 
+					getSimulator(), 
+					new AlgorithmResponseMessage(
+						aMessage.getData())));
 		}
 	}
 	
@@ -172,20 +235,53 @@ public class RandomDistributionAlgorithm
 	 * @param e event to handle.
 	 */
 	protected void serverHandle( IDiscreteScheduledEvent e ) {
-		
+		IMessage message = e.getMessage();
+		switch( _serverState ) {
+			case DISTRIBUTE:
+				// grab more information
+				if( message instanceof AlgorithmDoWorkMessage ) {
+					// do we have more?
+					if( haveMoreToDistribute() ) {
+						
+					} else {
+						_serverState = Server_State.IDLE;	// don't move on yet
+					}
+				}
+				break;
+			case READ:
+				break;
+		}
 	}
 	
-	protected void doWork() {
-		
+	/**
+	 * Determine if there is more to distribute.
+	 * @return true if there is more to distribute, false otherwise.
+	 */
+	protected boolean haveMoreToDistribute() {
+		return true;
 	}
-	
-	
-	protected boolean hasWork() {
+
+	/**
+	 * Determine if there is more to read back from the network.
+	 * @return true if there is more to read, false otherwise.
+	 */
+	protected boolean haveMoreToRead() {
 		return true;
 	}
 	
-	public void handle(IData data) {
-		
+	/**
+	 * Send ourselves a new message to distribute.  We send this to ourselves at
+	 * current simulator time, with the understanding that the underlying model
+	 * of renewal/blocking we are built upon will limit exactly how much we can
+	 * do.
+	 */
+	protected void sendDoWork() {
+		getSimulator().schedule(
+			new DefaultDiscreteScheduledEvent<IMessage>(
+				this, 
+				this, 
+				getSimulator().getTime(), 
+				getSimulator(), 
+				new AlgorithmDoWorkMessage()));
 	}
-
 }

@@ -8,7 +8,7 @@ import simulation.IDiscreteScheduledEvent.IMessage;
  * @author Alex Maskovyak
  *
  */
-public class AlgorithmDoDistributeMessage 
+public class AlgorithmDoWorkMessage 
 		implements IMessage {
 
 }

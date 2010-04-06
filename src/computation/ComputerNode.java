@@ -70,7 +70,7 @@ public class ComputerNode
 	public void install(IAlgorithm algorithm) {
 		_algorithm = (AbstractAlgorithm) algorithm;
 		IProtocolHandler handler = (IProtocolHandler)algorithm;
-		this.install(handler, handler.getProtocol());
+		install(handler, handler.getProtocol());
 		_algorithm.setSimulator( getSimulator() );
 	}
 

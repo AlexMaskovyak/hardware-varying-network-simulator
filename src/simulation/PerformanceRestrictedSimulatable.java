@@ -23,11 +23,18 @@ import simulation.IDiscreteScheduledEvent.IMessage;
 public class PerformanceRestrictedSimulatable 
 		extends AbstractSimulatable
 		implements ISimulatable {
-
+	
+	
+/// Constants
+	
+	/** defines an unimpeded performance simulatable, that, nonetheless, 
+	 * uses the FSM present here. */
+	public static final int INFINITY = Integer.MAX_VALUE;
+	
 /// State Info
 
 	/** states of this device. */
-	protected static enum State {
+	protected enum State {
 		FULLY_AWAKE, PARTIALLY_AWAKE, BLOCKED
 	};
 	
@@ -43,7 +50,7 @@ public class PerformanceRestrictedSimulatable
 	/** time when the last refresh event was scheduled. */
 	protected double _lastRefreshTime;
 	/** current state of operational status. */
-	protected State _state;
+	private State _state;
 	/** time it takes us to send a message. */
 	protected double _transitTime;
 	
@@ -54,7 +61,7 @@ public class PerformanceRestrictedSimulatable
 	 * Default constructor.
 	 */
 	public PerformanceRestrictedSimulatable() {
-		this(1, 1, 1);
+		this(INFINITY, INFINITY, 0);
 	}
 	
 	/**
@@ -79,6 +86,7 @@ public class PerformanceRestrictedSimulatable
 	 */
 	protected void init() {
 		super.init();
+		_state = State.FULLY_AWAKE;
 	}
 
 
@@ -182,7 +190,9 @@ public class PerformanceRestrictedSimulatable
 	 * one operations.
 	 */
 	protected void spendOperation() {
-		setRemainingOperations( getRemainingOperations() - 1 );
+		if( getMaxAllowedOperations() != INFINITY ) {
+			setRemainingOperations( getRemainingOperations() - 1 );
+		}
 	}
 	
 	/*
@@ -190,7 +200,28 @@ public class PerformanceRestrictedSimulatable
 	 * @see simulation.AbstractSimulatable#canPerformOperation()
 	 */
 	public boolean canPerformOperation() {
-		return ( getRemainingOperations() > 0 );
+		return ( getRemainingOperations() > 0 ) 
+				|| getMaxAllowedOperations() == INFINITY;
+	}
+	
+	/**
+	 * Obtains the state of this item.
+	 * @return state the Simulatable is in.
+	 */
+	protected State getState() {
+		synchronized( _state ) {
+			return _state;
+		}
+	}
+	
+	/**
+	 * Sets the value of the simulatable's state.
+	 * @param newState state to place the simulatable in.
+	 */
+	protected void setState( State newState ) {
+		synchronized( _state ) {
+			_state = newState;
+		}
 	}
 	
 /// ISimulatable
@@ -200,22 +231,23 @@ public class PerformanceRestrictedSimulatable
 	 * @see simulation.AbstractSimulatable#handleEvent(simulation.IDiscreteScheduledEvent)
 	 */
 	@Override
-	public void handleEvent(IDiscreteScheduledEvent e) {
+	public synchronized void handleEvent(IDiscreteScheduledEvent e) {
 		IMessage message = e.getMessage();
-		
+	
 		// do this for all states.
 		if( message instanceof SimulatableRefreshMessage ) {
+			System.out.println( " got refresh. " );
 			_state = State.FULLY_AWAKE;
 			setLastRefreshTime( e.getEventTime() );
 			resetRemainingOperations();
 			return;
 		} 
 		
-		switch( _state ) {
+		switch( getState() ) {
 			case FULLY_AWAKE:
 				// handle cost and state
 				spendOperation();						// cost us
-				_state = State.PARTIALLY_AWAKE;			// set next
+				setState( State.PARTIALLY_AWAKE );		// set next
 				
 				// handle refresh
 				setLastRefreshTime( e.getEventTime() );	// 
@@ -227,9 +259,9 @@ public class PerformanceRestrictedSimulatable
 			case PARTIALLY_AWAKE:
 				// handle cost and state
 				spendOperation();						// spend operation first
-				_state = ( canPerformOperation() ) 		// determine next state
+				setState( ( canPerformOperation() ) 	// determine next state
 					? State.PARTIALLY_AWAKE
-					: State.BLOCKED;
+					: State.BLOCKED );
 				
 				// handle event
 				subclassHandle( e );
@@ -257,14 +289,16 @@ public class PerformanceRestrictedSimulatable
 	 * @param currentEventTime time baseline from which we are responding.
 	 */
 	protected void sendRefreshMessage( double currentEventTime ) {
-		getSimulator().schedule(
-			new DefaultDiscreteScheduledEvent<SimulatableRefreshMessage>(
-				this, 
-				this, 
-				currentEventTime + getRefreshInterval(), 
-				getSimulator(), 
-				new SimulatableRefreshMessage(),
-				DefaultDiscreteScheduledEvent.INTERNAL));
+		if( getMaxAllowedOperations() != INFINITY ) {
+			getSimulator().schedule(
+				new DefaultDiscreteScheduledEvent<SimulatableRefreshMessage>(
+					this, 
+					this, 
+					currentEventTime + getRefreshInterval(), 
+					getSimulator(), 
+					new SimulatableRefreshMessage(),
+					DefaultDiscreteScheduledEvent.INTERNAL));
+		}
 	}
 	
 	/**

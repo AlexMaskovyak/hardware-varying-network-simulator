@@ -191,6 +191,7 @@ public class Node
 			IAddress destination = nodeMessage.getAddress();
 			IData data = nodeMessage.getData();
 			String protocol = nodeMessage.getProtocol();
+			System.out.println( "node handle event" );
 			getSimulator().schedule( 
 				new DefaultDiscreteScheduledEvent<ConnectionAdaptorManagerMessage>(
 					this, 
@@ -211,6 +212,9 @@ public class Node
 			String protocol = nodeMessage.getProtocol();
 			IData data = nodeMessage.getData();
 			AbstractProtocolHandler handler = getHandler( protocol );
+			if( handler == null ) {
+				System.out.println("handler is null");
+			}
 			getSimulator().schedule(
 				new DefaultDiscreteScheduledEvent<AlgorithmResponseMessage>(
 					this, 
