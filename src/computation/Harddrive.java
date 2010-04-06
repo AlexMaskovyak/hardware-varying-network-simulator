@@ -51,9 +51,12 @@ public class Harddrive<T extends IData>
 	protected void init() {
 		super.init();
 		_data = new HashMap<Integer, IData>();
-		_data.put(0, new Data( 0, new byte[] { 0, 0, 0} ) );
-		_data.put(1, new Data( 1, new byte[] { 0, 0, 1} ) );
-		_data.put(2, new Data( 2, new byte[] { 0, 1, 0} ) );
+		_data.put(0, new Data( 0, new byte[] { 0, 0, 0 } ) );
+		_data.put(1, new Data( 1, new byte[] { 0, 0, 1 } ) );
+		_data.put(2, new Data( 2, new byte[] { 0, 1, 0 } ) );
+		_data.put(3, new Data( 3, new byte[] { 0, 1, 1 } ) );
+		_data.put(4, new Data( 4, new byte[] { 1, 0, 0 } ) );
+		_data.put(5, new Data( 5, new byte[] { 1, 0, 1 } ) );
 	}
 	
 	

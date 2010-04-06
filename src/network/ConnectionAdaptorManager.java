@@ -182,7 +182,7 @@ public class ConnectionAdaptorManager
 					getSimulator().getTime() + .00001, 
 					getSimulator(), 
 					new NodeInMessage(
-						(IData)packet.getContent(), packet.getProtocol())));
+						(IMessage)packet.getContent(), packet.getProtocol())));
 		}
 		//(handler)
 		//handler.handle( packet );
@@ -199,14 +199,7 @@ public class ConnectionAdaptorManager
 			IPacket packet = ((ConnectionAdaptorManagerMessage)message).getPacket();
 			System.out.printf("%s CAM handle %s\n", getAddress(), packet );
 			handle(((ConnectionAdaptorManagerMessage)message).getPacket());
-		} /*else if ( message instanceof ConnectionAdaptorManagerOutMessage ) {
-			ConnectionAdaptorManagerOutMessage caMessage = 
-				(ConnectionAdaptorManagerOutMessage)message;
-			Object data = caMessage.getData();
-			IAddress destination = caMessage.getDestination();
-			System.out.printf("%s CAM handle %s\n", getAddress(), data );
-			//new Packet(data, getAddress(), destination, );
-		}*/
+		} 
 	}
 	
 /// IPacketHandler

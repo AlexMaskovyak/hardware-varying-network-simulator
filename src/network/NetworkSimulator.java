@@ -15,6 +15,7 @@ import simulation.IDiscreteScheduledEventSimulator;
 import simulation.ISimulatable;
 import simulation.ISimulator;
 
+
 /**
  * Simulates a network of nodes, connectionmediums, etc.
  * @author Alex Maskovyak

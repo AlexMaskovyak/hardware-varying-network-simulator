@@ -62,6 +62,8 @@ public class DiscreteScheduledEventSimulator
 				System.out.println( event.toString() );
 				_currentTime = event.getEventTime();				// update time
 				event.getDestination().handleEvent(event);			// get destination and deliver
+				
+				//Thread.currentThread().sleep(200);
 			}
 		} catch (Exception e) { e.printStackTrace(); } 
 		finally {

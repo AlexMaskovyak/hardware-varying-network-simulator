@@ -73,6 +73,15 @@ public class ComputerNode
 		install(handler, handler.getProtocol());
 		_algorithm.setSimulator( getSimulator() );
 	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see computation.IComputer#getInstalledAlgorithm()
+	 */
+	@Override
+	public IAlgorithm getInstalledAlgorithm() {
+		return _algorithm;
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -96,6 +105,10 @@ public class ComputerNode
 		_algorithm = null;
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * @see network.Node#createNew(routing.IAddress)
+	 */
 	@Override
 	public INode createNew(IAddress address) {
 		return new ComputerNode(address);

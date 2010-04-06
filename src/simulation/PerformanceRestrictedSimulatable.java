@@ -61,7 +61,7 @@ public class PerformanceRestrictedSimulatable
 	 * Default constructor.
 	 */
 	public PerformanceRestrictedSimulatable() {
-		this(INFINITY, INFINITY, 0);
+		this(INFINITY, 0, 0);
 	}
 	
 	/**
@@ -177,6 +177,14 @@ public class PerformanceRestrictedSimulatable
 	
 
 /// Helpers
+
+	/**
+	 * Resets this items state to the default start state.
+	 */
+	protected void reset() {
+		resetRemainingOperations();
+		setState( State.FULLY_AWAKE );
+	}
 	
 	/**
 	 * Sets the remaining operations to the maximum allowed.
@@ -247,10 +255,11 @@ public class PerformanceRestrictedSimulatable
 			case FULLY_AWAKE:
 				// handle cost and state
 				spendOperation();						// cost us
+				System.out.println(getRemainingOperations());
 				setState( State.PARTIALLY_AWAKE );		// set next
 				
 				// handle refresh
-				setLastRefreshTime( e.getEventTime() );	// 
+				setLastRefreshTime( e.getEventTime() );	
 				sendRefreshMessage( e.getEventTime() );
 				
 				// handle event
@@ -259,6 +268,7 @@ public class PerformanceRestrictedSimulatable
 			case PARTIALLY_AWAKE:
 				// handle cost and state
 				spendOperation();						// spend operation first
+				System.out.println(getRemainingOperations());
 				setState( ( canPerformOperation() ) 	// determine next state
 					? State.PARTIALLY_AWAKE
 					: State.BLOCKED );
@@ -290,11 +300,12 @@ public class PerformanceRestrictedSimulatable
 	 */
 	protected void sendRefreshMessage( double currentEventTime ) {
 		if( getMaxAllowedOperations() != INFINITY ) {
+			System.out.println("schedule refresh.");
 			getSimulator().schedule(
 				new DefaultDiscreteScheduledEvent<SimulatableRefreshMessage>(
 					this, 
 					this, 
-					currentEventTime + getRefreshInterval(), 
+					currentEventTime + getRefreshInterval() - .1, 
 					getSimulator(), 
 					new SimulatableRefreshMessage(),
 					DefaultDiscreteScheduledEvent.INTERNAL));

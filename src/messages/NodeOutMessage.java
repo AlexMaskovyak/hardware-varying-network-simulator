@@ -12,7 +12,7 @@ import simulation.IDiscreteScheduledEvent.IMessage;
 public class NodeOutMessage implements IMessage {
 	
 	/** data to handle. */
-	protected IData _data;
+	protected IMessage _message;
 	/** address to send to. */
 	protected IAddress _address;
 	/** protocol requesting the send. */
@@ -22,8 +22,8 @@ public class NodeOutMessage implements IMessage {
 	 * Default constructor.
 	 * @param packet for ConnectionAdaptorManager to handle.
 	 */
-	public NodeOutMessage( IData data, IAddress address, String protocol ) {
-		_data = data;
+	public NodeOutMessage( IMessage message, IAddress address, String protocol ) {
+		_message = message;
 		_address = address;
 		_protocol = protocol;
 	}
@@ -32,8 +32,8 @@ public class NodeOutMessage implements IMessage {
 	 * Get the packet.
 	 * @return data to handle.
 	 */
-	public IData getData() {
-		return _data;
+	public IMessage getMessage() {
+		return _message;
 	}
 	
 	/**

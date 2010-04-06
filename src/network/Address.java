@@ -24,8 +24,19 @@ public class Address implements IAddress {
 	public Address(int address) {
 		_address = address;
 	}
-	
 
+	
+/// Field accessor
+	
+	/**
+	 * Gets the underlying representation of this address.
+	 * @return the underlying integer.
+	 */
+	public int getRepresentation() {
+		return _address;
+	}
+
+	
 /// Equality
 	
 	/*
