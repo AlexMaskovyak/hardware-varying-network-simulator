@@ -8,20 +8,24 @@ import simulation.IDiscreteScheduledEvent.IMessage;
  * @author Alex Maskovyak
  *
  */
-public class AlgorithmMessage 
+public class AlgorithmResponseMessage 
 		implements IMessage {
 
-	/** data for an algorithm...this should probably be something else. */
+	/** payload for the algorithm... */
 	protected IData _data;
 	
 	/**
-	 * Data to send 
-	 * @param data
+	 * Default constructor.
+	 * @param data to send as a response.
 	 */
-	public AlgorithmMessage( IData data ) {
+	public AlgorithmResponseMessage( IData data ) {
 		_data = data;
 	}
 	
+	/**
+	 * Obtain data.
+	 * @return data sent as response.
+	 */
 	public IData getData() {
 		return _data;
 	}

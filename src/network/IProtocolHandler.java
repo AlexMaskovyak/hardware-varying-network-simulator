@@ -14,7 +14,7 @@ public interface IProtocolHandler<T> {
 	public IProtocolHandler getHandler(String protocol);
 	
 	/** obtains the protocol with which this handler identifies itself. */
-	public String getProtocal();
+	public String getProtocol();
 	
 	/** install a packethandler to handle for the specified protocal. */
 	public void install(IProtocolHandler handler, String protocal);

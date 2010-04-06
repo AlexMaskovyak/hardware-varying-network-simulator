@@ -34,7 +34,7 @@ public class AbstractAlgorithm
 	 * @see network.AbstractProtocolHandler#getProtocal()
 	 */
 	@Override
-	public String getProtocal() {
+	public String getProtocol() {
 		return "ALGORITHM";
 	}
 
@@ -90,5 +90,4 @@ public class AbstractAlgorithm
 	public void read() {
 		
 	}
-
 }

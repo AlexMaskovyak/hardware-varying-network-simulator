@@ -1,0 +1,44 @@
+package messages;
+
+import network.IData;
+import simulation.IDiscreteScheduledEvent.IMessage;
+
+/**
+ * Message telling Harddrive to store information.
+ * @author Alex Maskovyak
+ *
+ */
+public class MemoryStoreMessage 
+		implements IMessage {
+
+	/** index at which to store the data. */
+	protected int _index;
+	/** data to store. */
+	protected IData _data;
+	
+	/**
+	 * Default constructor.
+	 * @param index at which to store the information.
+	 * @param data to store.
+	 */
+	public MemoryStoreMessage( int index, IData data ) {
+		_index = index;
+		_data = data;
+	}
+	
+	/**
+	 * Obtain the index.
+	 * @return index.
+	 */
+	public int getIndex() {
+		return _index;
+	}
+	
+	/**
+	 * Obtain the data to store.
+	 * @return data to store.
+	 */
+	public IData getData() {
+		return _data;
+	}
+}

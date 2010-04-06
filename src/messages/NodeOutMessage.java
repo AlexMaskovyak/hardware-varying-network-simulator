@@ -15,14 +15,17 @@ public class NodeOutMessage implements IMessage {
 	protected IData _data;
 	/** address to send to. */
 	protected IAddress _address;
+	/** protocol requesting the send. */
+	protected String _protocol;
 	
 	/**
 	 * Default constructor.
 	 * @param packet for ConnectionAdaptorManager to handle.
 	 */
-	public NodeOutMessage( IData data, IAddress address ) {
+	public NodeOutMessage( IData data, IAddress address, String protocol ) {
 		_data = data;
 		_address = address;
+		_protocol = protocol;
 	}
 	
 	/**
@@ -39,5 +42,13 @@ public class NodeOutMessage implements IMessage {
 	 */
 	public IAddress getAddress() {
 		return _address;
+	}
+	
+	/**
+	 * Get the protocol.
+	 * @return protocol who is to handle this.
+	 */
+	public String getProtocol() {
+		return _protocol;
 	}
 }

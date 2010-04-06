@@ -16,8 +16,8 @@ import simulation.ISimulatorEvent;
 import simulation.AbstractSimulatable;
 import simulation.IDiscreteScheduledEvent.IMessage;
 
-import messages.AlgorithmMessage;
-import messages.ConnectionAdaptorManagerInMessage;
+import messages.AlgorithmResponseMessage;
+import messages.ConnectionAdaptorManagerMessage;
 import messages.ConnectionAdaptorManagerOutMessage;
 import messages.NodeInMessage;
 import messages.NodeOutMessage;
@@ -190,18 +190,19 @@ public class Node
 			NodeOutMessage nodeMessage = ((NodeOutMessage)message);
 			IAddress destination = nodeMessage.getAddress();
 			IData data = nodeMessage.getData();
+			String protocol = nodeMessage.getProtocol();
 			getSimulator().schedule( 
-				new DefaultDiscreteScheduledEvent<ConnectionAdaptorManagerInMessage>(
+				new DefaultDiscreteScheduledEvent<ConnectionAdaptorManagerMessage>(
 					this, 
 					_manager, 
 					e.getEventTime() + .00001, 
 					e.getSimulator(), 
-					new ConnectionAdaptorManagerInMessage(
+					new ConnectionAdaptorManagerMessage(
 						new Packet(
 							data, 
 							getAddress(),
 							destination,
-							"DISTR_ALGORITHM",
+							protocol,
 							-1,
 							-1 ) ) ));
 		} else if( message instanceof NodeInMessage ) {
@@ -211,12 +212,12 @@ public class Node
 			IData data = nodeMessage.getData();
 			AbstractProtocolHandler handler = getHandler( protocol );
 			getSimulator().schedule(
-				new DefaultDiscreteScheduledEvent<AlgorithmMessage>(
+				new DefaultDiscreteScheduledEvent<AlgorithmResponseMessage>(
 					this, 
 					handler, 
 					getSimulator().getTime() + .0001, 
 					getSimulator(),
-					new AlgorithmMessage(data)));
+					new AlgorithmResponseMessage(data)));
 		}
 	}
 
@@ -297,7 +298,7 @@ public class Node
 	 * @see network.AbstractProtocolHandler#getProtocal()
 	 */
 	@Override
-	public String getProtocal() {
+	public String getProtocol() {
 		return null;
 	}
 

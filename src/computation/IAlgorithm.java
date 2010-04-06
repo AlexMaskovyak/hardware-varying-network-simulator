@@ -27,5 +27,5 @@ public interface IAlgorithm {
 	 * Obtains the protocal for this algorithm.
 	 * @return protocal this algorithm is associated with.
 	 */
-	public String getProtocal();
+	public String getProtocol();
 }

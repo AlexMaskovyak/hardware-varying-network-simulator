@@ -15,12 +15,16 @@ import simulation.AbstractSimulatable;
 public abstract class AbstractProtocolHandler<T> 
 		extends AbstractSimulatable
 		implements IProtocolHandler<T> {
-
+	
+/// Fields
+	
 	/** protocals installed on this adaptor. */
 	protected Map<String, AbstractProtocolHandler> _protocalMappings;
 	/** universal accept protocal, if no other protocal is present check this. */ 
 	public static String DEFAULT_PROTOCAL = "UNIVERSAL_HANDLER";
 	
+
+/// Construction
 	
 	/** Default constructor. */
 	protected AbstractProtocolHandler() {
@@ -33,9 +37,20 @@ public abstract class AbstractProtocolHandler<T>
 		_protocalMappings = new HashMap<String, AbstractProtocolHandler>();
 	}
 	
+
+/// IProtocolHandler
+	
+	/*
+	 * (non-Javadoc)
+	 * @see network.IProtocolHandler#handle(java.lang.Object)
+	 */
 	@Override
 	public abstract void handle(T packetLikeObject);	
 	
+	/*
+	 * (non-Javadoc)
+	 * @see network.IProtocolHandler#getHandler(java.lang.String)
+	 */
 	@Override
 	public AbstractProtocolHandler getHandler(String protocal) {
 		IProtocolHandler result = _protocalMappings.get(protocal);
@@ -45,9 +60,17 @@ public abstract class AbstractProtocolHandler<T>
 			: _protocalMappings.get(AbstractProtocolHandler.DEFAULT_PROTOCAL));
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * @see network.IProtocolHandler#getProtocol()
+	 */
 	@Override
-	public abstract String getProtocal();
+	public abstract String getProtocol();
 	
+	/*
+	 * (non-Javadoc)
+	 * @see network.IProtocolHandler#install(network.IProtocolHandler, java.lang.String)
+	 */
 	@Override
 	public void install(IProtocolHandler handler, String protocal) {
 		if( handler instanceof AbstractProtocolHandler ) {
@@ -55,11 +78,19 @@ public abstract class AbstractProtocolHandler<T>
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see network.IProtocolHandler#uninstall(network.IProtocolHandler)
+	 */
 	@Override
 	public void uninstall(IProtocolHandler handler) {
 		_protocalMappings.values().remove(handler);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see network.IProtocolHandler#uninstall(java.lang.String)
+	 */
 	@Override
 	public void uninstall(String protocal) {
 		_protocalMappings.remove(protocal);

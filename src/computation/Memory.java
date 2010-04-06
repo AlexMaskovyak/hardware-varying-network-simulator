@@ -1,12 +1,21 @@
 package computation;
 
+import java.util.Map;
+
+import messages.AlgorithmResponseMessage;
+import messages.HarddriveRequestMessage;
+import messages.HarddriveStoreMessage;
+import messages.MemoryRequestMessage;
+import messages.MemoryStoreMessage;
 import network.IData;
 import simulation.AbstractSimulatable;
+import simulation.DefaultDiscreteScheduledEvent;
 import simulation.IDiscreteScheduledEvent;
 import simulation.ISimulatable;
+import simulation.IDiscreteScheduledEvent.IMessage;
 
 public class Memory 
-		extends AbstractSimulatable 
+		extends Harddrive 
 		implements IHardware, ISimulatable {
 
 	protected int _capacity;
@@ -44,8 +53,26 @@ public class Memory
 
 	@Override
 	public void handleEvent(IDiscreteScheduledEvent e) {
-		// TODO Auto-generated method stub
-		
+		IMessage message = e.getMessage();
+		if( message instanceof MemoryRequestMessage ) {
+			MemoryRequestMessage mMessage = (MemoryRequestMessage)message;
+			int index = mMessage.getSequence();
+			System.out.println("harddrive request");
+			getSimulator().schedule(
+				new DefaultDiscreteScheduledEvent<IMessage>(
+					this, 
+					e.getSource(), 
+					getSimulator().getTime() + .0001, 
+					getSimulator(), 
+					new AlgorithmResponseMessage(getIndex(index))));
+		} else if( message instanceof MemoryStoreMessage ) {
+			MemoryStoreMessage mMessage = (MemoryStoreMessage)message;
+			int index = mMessage.getIndex();
+			IData data = mMessage.getData();
+			setIndex( index, data );
+			System.out.println("harddrive store");
+			
+		}
 	}
 
 	@Override
