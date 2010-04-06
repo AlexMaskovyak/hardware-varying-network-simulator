@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import simulation.AbstractSimulatable;
+import simulation.PerformanceRestrictedSimulatable;
 
 /**
  * Basic implementation of a PacketHandler.  It has a protocal mapping set and can handle packets
@@ -13,7 +14,7 @@ import simulation.AbstractSimulatable;
  * @param <T>
  */
 public abstract class AbstractProtocolHandler<T> 
-		extends AbstractSimulatable
+		extends PerformanceRestrictedSimulatable
 		implements IProtocolHandler<T> {
 	
 /// Fields
@@ -28,7 +29,7 @@ public abstract class AbstractProtocolHandler<T>
 	
 	/** Default constructor. */
 	protected AbstractProtocolHandler() {
-		init();
+		super();
 	}
 	
 	/** Externalize instantiation. */

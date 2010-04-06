@@ -57,8 +57,9 @@ public class DiscreteScheduledEventSimulator
 				// await on events being added
 				while( _queue.isEmpty() ) { _eventsAddedCondition.await(); }
 				while( _state == State.PAUSED ) { _startedCondition.await(); }
-
+				
 				IDiscreteScheduledEvent event = _queue.poll();		// get event
+				System.out.println( event.toString() );
 				_currentTime = event.getEventTime();				// update time
 				event.getDestination().handleEvent(event);			// get destination and deliver
 			}

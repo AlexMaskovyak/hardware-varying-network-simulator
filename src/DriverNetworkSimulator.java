@@ -4,6 +4,9 @@ import java.util.Set;
 
 import computation.ComputerNetworkSimulator;
 import computation.HardwareComputerNode;
+import computation.IComputer;
+import computation.IHardwareComputer;
+import computation.RandomDistributionAlgorithm;
 
 import reporting.NodeReporter;
 import routing.IAddress;
@@ -46,11 +49,16 @@ public class DriverNetworkSimulator {
 		
 		System.out.println("starting");
 		
+		
 		NetworkSimulator sim = new ComputerNetworkSimulator();
-		List<ISimulatable> simulatables = sim.createRingOfConnectedNodes(5);
-		INode n0 = (INode) simulatables.get(1);
-	//	System.out.println(simulatables.size());
-		/*INode n0 = sim.createNode(); //  new Node(new Address(1));
+		//IHardwareComputer n0 = (IHardwareComputer)sim.createNode();
+		//System.out.println("\n");
+		//n0.install( new RandomDistributionAlgorithm( n0 ) );
+		//List<ISimulatable> simulatables = sim.createSeriesOfConnectedNodes(1);
+		//INode n0 = (INode) simulatables.get(0);
+		
+		//System.out.println(simulatables.size());
+		INode n0 = sim.createNode(); //  new Node(new Address(1));
 		INode n1 = sim.createNode();
 		IConnectionMedium medium = sim.createConnectionMedium();
 		sim.connect(n0, medium);
@@ -75,17 +83,20 @@ public class DriverNetworkSimulator {
 		//sim.disconnect( n4, n3 );
 		
 		((ISimulatable)n0).addListener(new NodeSimulatableListener(System.out));
-		((ISimulatable)n1).addListener(new NodeSimulatableListener(System.out));*/
+		((ISimulatable)n1).addListener(new NodeSimulatableListener(System.out));
 		
 		Thread t = new Thread((Runnable)sim);
 		//sim.start();
 		t.start();
 		//t.join();
 		//sim.schedule(new DefaultDiscreteScheduledEvent<NodeOutMessage>(null, (ISimulatable)n0, 3, sim, new NodeOutMessage( new Data(1, new byte[] {0, 0, 0} ), new Address(4) ) ) );
-		HardwareComputerNode c = (HardwareComputerNode)n0;
-		c.start();
+		//HardwareComputerNode c = (HardwareComputerNode)n0;
+		//c.start();
 		//sim.schedule(new DefaultDiscreteScheduledEvent<NodeMessage>(null, (ISimulatable)n4, 1, sim, new NodeMessage( new Data(1, new byte[] {0, 0, 0} ), new Address(0) ) ) );
-		//sim.schedule(new DefaultDiscreteScheduledEvent<NodeMessage>(null, (ISimulatable)n0, -100, sim, new NodeMessage( new Data(1, new byte[] {0, 0, 0} ), new Address(4) ) ) );
+		//sim.schedule(new DefaultDiscreteScheduledEvent<NodeOutMessage>(null, (ISimulatable)n0, 1, sim, new NodeOutMessage( new Data(1, new byte[] {0, 0, 0} ), new Address(4), "DISTR_ALGORITHM" ) ) );
+		
+		((IComputer)n0).start();
+		
 		//sim.start();
 		//sim.simulate(5);
 		//n0.send(new Data(15, new byte[] {0} ), n4.getAddress());
