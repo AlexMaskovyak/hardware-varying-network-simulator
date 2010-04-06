@@ -16,6 +16,9 @@ public interface IDiscreteScheduledEvent<T extends IDiscreteScheduledEvent.IMess
 	/** operate upon the destination...as in, give them a message. */
 	public T getMessage();
 	
+	/** priority of this event. */
+	public int getPriority();
+	
 	/** labels a message, every simulatable should expect this. */
 	public interface IMessage {}
 }
@@ -36,6 +39,10 @@ class DiscreteScheduleEventComparator<T extends IDiscreteScheduledEvent>
 	public int compare(IDiscreteScheduledEvent arg0, IDiscreteScheduledEvent arg1) {
 		if( arg0.getEventTime() < arg1.getEventTime() ) { return -1; }
 		if( arg0.getEventTime() > arg1.getEventTime() ) { return 1; }
+		if( arg0.getEventTime() == arg1.getEventTime() ) {
+			if( arg0.getPriority() < arg1.getPriority() ) { return -1; }
+			if( arg0.getPriority() > arg1.getPriority() ) { return 1; }
+		}
 		return 0;
 	}
 }

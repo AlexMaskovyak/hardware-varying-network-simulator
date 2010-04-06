@@ -38,7 +38,7 @@ public class DiscreteScheduledEventSimulator
 		_lock.lock();
 		try {
 			// ensure that this isn't from the past
-			if ( event.getEventTime() <= getTime() ) { return; }
+			if ( event.getEventTime() < getTime() ) { return; }
 			_queue.offer(event);
 			_eventsAddedCondition.signalAll();
 		} finally {
