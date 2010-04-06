@@ -21,6 +21,11 @@ public interface IComputer {
 	 */
 	public void install(IAlgorithm algorithm);
 
+	/**
+	 * Retrieves the algorithm installed on this computer.
+	 * @return alogirhtm installed on this computer.
+	 */
+	public IAlgorithm getInstalledAlgorithm();
 	
 	/**
 	 * Removes a distributed algorithm from this computer.

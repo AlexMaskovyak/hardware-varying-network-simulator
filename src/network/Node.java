@@ -189,7 +189,7 @@ public class Node
 			//doit = false;
 			NodeOutMessage nodeMessage = ((NodeOutMessage)message);
 			IAddress destination = nodeMessage.getAddress();
-			IData data = nodeMessage.getData();
+			IMessage data = nodeMessage.getMessage();
 			String protocol = nodeMessage.getProtocol();
 			System.out.println( "node handle event" );
 			getSimulator().schedule( 
@@ -210,18 +210,18 @@ public class Node
 			System.out.println("GOT node in");
 			NodeInMessage nodeMessage = ((NodeInMessage)message);
 			String protocol = nodeMessage.getProtocol();
-			IData data = nodeMessage.getData();
+			IMessage data = nodeMessage.getMessage();
 			AbstractProtocolHandler handler = getHandler( protocol );
 			if( handler == null ) {
 				System.out.println("handler is null");
 			}
 			getSimulator().schedule(
-				new DefaultDiscreteScheduledEvent<AlgorithmResponseMessage>(
+				new DefaultDiscreteScheduledEvent(
 					this, 
 					handler, 
 					getSimulator().getTime() + .0001, 
 					getSimulator(),
-					new AlgorithmResponseMessage(data)));
+					data));
 		}
 	}
 

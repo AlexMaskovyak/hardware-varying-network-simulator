@@ -13,7 +13,9 @@ import messages.NodeOutMessage;
 import network.AbstractProtocolHandler;
 import network.Address;
 import network.IData;
+import network.INode;
 
+import routing.IAddress;
 import simulation.AbstractSimulatable;
 import simulation.DefaultDiscreteScheduledEvent;
 import simulation.IDiscreteScheduledEvent;
@@ -71,11 +73,35 @@ public class RandomDistributionAlgorithm
 	protected Role _role;
 	
 	
+	/** first index of data to store and retrieve. */
+	protected int _startIndex;
+	/** last index of data to store and retrieve. */
+	protected int _endIndex;
+	/** current index. */
+	protected int _currentIndex;
+	
+	/** total responses from the HD. */
+	protected int _totalHDResponses;
+	/** total responses from clients. */
+	protected int _totalClientResponses;
+	
+	
+	/** first address in the range of addresses to store and retrieve from. */
+	protected IAddress _startAddress;
+	/** current address to use...used during the read...we simply request things
+	 *  in order. */
+	protected IAddress _currentAddress;
+	/** last address in the range of addresses */
+	protected IAddress _endAddress;
+	
+	/** address of the server */
+	protected IAddress _knownServerAddress;
+	
 /// Construction
 	
 	/** Default constructor. */
 	public RandomDistributionAlgorithm() {
-		super();
+		this( null );
 	}
 	
 	/** Constructor.
@@ -84,6 +110,9 @@ public class RandomDistributionAlgorithm
 	public RandomDistributionAlgorithm( IHardwareComputer computer ) {
 		super();
 		_computer = computer;
+		setMaxAllowedOperations( 3 );
+		setRefreshInterval( 1 );
+		reset();
 	}
 	
 	/*
@@ -108,6 +137,35 @@ public class RandomDistributionAlgorithm
 		return _computer;
 	}
 	
+	/**
+	 * Sets the range of addresses available for use.
+	 * @param startAddress of the address range.
+	 * @param endAddress of the address range.
+	 */
+	public void setAddressRange( IAddress startAddress, IAddress endAddress ) {
+		_startAddress = startAddress;
+		_endAddress = endAddress;
+	}
+	
+	/**
+	 * Obtains the next address to use for information storage.
+	 * @return next address to store information.
+	 */
+	public IAddress getNextStorageAddress() {
+		System.out.println("curr address in getnext" + _currentAddress);
+		IAddress current = _currentAddress;
+		_currentAddress = new Address(((Address)_currentAddress).getRepresentation() + 1);
+		return current;
+	}
+	
+	/**
+	 * Obtains the next address to query for information during the read phase.
+	 * @return next address to ask for information.
+	 */
+	public IAddress getNextRetrievalAddress() {
+		return getNextStorageAddress();
+	}
+	
 	
 /// IProtocolHandler
 	
@@ -129,22 +187,39 @@ public class RandomDistributionAlgorithm
 		handleEvent( (IDiscreteScheduledEvent) packetLikeObject );
 	}
 
-	
+
 /// IAlgorithm
-		
+
+	/*
+	 * (non-Javadoc)
+	 * @see computation.AbstractAlgorithm#distribute()
+	 */
+	@Override
+	public void distribute() {
+		distribute( 1, 5 );
+	}
+	
 	/**
 	 * Distribute here queues up a distribute event to kick-start disribution 
 	 * operations.
 	 * @see computation.IAlgorithm#distribute()
 	 */
-	@Override
-	public void distribute() {
+	public void distribute( int startIndex, int endIndex ) {
+		_startIndex = startIndex;
+		_endIndex = endIndex;
+		_currentIndex = startIndex;
+		
+		_currentAddress = _startAddress;
+		
+		_totalClientResponses = 0;
+		_totalHDResponses = 0;
+		
 		_role = Role.SERVER;						// distributors are servers	
 		_serverState = Server_State.DISTRIBUTE;		// inside distribution
+		System.out.println(_serverState);
 		sendDoWork();								// kick-start us.
 	}
 	
-
 	/**
 	 * Read, queues up a read event to kick-start read-back operations.
 	 * (non-Javadoc)
@@ -152,8 +227,9 @@ public class RandomDistributionAlgorithm
 	 */
 	@Override
 	public void read() {
-		_serverState = Server_State.READ;			// inside read
-		sendDoWork();								// kick-start us
+		//System.out.println("in read call.");
+		//_serverState = Server_State.READ;			// inside read
+		//sendDoWork();								// kick-start us
 	}
 
 	
@@ -193,6 +269,8 @@ public class RandomDistributionAlgorithm
 		// store information into memory
 		if( message instanceof AlgorithmStoreMessage ) {
 			AlgorithmStoreMessage aMessage = (AlgorithmStoreMessage)message;
+			// store the server's address
+			_knownServerAddress = aMessage.getServer();
 			getSimulator().schedule(
 				new DefaultDiscreteScheduledEvent<HarddriveStoreMessage>(
 					this, 
@@ -225,8 +303,10 @@ public class RandomDistributionAlgorithm
 					(ISimulatable)getComputer(), 
 					e.getEventTime() + getTransitTime(), 
 					getSimulator(), 
-					new AlgorithmResponseMessage(
-						aMessage.getData())));
+					new NodeOutMessage(
+						new AlgorithmResponseMessage( aMessage.getData()),
+						_knownServerAddress, 
+						getProtocol())));
 		}
 	}
 	
@@ -236,19 +316,44 @@ public class RandomDistributionAlgorithm
 	 */
 	protected void serverHandle( IDiscreteScheduledEvent e ) {
 		IMessage message = e.getMessage();
+		System.out.println( _serverState );
 		switch( _serverState ) {
 			case DISTRIBUTE:
 				// grab more information
 				if( message instanceof AlgorithmDoWorkMessage ) {
 					// do we have more?
 					if( haveMoreToDistribute() ) {
-						
-					} else {
-						_serverState = Server_State.IDLE;	// don't move on yet
+						System.out.println("have more to dist");
+						sendDoWork();
+						// read index from harddrive
+						sendHarddriveRequest( _currentIndex++ );
+					} 
+				} else if( message instanceof AlgorithmResponseMessage ) {
+					IData data = ((AlgorithmResponseMessage)message).getData();
+					sendDataToClient( data, getNextStorageAddress() );
+					
+					_totalHDResponses++;
+					// check if we've received and distributed everything
+					if( _totalHDResponses == ( _endIndex - _startIndex + 1 ) ) {
+						_serverState = Server_State.READ;	// read round
+						_currentIndex = _startIndex;
+						_currentAddress = _startAddress;
+						sendDoWork();
 					}
 				}
 				break;
 			case READ:
+				if( message instanceof AlgorithmDoWorkMessage ) {
+					if( haveMoreToRead() ) {
+						sendDoWork();
+						sendClientRequest( _currentIndex++, getNextRetrievalAddress() );
+					} 
+				} else if( message instanceof AlgorithmResponseMessage ) {
+					_totalClientResponses++;
+					if( _totalClientResponses == ( _endIndex - _startIndex + 1 ) ) {
+						System.out.println("hurray.");
+					}
+				}
 				break;
 		}
 	}
@@ -258,7 +363,7 @@ public class RandomDistributionAlgorithm
 	 * @return true if there is more to distribute, false otherwise.
 	 */
 	protected boolean haveMoreToDistribute() {
-		return true;
+		return ( _currentIndex <= _endIndex );
 	}
 
 	/**
@@ -266,7 +371,7 @@ public class RandomDistributionAlgorithm
 	 * @return true if there is more to read, false otherwise.
 	 */
 	protected boolean haveMoreToRead() {
-		return true;
+		return ( _currentIndex <= _endIndex );
 	}
 	
 	/**
@@ -283,5 +388,62 @@ public class RandomDistributionAlgorithm
 				getSimulator().getTime(), 
 				getSimulator(), 
 				new AlgorithmDoWorkMessage()));
+	}
+	
+	/**
+	 * Sends a request to the harddrive for a specific index of data.
+	 * @param index to retrieve from the harddrive.
+	 */
+	protected void sendHarddriveRequest( int index ) {
+		System.out.println("harddrive request.");
+		getSimulator().schedule(
+			new DefaultDiscreteScheduledEvent<IMessage>(
+				this, 
+				getComputer().getHarddrive(), 
+				getSimulator().getTime() + getTransitTime(), 
+				getSimulator(), 
+				new HarddriveRequestMessage( 
+					index, 
+					-1 )));
+	}
+	
+	/**
+	 * Sends a data storage request to the client with data.
+	 * @param data for the client to store.
+	 * @param address of the client which is to store it.
+	 */
+	protected void sendDataToClient( IData data, IAddress address ) {
+		getSimulator().schedule(
+			new DefaultDiscreteScheduledEvent<IMessage>(
+				this, 
+				(ISimulatable)getComputer(), 
+				getSimulator().getTime() + getTransitTime(),
+				getSimulator(), 
+				new NodeOutMessage(
+					new AlgorithmStoreMessage( 
+						data.getID(), 
+						data,
+						((INode)getComputer()).getAddress()),
+					address,
+					getProtocol())));
+	}
+	
+	/**
+	 * Sends a request to a client at the specified address for data with the
+	 * index value.
+	 * @param index to request. 
+	 * @param address of the client which is to field the request.
+	 */
+	protected void sendClientRequest( int index, IAddress address ) {
+		getSimulator().schedule(
+			new DefaultDiscreteScheduledEvent<IMessage>(
+				this, 
+				(ISimulatable)getComputer(), 
+				getSimulator().getTime() + getTransitTime(), 
+				getSimulator(), 
+				new NodeOutMessage(
+					new AlgorithmRequestMessage( index ),
+					address,
+					getProtocol())));
 	}
 }

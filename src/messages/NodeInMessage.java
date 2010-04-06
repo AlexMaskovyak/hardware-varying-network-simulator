@@ -2,6 +2,7 @@ package messages;
 
 import network.IData;
 import routing.IAddress;
+import simulation.IDiscreteScheduledEvent;
 import simulation.IDiscreteScheduledEvent.IMessage;
 
 /**
@@ -11,8 +12,8 @@ import simulation.IDiscreteScheduledEvent.IMessage;
  */
 public class NodeInMessage implements IMessage {
 	
-	/** data to handle. */
-	protected IData _data;
+	/** event to handle. */
+	protected IMessage _message;
 	/** address to send to. */
 	protected String _protocol;
 	
@@ -20,8 +21,8 @@ public class NodeInMessage implements IMessage {
 	 * Default constructor.
 	 * @param packet for ConnectionAdaptorManager to handle.
 	 */
-	public NodeInMessage( IData data, String protocol ) {
-		_data = data;
+	public NodeInMessage( IMessage message, String protocol ) {
+		_message = message;
 		_protocol = protocol;
 	}
 	
@@ -29,8 +30,8 @@ public class NodeInMessage implements IMessage {
 	 * Get the packet.
 	 * @return data to handle.
 	 */
-	public IData getData() {
-		return _data;
+	public IMessage getMessage() {
+		return _message;
 	}
 	
 	/**

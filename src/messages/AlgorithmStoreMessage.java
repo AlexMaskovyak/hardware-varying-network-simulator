@@ -1,6 +1,7 @@
 package messages;
 
 import network.IData;
+import routing.IAddress;
 import simulation.IDiscreteScheduledEvent.IMessage;
 
 /**
@@ -15,15 +16,18 @@ public class AlgorithmStoreMessage
 	protected int _index;
 	/** data to store. */
 	protected IData _data;
+	/** address of the server requesting storage. */
+	protected IAddress _server;
 	
 	/**
 	 * Default constructor.
 	 * @param index at which to store the data.
 	 * @param data to store.
 	 */
-	public AlgorithmStoreMessage( int index, IData data ) {
+	public AlgorithmStoreMessage( int index, IData data, IAddress server ) {
 		_index = index;
 		_data = data;
+		_server = server;
 	}
 	
 	/**
@@ -40,5 +44,13 @@ public class AlgorithmStoreMessage
 	 */
 	public IData getData() {
 		return _data;
+	}
+	
+	/**
+	 * Gets the address of the server who sent this.
+	 * @return address of the server.
+	 */
+	public IAddress getServer() {
+		return _server;
 	}
 }
