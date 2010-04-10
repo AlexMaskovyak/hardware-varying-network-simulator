@@ -218,7 +218,6 @@ public class RandomDistributionAlgorithm
 		
 		_role = Role.SERVER;						// distributors are servers	
 		_serverState = Server_State.DISTRIBUTE;		// inside distribution
-		System.out.println(_serverState);
 		sendDoWork();								// kick-start us.
 	}
 	
@@ -317,7 +316,6 @@ public class RandomDistributionAlgorithm
 	 */
 	protected void serverHandle( IDiscreteScheduledEvent e ) {
 		IMessage message = e.getMessage();
-		System.out.println( _serverState );
 		switch( _serverState ) {
 			case DISTRIBUTE:
 				// grab more information

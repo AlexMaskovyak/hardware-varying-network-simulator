@@ -196,7 +196,7 @@ public class Node
 				new DefaultDiscreteScheduledEvent<ConnectionAdaptorManagerMessage>(
 					this, 
 					_manager, 
-					e.getEventTime() + .00001, 
+					e.getEventTime() + getTransitTime(), 
 					e.getSimulator(), 
 					new ConnectionAdaptorManagerMessage(
 						new Packet(
@@ -254,9 +254,10 @@ public class Node
 		// as a part of their computation
 		Set<ISimulatableListener> _listenersCopy = new HashSet<ISimulatableListener>(_listeners);
 		for( ISimulatableListener listener : _listenersCopy ) {
+			listener.update( e );
 			switch(_currentState) {
-				case GOT_TICK: listener.tickReceivedUpdate(e); break;
-				case HANDLED_TICK: listener.tickHandledUpdate(e); break;
+				case GOT_TICK: listener.update(e); break;
+				case HANDLED_TICK: listener.update(e); break;
 				case SENT: 
 					if (listener instanceof NodeSimulatableListener) {
 						((NodeSimulatableListener)listener).sendUpdate((NodeSimulatableEvent)e);

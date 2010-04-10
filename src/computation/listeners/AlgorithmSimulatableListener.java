@@ -1,5 +1,7 @@
 package computation.listeners;
 
+import simulation.event.IDiscreteScheduledEvent;
+import simulation.simulatable.AbstractSimulatable;
 import simulation.simulatable.listeners.ISimulatableEvent;
 import simulation.simulatable.listeners.ISimulatableListener;
 
@@ -9,10 +11,16 @@ import simulation.simulatable.listeners.ISimulatableListener;
  *
  */
 public class AlgorithmSimulatableListener 
+		extends AbstractSimulatable
 		implements ISimulatableListener {
 
-
+	
 	public AlgorithmSimulatableListener() {
+		
+	}
+	
+	/**	 */
+	protected void init() {
 		
 	}
 	
@@ -37,4 +45,22 @@ public class AlgorithmSimulatableListener
 	 */
 	@Override
 	public void tickReceivedUpdate(ISimulatableEvent e) {}
+
+	@Override
+	public void handleEvent(IDiscreteScheduledEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void update(ISimulatableEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void notifyListeners() {
+		// TODO Auto-generated method stub
+		
+	}
 }

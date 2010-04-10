@@ -101,6 +101,4 @@ public class NodeReporter
 	public void tickReceivedUpdate(ISimulatableEvent e) {
 		
 	}
-
-	
 }

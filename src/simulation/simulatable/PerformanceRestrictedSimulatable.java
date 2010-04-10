@@ -253,7 +253,6 @@ public class PerformanceRestrictedSimulatable
 			case PARTIALLY_AWAKE:
 				// handle cost and state
 				spendOperation();						// spend operation first
-				System.out.println(getRemainingOperations());
 				setState( ( canPerformOperation() ) 	// determine next state
 					? State.PARTIALLY_AWAKE
 					: State.BLOCKED );
