@@ -1,7 +1,13 @@
 package computation.algorithms.listeners;
 
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.OutputStream;
+
+import network.entities.INode;
+
+import computation.algorithms.IAlgorithm;
 
 import simulation.event.IDiscreteScheduledEvent;
 import simulation.simulatable.AbstractSimulatable;
@@ -18,9 +24,30 @@ public class AlgorithmListener
 		extends ReportingAbstractSimulatableListener
 		implements IAlgorithmListener, ISimulatableListener {
 
+/// Control values
+	
 	/** determine whether to output the header, or if it has already been 
 	 * output. */
 	protected boolean _outputHeader;
+
+
+/// Construction
+	
+	/**
+	 * Constructor.
+	 * @param configDirectory containing the configuration file for the network.
+	 * @param algorithm to which we are being installed.
+	 * @throws FileNotFoundException if the constructed file-path to which we 
+	 * are storing our logging information does not exist.
+	 */
+	public AlgorithmListener(String configDirectory, IAlgorithm algorithm) 
+			throws FileNotFoundException {
+		super( String.format(
+			"%s%s%s.log",
+			configDirectory,
+			File.separator,
+			((INode)algorithm.getComputer()).getAddress()) );
+	}
 	
 	/**
 	 * Default constructor.

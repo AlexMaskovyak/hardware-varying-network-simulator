@@ -372,7 +372,6 @@ public class NetworkSimulator
 	 * @return list of all ISimulatables connected (all nodes, all mediums).
 	 */
 	public List<ISimulatable> connectRandomly( int seed, INode... nodes ) {
-		System.out.println("connectrandomly");
 		Random r = new Random(seed);
 		List<ISimulatable> result = 
 			new ArrayList<ISimulatable>( (2 * nodes.length) - 1);

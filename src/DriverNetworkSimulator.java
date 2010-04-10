@@ -31,9 +31,9 @@ public class DriverNetworkSimulator {
 	 * @param args
 	 */
 	public static void main(String... args) throws Exception {
-		//if( args.length != 0 ) {
-		//	System.err.println( "java -jar program.jar <path to config file>" );
-		//}
+		if( args.length != 0 ) {
+			System.err.println( "java -jar program.jar <path to config file>" );
+		}
 		
 		System.out.println("starting");
 		
@@ -42,7 +42,7 @@ public class DriverNetworkSimulator {
 		//IHardwareComputer n0 = (IHardwareComputer)sim.createNode();
 		//System.out.println("\n");
 		//n0.install( new RandomDistributionAlgorithm( n0 ) );
-		List<ISimulatable> simulatables = sim.createRandomlyConnectedNodes( 200, 15 ); //sim.createSeriesOfConnectedNodes(8);
+		List<ISimulatable> simulatables = sim.createRandomlyConnectedNodes( 200, 100 ); //sim.createSeriesOfConnectedNodes(8);
 		System.out.println(simulatables.size());
 		INode n0 = null;
 		for( ISimulatable simulatable : simulatables ) {

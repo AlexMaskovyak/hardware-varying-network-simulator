@@ -78,4 +78,9 @@ public abstract class AbstractAlgorithm
 	public void read() {
 		System.out.println("READ");
 	}
+
+
+	public IHardwareComputer getComputer() {
+		return null;
+	}
 }
