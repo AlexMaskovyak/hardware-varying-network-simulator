@@ -124,7 +124,7 @@ public class Node
 				getSimulator().getTime(),
 				getSimulator(),
 				new ConnectionAdaptorManagerOutMessage(data, address)));
-		_manager.receive(packet);
+		//_manager.receive(packet);
 		
 		notifyListeners(new NodeSimulatableEvent(this, -1, "Sent data.", packet));
 		_currentState = State.IDLE;

@@ -241,7 +241,6 @@ public class PerformanceRestrictedSimulatable
 			case FULLY_AWAKE:
 				// handle cost and state
 				spendOperation();						// cost us
-				System.out.println(getRemainingOperations());
 				setState( State.PARTIALLY_AWAKE );		// set next
 				
 				// handle refresh

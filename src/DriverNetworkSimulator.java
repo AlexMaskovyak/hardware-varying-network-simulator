@@ -12,6 +12,7 @@ import computation.algorithms.RandomDistributionAlgorithm;
 
 
 import reporting.NodeReporter;
+import simulation.event.IDiscreteScheduledEvent.IMessage;
 import simulation.event.DefaultDiscreteScheduledEvent;
 import simulation.event.IDiscreteScheduledEvent;
 import simulation.simulatable.ISimulatable;
@@ -57,8 +58,9 @@ public class DriverNetworkSimulator {
 		//IHardwareComputer n0 = (IHardwareComputer)sim.createNode();
 		//System.out.println("\n");
 		//n0.install( new RandomDistributionAlgorithm( n0 ) );
-		List<ISimulatable> simulatables = sim.createSeriesOfConnectedNodes(8);
+		List<ISimulatable> simulatables = sim.createRandomlyConnectedNodes( 200, 26 ); //sim.createSeriesOfConnectedNodes(8);
 		INode n0 = (INode) simulatables.get(0);
+		System.out.println(n0.getAddress());
 		
 		//System.out.println(simulatables.size());
 
@@ -70,11 +72,12 @@ public class DriverNetworkSimulator {
 		HardwareComputerNode c = (HardwareComputerNode)n0;
 		RandomDistributionAlgorithm alg = (RandomDistributionAlgorithm)c.getInstalledAlgorithm();
 		alg.setAddressRange( new Address(1), new Address(5));
+		//n0.send(new IMessage() {}, new Address(7));
 		c.start();
-		sim.pause();
+		//sim.pause();
 		
-		Thread.currentThread().sleep( 4000);
-		sim.resume();
+		//Thread.currentThread().sleep( 4000);
+		//sim.resume();
 	}
 }
 

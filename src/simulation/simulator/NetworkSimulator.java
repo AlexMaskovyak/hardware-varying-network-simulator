@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.Random;
 
 import network.communication.AddressCreator;
 import network.entities.ConnectionAdaptor;
@@ -136,7 +137,18 @@ public class NetworkSimulator
 		return connectAsMesh( createNodes( number ) ); // create > connect them
 	}
 	
+	/**
+	 * Creates a series of Nodes, installs Adaptors, and ConnectionMediums and
+	 * connects them all randomly using the seed as a base.
+	 * @param seed value to use for connection algorithm.
+	 * @param number of nodes to create and connected.
+	 * @return collection of nodes and mediums.
+	 */
+	public List<ISimulatable> createRandomlyConnectedNodes( int seed, int number ) {
+		return connectRandomly( seed, createNodes( number ) );
+	}
 
+	
 /// Anti-factories.
 	
 	/**
@@ -326,6 +338,35 @@ public class NetworkSimulator
 				try { result.add( (ISimulatable) connect( current, node ) ); }
 				catch( Exception e ) { /* cannot occur. */ }
 			}
+		}
+		return result;
+	}
+	
+	/**
+	 * Connects all nodes in a random fashion.  All nodes will be reachable.  
+	 * Repeated calls of this method with the same seed will produce the same
+	 * resultant tree.
+	 * @param nodes to connected.
+	 * @return list of all ISimulatables connected (all nodes, all mediums).
+	 */
+	public List<ISimulatable> connectRandomly( int seed, INode... nodes ) {
+		Random r = new Random(seed);
+		List<ISimulatable> result = 
+			new ArrayList<ISimulatable>( (2 * nodes.length) - 1);
+		List<INode> connected = new ArrayList<INode>(nodes.length);
+		connected.add( nodes[ 0 ] );
+		result.add( (ISimulatable)nodes[ 0 ] );
+		// take node from list
+		// roll number from 0 - size of connected list
+		// connect node to that node on the connected list
+		// repeat
+		for( int i = 1; i < nodes.length; ++i ) {
+			INode curr = nodes[ i ];
+			INode other = connected.get( r.nextInt( connected.size() ) );
+			connected.add( curr );
+			result.add( (ISimulatable)curr );
+			try { result.add( (ISimulatable)connect( curr, other ) ); }
+			catch( Exception e ) { /* cannot occur. */}
 		}
 		return result;
 	}
