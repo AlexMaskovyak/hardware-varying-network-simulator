@@ -1,4 +1,4 @@
-package network;
+package simulation;
 
 import java.io.InvalidObjectException;
 import java.util.ArrayList;
@@ -8,12 +8,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+import network.AddressCreator;
+import network.ConnectionAdaptor;
+import network.ConnectionMedium;
+import network.IConnectionAdaptor;
+import network.IConnectionMedium;
+import network.INode;
+import network.Node;
+
 import reporting.NodeReporter;
 import routing.CentralRouter;
-import simulation.DiscreteScheduledEventSimulator;
-import simulation.IDiscreteScheduledEventSimulator;
-import simulation.ISimulatable;
-import simulation.ISimulator;
 
 
 /**

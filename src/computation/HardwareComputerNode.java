@@ -117,6 +117,7 @@ public class HardwareComputerNode
 	@Override
 	public void setHarddrive(Harddrive harddrive) {
 		_harddrive = harddrive;
+		_harddrive.setSimulator( getSimulator() );
 	}
 
 	/*
@@ -172,5 +173,5 @@ public class HardwareComputerNode
 	public void handleTickEvent(ISimulatorEvent o) {
 		// flow should be: node gets info in buffer > mainmemory > cpu > harddrive		
 		super.handleTickEvent(o);
-	}	
+	}
 }

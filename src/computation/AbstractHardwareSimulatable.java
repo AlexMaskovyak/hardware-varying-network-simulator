@@ -79,5 +79,12 @@ public abstract class AbstractHardwareSimulatable
 
 	public abstract void send( IData data );
 
+	public double getTransitTime() {
+		return 0;
+	}
+
+	public void setTransitTime(double transitTime) {
+	}
+
 
 }

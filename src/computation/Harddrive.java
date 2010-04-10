@@ -16,6 +16,7 @@ import simulation.DefaultDiscreteScheduledEvent;
 import simulation.DiscreteScheduledEventSimulator;
 import simulation.IDiscreteScheduledEvent;
 import simulation.ISimulatable;
+import simulation.PerformanceRestrictedSimulatable;
 import simulation.IDiscreteScheduledEvent.IMessage;
 
 /**
@@ -26,7 +27,7 @@ import simulation.IDiscreteScheduledEvent.IMessage;
  * @param <T>
  */
 public class Harddrive<T extends IData> 
-		extends AbstractSimulatable 
+		extends PerformanceRestrictedSimulatable 
 		implements IHardware, ISimulatable, Iterable<T> {
 
 /// Fields

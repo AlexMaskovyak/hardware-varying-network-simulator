@@ -52,8 +52,27 @@ public interface ISimulatable extends EventListener {
 	public void setSimulator(ISimulator simulator);
 	
 	/**
+	 * Notifies all listeners of the current Simulatable's state.
+	 */
+	public void notifyListeners();
+	
+	/**
 	 * Notifies all listeners that an event has occurred.
 	 * @param e ISimulatableEvent to disseminate.
 	 */
-	public void notify(ISimulatableEvent e);
+	public void notifyListeners(ISimulatableEvent e);
+
+	/**
+	 * Gets the time it takes for us to send a message.  This time is equivalent
+	 * to how far in the future our messages will be scheduled from the current
+	 * time.
+	 */
+	public double getTransitTime();
+
+	/**
+	 * Sets the time it takes for us to send a message.
+	 * @param transitTime is how long it takes for our message to reach a 
+	 * destination.
+	 */
+	public void setTransitTime(double transitTime);
 }

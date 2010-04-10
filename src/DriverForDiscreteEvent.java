@@ -116,6 +116,34 @@ public class DriverForDiscreteEvent {
 		//sim.unregisterSimulatable((ISimulatable)n);
 		//sim.start();
 		//sim.simulate(5);
+		
+		
+		/*INode n0 = sim.createNode(); //  new Node(new Address(1));
+		INode n1 = sim.createNode();
+		IConnectionMedium medium = sim.createConnectionMedium();
+		sim.connect(n0, medium);
+		sim.connect(n1, medium);
+		
+		INode n2 = sim.createNode();
+		IConnectionMedium medium2 = sim.createConnectionMedium();
+		sim.connect(n1, medium2);
+		sim.connect(n2, medium2);
+		
+		INode n3 = sim.createNode();
+		IConnectionMedium medium3 = sim.createConnectionMedium();
+		sim.connect(n2, medium3);
+		sim.connect(n3, medium3);
+		
+		INode n4 = sim.createNode();
+		IConnectionMedium medium4 = sim.createConnectionMedium();
+		sim.connect(n3, medium4);
+		sim.connect(n4, medium4);
+		
+		//sim.disconnect( medium4 );
+		//sim.disconnect( n4, n3 );
+		
+		((ISimulatable)n0).addListener(new NodeSimulatableListener(System.out));
+		((ISimulatable)n1).addListener(new NodeSimulatableListener(System.out));*/
 	}
 }
 

@@ -3,12 +3,11 @@ package network;
 import java.util.HashMap;
 import java.util.Map;
 
-import simulation.AbstractSimulatable;
 import simulation.PerformanceRestrictedSimulatable;
 
 /**
- * Basic implementation of a PacketHandler.  It has a protocal mapping set and can handle packets
- * based upon that mapping.
+ * Basic implementation of a ProtocolHandler.  It has a protocol mapping set and 
+ * can handle messages based upon that mapping.
  * @author Alex Maskovyak
  *
  * @param <T>
@@ -67,6 +66,15 @@ public abstract class AbstractProtocolHandler<T>
 	 */
 	@Override
 	public abstract String getProtocol();
+	
+	/*
+	 * (non-Javadoc)
+	 * @see network.IProtocolHandler#install(network.IProtocolHandler)
+	 */
+	@Override
+	public void install(IProtocolHandler handler) {
+		install( handler, handler.getProtocol() );
+	}
 	
 	/*
 	 * (non-Javadoc)

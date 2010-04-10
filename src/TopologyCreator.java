@@ -1,4 +1,4 @@
-import network.NetworkSimulator;
+import simulation.NetworkSimulator;
 
 
 /**

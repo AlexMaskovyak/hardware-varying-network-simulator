@@ -29,7 +29,7 @@ public interface ISimulator {
 	 */
 	public void notifyListeners(ISimulatorEvent o);
 	
-
+	
 /// simulatable management
 	
 	/**
