@@ -372,24 +372,35 @@ public class NetworkSimulator
 	 * @return list of all ISimulatables connected (all nodes, all mediums).
 	 */
 	public List<ISimulatable> connectRandomly( int seed, INode... nodes ) {
+		System.out.println("connectrandomly");
 		Random r = new Random(seed);
 		List<ISimulatable> result = 
 			new ArrayList<ISimulatable>( (2 * nodes.length) - 1);
-		List<INode> connected = new ArrayList<INode>(nodes.length);
-		connected.add( nodes[ 0 ] );
-		result.add( (ISimulatable)nodes[ 0 ] );
-		// take node from list
-		// roll number from 0 - size of connected list
-		// connect node to that node on the connected list
-		// repeat
-		for( int i = 1; i < nodes.length; ++i ) {
-			INode curr = nodes[ i ];
-			INode other = connected.get( r.nextInt( connected.size() ) );
-			connected.add( curr );
-			result.add( (ISimulatable)curr );
-			try { result.add( (ISimulatable)connect( curr, other ) ); }
-			catch( Exception e ) { /* cannot occur. */}
+		List<INode> notConnected = new ArrayList<INode>( Arrays.asList( nodes ) );
+		List<INode> connected = new ArrayList<INode>();
+	
+		INode notNode = null;
+		INode conNode = null;
+		
+		// get one node from the notConnected list and add to the other
+		// get us started with the first one
+		notNode = notConnected.get( r.nextInt( notConnected.size() ));
+		notConnected.remove( notNode );
+		connected.add( notNode );
+		
+		for( int i = 0; i < nodes.length; ++i ) {
+			try {
+				if( notConnected.size() > 0 ) {
+					notNode = notConnected.get( r.nextInt( notConnected.size() ) );
+					conNode = connected.get( r.nextInt( connected.size() ) );
+					result.add( (ISimulatable)notNode );
+					result.add( (ISimulatable)connect( notNode, conNode ) );
+					notConnected.remove( notNode );
+					connected.add( notNode );
+				}
+			} catch( Exception e ) { e.printStackTrace(); }
 		}
+		
 		return result;
 	}
 	
