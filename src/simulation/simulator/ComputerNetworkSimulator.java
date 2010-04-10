@@ -18,6 +18,8 @@ public class ComputerNetworkSimulator
 		extends NetworkSimulator 
 		implements ISimulator {
 
+/// Construction
+	
 	/*
 	 * (non-Javadoc)
 	 * @see network.NetworkSimulator#init()
@@ -26,6 +28,17 @@ public class ComputerNetworkSimulator
 		super.init();
 		_baseline = new HardwareComputerNode();
 	}
+
+	/**
+	 * Sets the output path for reporters to store information.
+	 * @param outPath for reporters to store their information.
+	 */
+	public void setOutputPath( String outPath ) {
+		
+	}
+	
+	
+/// Factory methods
 	
 	/*
 	 * (non-Javadoc)

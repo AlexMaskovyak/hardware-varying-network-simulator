@@ -1,6 +1,7 @@
 package computation.algorithms;
 
 import computation.IComputer;
+import computation.IHardwareComputer;
 
 /**
  * Represents an algorithm for distributed I/O runnable on an IComputer.
@@ -19,6 +20,12 @@ public interface IAlgorithm {
 	 * @param computer
 	 */
 	public void install(IComputer computer);
+
+	/**
+	 * Get the computer on which we are loaded.
+	 * @return computer on which we are loaded.
+	 */
+	public IHardwareComputer getComputer();
 	
 	/**
 	 * Reads back information previously placed on the network.
@@ -30,4 +37,5 @@ public interface IAlgorithm {
 	 * @return protocal this algorithm is associated with.
 	 */
 	public String getProtocol();
+
 }

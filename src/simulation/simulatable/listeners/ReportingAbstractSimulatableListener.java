@@ -1,6 +1,9 @@
 package simulation.simulatable.listeners;
 
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -15,9 +18,34 @@ import simulation.simulatable.listeners.ISimulatableListener;
  */
 public abstract class ReportingAbstractSimulatableListener 
 		implements ISimulatableListener {
-
+	
+/// Protected Fields
+	
 	/** area for output. */
 	protected PrintWriter _out;
+	
+	
+/// Construction 
+	
+	/**
+	 * Constructor.
+	 * @param logPath path to the file to which to output.
+	 * @throws FileNotFoundException if the file at the path cannot be found.
+	 */
+	public ReportingAbstractSimulatableListener( String logPath ) 
+			throws FileNotFoundException {
+		this( new File( logPath ) );
+	}
+	
+	/**
+	 * 
+	 * @param logfile
+	 * @throws FileNotFoundException 
+	 */
+	public ReportingAbstractSimulatableListener( File logfile ) 
+			throws FileNotFoundException {
+		this( new FileOutputStream( logfile ) );
+	}
 	
 	/**
 	 * Default constructor.
