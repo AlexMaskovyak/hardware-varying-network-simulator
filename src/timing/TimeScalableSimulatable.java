@@ -7,7 +7,7 @@ import simulation.simulatable.PerformanceRestrictedSimulatable;
 import simulation.simulatable.listeners.ISimulatableEvent;
 import simulation.simulatable.listeners.ISimulatableListener;
 import simulation.simulatable.listeners.SimulatableEvent;
-import simulation.simulator.IDiscreteScheduledEventSimulator;
+import simulation.simulator.IDESimulator;
 import simulation.simulator.ISimulator;
 import simulation.simulator.listeners.ISimulatorEvent;
 
@@ -55,15 +55,14 @@ public class TimeScalableSimulatable extends PerformanceRestrictedSimulatable im
 		return _scaledPerformance;
 	}
 
-	@Override
-	public void handleTickEvent(ISimulatorEvent e) {
+	public void handleEvent(ISimulatorEvent e) {
 		// we've received a tick
 		updateTickReceivedCount();
 		
 		// determine if we've received enough ticks
 		if( !canPerformOperation() ) {
 			// make the simulator happy
-			super.handleTickEvent(e);
+			//super.handleEvent(e);
 			return;
 		}
 		
@@ -72,7 +71,7 @@ public class TimeScalableSimulatable extends PerformanceRestrictedSimulatable im
 		// notify everyone that we received an actionable tick
 		super.notifyListeners(new SimulatableEvent(this, e.getEventTime()));
 		// ensure the simulator is happy
-		super.handleTickEvent(e);
+		//super.handleTickEvent(e);
 	}
 
 	@Override
@@ -111,7 +110,7 @@ public class TimeScalableSimulatable extends PerformanceRestrictedSimulatable im
 	}
 
 	@Override
-	public IDiscreteScheduledEventSimulator getSimulator() {
+	public IDESimulator getSimulator() {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -199,14 +199,6 @@ public class ConnectionAdaptor
 		}
 	}
 	
-	/*
-	 * (non-Javadoc)
-	 * @see simulation.ISimulatable#handleTickEvent(simulation.ISimulatorEvent)
-	 */
-	@Override
-	public void handleTickEvent(ISimulatorEvent e) {
-		e.getSimulator().signalDone(this);
-	}
 	
 // Equals
 	

@@ -4,6 +4,7 @@ import java.util.Iterator;
 
 import computation.IData;
 import computation.IHardwareComputer;
+import computation.algorithms.listeners.AlgorithmEvent;
 
 import messages.AlgorithmDoWorkMessage;
 import messages.AlgorithmRequestMessage;
@@ -34,7 +35,7 @@ import simulation.simulator.listeners.ISimulatorEvent;
  * @author Alex Maskovyak
  *
  */
-public class RandomDistributionAlgorithm 
+public class DummyAlgorithm 
 		extends AbstractAlgorithm
 		implements IAlgorithm, ISimulatable {
 
@@ -49,16 +50,17 @@ public class RandomDistributionAlgorithm
 	protected enum Role { SERVER, CLIENT }
 	
 	/**
-	 * States in which a Server can occupy.
-	 * @author Alex Maskovyak
-	 */
-	protected enum Server_State {  IDLE, DISTRIBUTE, READ }
-	
-	/**
 	 * States in which a Client can occupy.
 	 * @author Alex Maskovyak
 	 */
-	protected enum Client_State { AWAIT }
+	protected enum Client_State {  IDLE, DISTRIBUTE, READ }
+	
+	/**
+	 * States in which a Server can occupy, in this case, they await client 
+	 * commands and act upon them.
+	 * @author Alex Maskovyak
+	 */
+	protected enum Server_State { AWAIT }
 
 	
 /// Fields
@@ -70,7 +72,7 @@ public class RandomDistributionAlgorithm
 	
 	
 	/** state of the server, if we are a server. */
-	protected Server_State _serverState;
+	protected Client_State _serverState;
 	/** role in the algorithm. */
 	protected Role _role;
 	
@@ -102,14 +104,14 @@ public class RandomDistributionAlgorithm
 /// Construction
 	
 	/** Default constructor. */
-	public RandomDistributionAlgorithm() {
+	public DummyAlgorithm() {
 		this( null );
 	}
 	
 	/** Constructor.
 	 * @param computer which we are installed  upon.
 	 */
-	public RandomDistributionAlgorithm( IHardwareComputer computer ) {
+	public DummyAlgorithm( IHardwareComputer computer ) {
 		super();
 		_computer = computer;
 		setMaxAllowedOperations( 20 );
@@ -124,8 +126,8 @@ public class RandomDistributionAlgorithm
 	@Override
 	protected void init() {
 		super.init();
-		_serverState = Server_State.IDLE;
-		_role = Role.CLIENT;
+		_serverState = Client_State.IDLE;
+		_role = Role.SERVER;
 	}
 	
 
@@ -154,7 +156,6 @@ public class RandomDistributionAlgorithm
 	 * @return next address to store information.
 	 */
 	public IAddress getNextStorageAddress() {
-		System.out.println("curr address in getnext" + _currentAddress);
 		IAddress current = _currentAddress;
 		_currentAddress = new Address(((Address)_currentAddress).getRepresentation() + 1);
 		return current;
@@ -216,8 +217,8 @@ public class RandomDistributionAlgorithm
 		_totalClientResponses = 0;
 		_totalHDResponses = 0;
 		
-		_role = Role.SERVER;						// distributors are servers	
-		_serverState = Server_State.DISTRIBUTE;		// inside distribution
+		_role = Role.CLIENT;						// distributors are servers	
+		_serverState = Client_State.DISTRIBUTE;		// inside distribution
 		sendDoWork();								// kick-start us.
 	}
 	
@@ -253,10 +254,10 @@ public class RandomDistributionAlgorithm
 	 * @see simulation.simulatable.PerformanceRestrictedSimulatable#handleEventDelegate(simulation.event.IDiscreteScheduledEvent)
 	 */
 	protected void handleEventDelegate( IDiscreteScheduledEvent e) {
-		if( _role == Role.SERVER ) {
-			serverHandle( e );
-		} else {
+		if( _role == Role.CLIENT ) {
 			clientHandle( e );
+		} else {
+			serverHandle( e );
 		}
 	}
 	
@@ -264,13 +265,14 @@ public class RandomDistributionAlgorithm
 	 * Handles operation when a client.
 	 * @param e event to handle.
 	 */
-	protected void clientHandle( IDiscreteScheduledEvent e ) {
+	protected void serverHandle( IDiscreteScheduledEvent e ) {
 		IMessage message = e.getMessage();
 		// store information into memory
 		if( message instanceof AlgorithmStoreMessage ) {
 			AlgorithmStoreMessage aMessage = (AlgorithmStoreMessage)message;
 			// store the server's address
 			_knownServerAddress = aMessage.getServer();
+			notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "SERVER", 0, 1, 1, 0, 0, 0) );
 			getSimulator().schedule(
 				new DefaultDiscreteScheduledEvent<HarddriveStoreMessage>(
 					this, 
@@ -284,6 +286,7 @@ public class RandomDistributionAlgorithm
 		// previously stored information is requested
 		else if( message instanceof AlgorithmRequestMessage ) {
 			AlgorithmRequestMessage aMessage = (AlgorithmRequestMessage)message;
+			notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "SERVER", 0, 0, 0, 0, 1, 1) );
 			getSimulator().schedule(
 				new DefaultDiscreteScheduledEvent<HarddriveRequestMessage>(
 					this, 
@@ -296,6 +299,7 @@ public class RandomDistributionAlgorithm
 		} 
 		// information requested from memory has arrived
 		else if( message instanceof AlgorithmResponseMessage ) {
+			notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "SERVER", 1, 0, 0, 1, 0, 0) );
 			AlgorithmResponseMessage aMessage = (AlgorithmResponseMessage)message;
 			getSimulator().schedule(
 				new DefaultDiscreteScheduledEvent<IMessage>(
@@ -314,7 +318,7 @@ public class RandomDistributionAlgorithm
 	 * Handles operations when a server.
 	 * @param e event to handle.
 	 */
-	protected void serverHandle( IDiscreteScheduledEvent e ) {
+	protected void clientHandle( IDiscreteScheduledEvent e ) {
 		IMessage message = e.getMessage();
 		switch( _serverState ) {
 			case DISTRIBUTE:
@@ -331,9 +335,12 @@ public class RandomDistributionAlgorithm
 					sendDataToClient( data, getNextStorageAddress() );
 					
 					_totalHDResponses++;
+					
+					notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "DISTR", 1, 0, 0, 1, 0, 0));
+					
 					// check if we've received and distributed everything
 					if( _totalHDResponses == ( _endIndex - _startIndex + 1 ) ) {
-						_serverState = Server_State.READ;	// read round
+						_serverState = Client_State.READ;	// read round
 						_currentIndex = _startIndex;
 						_currentAddress = _startAddress;
 						sendDoWork();
@@ -346,9 +353,13 @@ public class RandomDistributionAlgorithm
 						sendDoWork();
 						IAddress address = getNextRetrievalAddress();
 						sendClientRequest( _currentIndex++, address );
+						notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "READ", 0, 0, 0, 0, 1, 0));
 					} 
 				} else if( message instanceof AlgorithmResponseMessage ) {
 					_totalClientResponses++;
+					
+					notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "READ", 0, 1, 0, 0, 0, 0));
+					
 					if( _totalClientResponses == ( _endIndex - _startIndex + 1 ) ) {
 						System.out.println("hurray.");
 					}

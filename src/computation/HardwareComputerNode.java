@@ -170,14 +170,4 @@ public class HardwareComputerNode
 			getHarddrive().setSimulator( simulator );
 		}
 	}
-	
-	/*
-	 * (non-Javadoc)
-	 * @see network.Node#handleTickEvent(simulation.ISimulatorEvent)
-	 */
-	@Override
-	public void handleTickEvent(ISimulatorEvent o) {
-		// flow should be: node gets info in buffer > mainmemory > cpu > harddrive		
-		super.handleTickEvent(o);
-	}
 }

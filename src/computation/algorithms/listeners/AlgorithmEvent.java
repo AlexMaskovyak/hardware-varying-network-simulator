@@ -1,4 +1,4 @@
-package computation.listeners;
+package computation.algorithms.listeners;
 
 import simulation.simulatable.ISimulatable;
 import simulation.simulatable.listeners.ISimulatableEvent;
@@ -9,7 +9,7 @@ import simulation.simulatable.listeners.SimulatableEvent;
  * @author Alex Maskovyak
  *
  */
-public class AlgorithmSimulatableEvent 
+public class AlgorithmEvent 
 		extends SimulatableEvent 
 		implements ISimulatableEvent {
 
@@ -40,7 +40,7 @@ public class AlgorithmSimulatableEvent
 	 * @param controlSent amount.
 	 * @param controlReceived amount.
 	 */
-	public AlgorithmSimulatableEvent(
+	public AlgorithmEvent(
 			ISimulatable source, 
 			double time,
 			String epoch,

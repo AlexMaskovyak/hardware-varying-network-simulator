@@ -34,12 +34,6 @@ public interface ISimulatable extends EventListener {
 	public boolean canPerformOperation();
 	
 	/**
-	 * Signals for operations to occur.
-	 * @param e ISimulatorEvent describing the tick event that occurred.
-	 */
-	public void handleTickEvent(ISimulatorEvent e);
-	
-	/**
 	 * Signals an event which may/may not trigger a response.
 	 * @param e ISimulatableEvent which has occurred.
 	 */

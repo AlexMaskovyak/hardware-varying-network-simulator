@@ -10,8 +10,8 @@ import simulation.simulatable.AbstractSimulatable;
 import simulation.simulatable.ISimulatable;
 import simulation.simulatable.listeners.ISimulatableEvent;
 import simulation.simulatable.listeners.ISimulatableListener;
-import simulation.simulator.DiscreteScheduledEventSimulator;
-import simulation.simulator.IDiscreteScheduledEventSimulator;
+import simulation.simulator.DESimulator;
+import simulation.simulator.IDESimulator;
 import simulation.simulator.ISimulator;
 import simulation.simulator.listeners.ISimulatorEvent;
 
@@ -219,29 +219,6 @@ public class Node
 					getSimulator(),
 					data));
 		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see simulation.AbstractSimulatable#handleTickEvent(simulation.ISimulatorEvent)
-	 */
-	@Override
-	public void handleTickEvent(ISimulatorEvent o) {
-		// notify that we've gotten a tick
-		_currentState = State.GOT_TICK;
-		notifyListeners(new NodeSimulatableEvent(this, o.getEventTime(), "Got tick.", null));
-		
-		// here is where we would do something, like perhaps move some data along a connection
-		// send outbound data across links
-//		if( !_bufferOut.isEmpty() ) {/
-//			send();
-//		}
-		
-		// call Simulatable's to distribute the fact that we've handled it
-		_currentState = State.HANDLED_TICK;
-		notifyListeners(new NodeSimulatableEvent(this, o.getEventTime(), "Handled tick.", null));
-		super.handleTickEvent(o);
-		_currentState = State.IDLE;
 	}
 
 	/*

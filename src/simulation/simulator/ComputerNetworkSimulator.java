@@ -2,7 +2,8 @@ package simulation.simulator;
 
 import computation.HardwareComputerNode;
 import computation.algorithms.IAlgorithm;
-import computation.algorithms.RandomDistributionAlgorithm;
+import computation.algorithms.DummyAlgorithm;
+import computation.algorithms.listeners.AlgorithmListener;
 import computation.hardware.Cache;
 import computation.hardware.Harddrive;
 
@@ -33,7 +34,9 @@ public class ComputerNetworkSimulator
 	@Override
 	public INode createNode() {
 		HardwareComputerNode result = (HardwareComputerNode) super.createNode();
-		result.install( (IAlgorithm)new RandomDistributionAlgorithm( result ) );
+		DummyAlgorithm algorithm = new DummyAlgorithm( result );
+		algorithm.addListener( new AlgorithmListener( System.out ) );
+		result.install( (IAlgorithm)algorithm );
 		result.setHarddrive( createHarddrive() );
 		return result;
 	}

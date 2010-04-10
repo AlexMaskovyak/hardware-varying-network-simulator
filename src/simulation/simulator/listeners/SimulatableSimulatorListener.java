@@ -19,11 +19,6 @@ public class SimulatableSimulatorListener implements ISimulatorListener {
 	public SimulatableSimulatorListener(ISimulatable delegate) {
 		_delegate = delegate;
 	}
-
-	@Override
-	public void tickUpdate(ISimulatorEvent e) {
-		_delegate.handleTickEvent(e);
-	}
 	
 	/**
 	 * Obtains the ISimulator delegate.
