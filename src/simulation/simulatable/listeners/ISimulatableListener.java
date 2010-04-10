@@ -9,6 +9,12 @@ package simulation.simulatable.listeners;
 public interface ISimulatableListener {
 
 	/**
+	 * Simulatable has experienced some sort of event, state change, etc.
+	 * @param e event of which to be informed.
+	 */
+	public void update(ISimulatableEvent e);
+	
+	/**
 	 * Simulatable has received a new tick.
 	 * @param e
 	 */

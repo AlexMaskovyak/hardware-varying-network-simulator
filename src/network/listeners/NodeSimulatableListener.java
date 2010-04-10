@@ -7,63 +7,62 @@ import java.io.PrintWriter;
 
 import network.entities.INode;
 
+import simulation.simulatable.AbstractSimulatable;
 import simulation.simulatable.listeners.ISimulatableEvent;
 import simulation.simulatable.listeners.ISimulatableListener;
+import simulation.simulatable.listeners.ReportingAbstractSimulatableListener;
 
 /**
  * A nice little class to display what is happening to a node.
  * @author Alex Maskovyak
  *
  */
-public class NodeSimulatableListener implements ISimulatableListener, INodeSimulatableListener {
+public class NodeSimulatableListener 
+		extends ReportingAbstractSimulatableListener
+		implements ISimulatableListener, INodeSimulatableListener {
 
-	/** area for output. */
-	protected PrintWriter _out;
-	
 	/**
 	 * Default constructor.
 	 * @param out to which to display debug.
 	 */
 	public NodeSimulatableListener(OutputStream out) {
-		_out = 
-			new PrintWriter(
-				new BufferedWriter(
-					new OutputStreamWriter(out)));
+		super( out );
 	}
 	
 	@Override
 	public void tickReceivedUpdate(ISimulatableEvent e) {
 		if( e.getSource() instanceof INode ) {
-			_out.printf("%s received tick #%f.\n", 
+			getWriter().printf("%s received tick #%f.\n", 
 					((INode)e.getSource()).getAddress(), 
 					e.getEventTime());
-			_out.flush();
+			getWriter().flush();
 		}
 	}
 	
 	@Override
 	public void tickHandledUpdate(ISimulatableEvent e) {
 		if( e.getSource() instanceof INode ) {
-			_out.printf("%s handled tick #%f.\n", 
+			getWriter().printf("%s handled tick #%f.\n", 
 					((INode)e.getSource()).getAddress(), 
 					e.getEventTime());
-			_out.flush();
+			getWriter().flush();
 		}
 	}
 
 	@Override
 	public void receiveUpdate(NodeSimulatableEvent e) {
-		_out.printf("%s received packet: %d.\n", 
+		getWriter().printf("%s received packet: %d.\n", 
 				((INode)e.getSource()).getAddress(), 
 				e.getPacket().getSequence());
-		_out.flush();
+		getWriter().flush();
 	}
 
 	@Override
 	public void sendUpdate(NodeSimulatableEvent e) {
-		_out.printf("%s sent data: %d.\n", 
+		getWriter().printf("%s sent data: %d.\n", 
 				((INode)e.getSource()).getAddress(), 
 				e.getPacket().getSequence());
-		_out.flush();
-	}	
+		getWriter().flush();
+	}
+
 }

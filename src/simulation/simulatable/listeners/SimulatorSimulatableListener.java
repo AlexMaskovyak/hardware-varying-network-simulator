@@ -1,5 +1,7 @@
 package simulation.simulatable.listeners;
 
+import simulation.event.IDiscreteScheduledEvent;
+import simulation.simulatable.AbstractSimulatable;
 import simulation.simulator.ISimulator;
 
 /**
@@ -7,7 +9,8 @@ import simulation.simulator.ISimulator;
  * @author Alex Maskovyak
  *
  */
-public class SimulatorSimulatableListener implements ISimulatableListener {
+public class SimulatorSimulatableListener 
+		implements ISimulatableListener {
 
 	/** ISimulator which is to handle this event. */
 	protected ISimulator _delegate;
@@ -78,4 +81,11 @@ public class SimulatorSimulatableListener implements ISimulatableListener {
 	public int hashCode() {
 		return _delegate.hashCode();
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.simulatable.listeners.ISimulatableListener#update(simulation.simulatable.listeners.ISimulatableEvent)
+	 */
+	@Override
+	public void update(ISimulatableEvent e) {}
 }
