@@ -50,6 +50,7 @@ public class ConnectionMedium
 		_active = true;
 	}
 	
+	
 /// IConnectionMedium
 	
 	/*
@@ -81,6 +82,21 @@ public class ConnectionMedium
 		_adaptors.remove(adaptor);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see network.entities.IConnectionMedium#areConnected(network.entities.INode, network.entities.INode)
+	 */
+	@Override
+	public boolean areConnected(INode node1, INode node2) {
+		boolean node1Found = false;
+		boolean node2Found = false;
+		for( IConnectionAdaptor adaptor : getConnectedAdaptors() ) {
+			node1Found = node1Found || adaptor.getConnectedNode().equals( node1 );
+			node2Found = node2Found || adaptor.getConnectedNode().equals( node2 );
+		}
+		return node1Found && node2Found;
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * @see network.IConnectionMedium#getConnectedAdaptors()
@@ -194,9 +210,4 @@ public class ConnectionMedium
 		return _adaptors.equals(theirConnectionAdaptors);
 	}
 
-	@Override
-	public boolean areConnected(INode node1, INode node2) {
-		// TODO Auto-generated method stub
-		return false;
-	}
 }
