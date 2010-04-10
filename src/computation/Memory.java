@@ -71,7 +71,6 @@ public class Memory
 			IData data = mMessage.getData();
 			setIndex( index, data );
 			System.out.println("harddrive store");
-			
 		}
 	}
 

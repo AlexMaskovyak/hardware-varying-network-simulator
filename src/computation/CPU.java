@@ -4,9 +4,10 @@ import network.IData;
 import simulation.AbstractSimulatable;
 import simulation.IDiscreteScheduledEvent;
 import simulation.ISimulatable;
+import simulation.PerformanceRestrictedSimulatable;
 
 public class CPU 
-		extends AbstractSimulatable 
+		extends PerformanceRestrictedSimulatable 
 		implements IHardware, ISimulatable {
 
 	protected int _speed;

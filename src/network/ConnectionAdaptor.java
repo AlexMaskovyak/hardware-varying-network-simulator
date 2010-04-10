@@ -1,11 +1,5 @@
 package network;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
-
 import messages.ConnectionAdaptorMessage;
 import messages.ConnectionMediumMessage;
 
@@ -15,8 +9,6 @@ import routing.RoutingTable;
 import simulation.DefaultDiscreteScheduledEvent;
 import simulation.IDiscreteScheduledEvent;
 import simulation.ISimulatable;
-import simulation.ISimulatableEvent;
-import simulation.ISimulatableListener;
 import simulation.ISimulatorEvent;
 import simulation.IDiscreteScheduledEvent.IMessage;
 
@@ -204,7 +196,6 @@ public class ConnectionAdaptor
 		IMessage message = e.getMessage();
 		if( message instanceof ConnectionAdaptorMessage ) {
 			ConnectionAdaptorMessage caMessage = ((ConnectionAdaptorMessage)message);
-			System.out.printf( "%S CA handles event %s\n", getAddress(), caMessage.getPacket() );
 			handle( caMessage.getPacket() );
 		}
 	}

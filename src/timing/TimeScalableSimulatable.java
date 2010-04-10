@@ -2,8 +2,13 @@ package timing;
 
 import simulation.AbstractSimulatable;
 import simulation.IDiscreteScheduledEvent;
+import simulation.IDiscreteScheduledEventSimulator;
 import simulation.ISimulatable;
+import simulation.ISimulatableEvent;
+import simulation.ISimulatableListener;
+import simulation.ISimulator;
 import simulation.ISimulatorEvent;
+import simulation.PerformanceRestrictedSimulatable;
 import simulation.SimulatableEvent;
 
 /**
@@ -12,7 +17,7 @@ import simulation.SimulatableEvent;
  * @author Alex Maskovyak
  *
  */
-public class TimeScalableSimulatable extends AbstractSimulatable implements ITimeScalable, ISimulatable {
+public class TimeScalableSimulatable extends PerformanceRestrictedSimulatable implements ITimeScalable, ISimulatable {
 
 	/** baseline performance in operations per tick. */
 	protected int _baselinePerformance;
@@ -65,7 +70,7 @@ public class TimeScalableSimulatable extends AbstractSimulatable implements ITim
 		// reset the received count since we are acting		
 		resetTicksReceivedCount();
 		// notify everyone that we received an actionable tick
-		super.notify(new SimulatableEvent(this, e.getEventTime()));
+		super.notifyListeners(new SimulatableEvent(this, e.getEventTime()));
 		// ensure the simulator is happy
 		super.handleTickEvent(e);
 	}
@@ -95,6 +100,42 @@ public class TimeScalableSimulatable extends AbstractSimulatable implements ITim
 
 	@Override
 	public void handleEvent(IDiscreteScheduledEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void addListener(ISimulatableListener listener) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public IDiscreteScheduledEventSimulator getSimulator() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void notifyListeners() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void notifyListeners(ISimulatableEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void removeListener(ISimulatableListener listener) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setSimulator(ISimulator simulator) {
 		// TODO Auto-generated method stub
 		
 	}

@@ -94,11 +94,9 @@ public class Node
 	 */
 	@Override
 	public void receive(IPacket packet) {
-		System.out.printf("%s Node Receives from below %s\n", getAddress(), packet);
-		
 		// notify listeners that we've received data
 		_currentState = State.RECEIVED;
-		notify(new NodeSimulatableEvent(this, -1, "Got data.", packet));
+		notifyListeners(new NodeSimulatableEvent(this, -1, "Got data.", packet));
 		
 		_currentState = State.IDLE;
 	}
@@ -123,7 +121,7 @@ public class Node
 				new ConnectionAdaptorManagerOutMessage(data, address)));
 		_manager.receive(packet);
 		
-		notify(new NodeSimulatableEvent(this, -1, "Sent data.", packet));
+		notifyListeners(new NodeSimulatableEvent(this, -1, "Sent data.", packet));
 		_currentState = State.IDLE;
 	}
 
@@ -185,13 +183,10 @@ public class Node
 	public void handleEvent(IDiscreteScheduledEvent e) {
 		IMessage message = e.getMessage();
 		if( message instanceof NodeOutMessage ) {
-			//if( !doit ) { return; } 
-			//doit = false;
 			NodeOutMessage nodeMessage = ((NodeOutMessage)message);
 			IAddress destination = nodeMessage.getAddress();
 			IMessage data = nodeMessage.getMessage();
 			String protocol = nodeMessage.getProtocol();
-			System.out.println( "node handle event" );
 			getSimulator().schedule( 
 				new DefaultDiscreteScheduledEvent<ConnectionAdaptorManagerMessage>(
 					this, 
@@ -207,14 +202,10 @@ public class Node
 							-1,
 							-1 ) ) ));
 		} else if( message instanceof NodeInMessage ) {
-			System.out.println("GOT node in");
 			NodeInMessage nodeMessage = ((NodeInMessage)message);
 			String protocol = nodeMessage.getProtocol();
 			IMessage data = nodeMessage.getMessage();
 			AbstractProtocolHandler handler = getHandler( protocol );
-			if( handler == null ) {
-				System.out.println("handler is null");
-			}
 			getSimulator().schedule(
 				new DefaultDiscreteScheduledEvent(
 					this, 
@@ -233,7 +224,7 @@ public class Node
 	public void handleTickEvent(ISimulatorEvent o) {
 		// notify that we've gotten a tick
 		_currentState = State.GOT_TICK;
-		notify(new NodeSimulatableEvent(this, o.getEventTime(), "Got tick.", null));
+		notifyListeners(new NodeSimulatableEvent(this, o.getEventTime(), "Got tick.", null));
 		
 		// here is where we would do something, like perhaps move some data along a connection
 		// send outbound data across links
@@ -243,7 +234,7 @@ public class Node
 		
 		// call Simulatable's to distribute the fact that we've handled it
 		_currentState = State.HANDLED_TICK;
-		notify(new NodeSimulatableEvent(this, o.getEventTime(), "Handled tick.", null));
+		notifyListeners(new NodeSimulatableEvent(this, o.getEventTime(), "Handled tick.", null));
 		super.handleTickEvent(o);
 		_currentState = State.IDLE;
 	}
@@ -253,7 +244,7 @@ public class Node
 	 * @see simulation.AbstractSimulatable#notify(simulation.ISimulatableEvent)
 	 */
 	@Override
-	public void notify(ISimulatableEvent e) {
+	public void notifyListeners(ISimulatableEvent e) {
 		// copy the set and enumerate over that so that listeners can unregister themselves
 		// as a part of their computation
 		Set<ISimulatableListener> _listenersCopy = new HashSet<ISimulatableListener>(_listeners);
@@ -261,7 +252,7 @@ public class Node
 			switch(_currentState) {
 				case GOT_TICK: listener.tickReceivedUpdate(e); break;
 				case HANDLED_TICK: listener.tickHandledUpdate(e); break;
-				case SENT:
+				case SENT: 
 					if (listener instanceof NodeSimulatableListener) {
 						((NodeSimulatableListener)listener).sendUpdate((NodeSimulatableEvent)e);
 					}

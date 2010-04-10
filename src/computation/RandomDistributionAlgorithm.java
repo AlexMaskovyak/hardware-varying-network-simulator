@@ -249,10 +249,9 @@ public class RandomDistributionAlgorithm
 	
 	/**
 	 * This override implements functionality for client and server.
-	 * @see simulation.PerformanceRestrictedSimulatable#subclassHandle(simulation.IDiscreteScheduledEvent)
+	 * @see simulation.PerformanceRestrictedSimulatable#handleEventDelegate(simulation.IDiscreteScheduledEvent)
 	 */
-	protected void subclassHandle( IDiscreteScheduledEvent e) {
-		System.out.println( "subclass handle" );
+	protected void handleEventDelegate( IDiscreteScheduledEvent e) {
 		if( _role == Role.SERVER ) {
 			serverHandle( e );
 		} else {
@@ -323,7 +322,6 @@ public class RandomDistributionAlgorithm
 				if( message instanceof AlgorithmDoWorkMessage ) {
 					// do we have more?
 					if( haveMoreToDistribute() ) {
-						System.out.println("have more to dist");
 						sendDoWork();
 						// read index from harddrive
 						sendHarddriveRequest( _currentIndex++ );
@@ -395,7 +393,6 @@ public class RandomDistributionAlgorithm
 	 * @param index to retrieve from the harddrive.
 	 */
 	protected void sendHarddriveRequest( int index ) {
-		System.out.println("harddrive request.");
 		getSimulator().schedule(
 			new DefaultDiscreteScheduledEvent<IMessage>(
 				this, 

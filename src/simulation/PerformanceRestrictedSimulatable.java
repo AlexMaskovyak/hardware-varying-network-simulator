@@ -124,12 +124,15 @@ public class PerformanceRestrictedSimulatable
 		_refreshInterval = refreshInterval;
 	}
 	
+
+/// Protected Accessors/Mutators
+	
 	/**
 	 * Gets the number of operations remaining until the next refresh event 
 	 * occurs.
 	 * @return number of operations remaining.
 	 */
-	public int getRemainingOperations() {
+	protected int getRemainingOperations() {
 		return _remainingOperations;
 	}
 	
@@ -137,7 +140,7 @@ public class PerformanceRestrictedSimulatable
 	 * Sets the remaining number of operations remaining until the next refresh.
 	 * @param remainingOperations left during this refresh period.
 	 */
-	public void setRemainingOperations( int remainingOperations ) {
+	protected void setRemainingOperations( int remainingOperations ) {
 		_remainingOperations = remainingOperations;
 	}
 	
@@ -145,7 +148,7 @@ public class PerformanceRestrictedSimulatable
 	 * Gets the last time a refresh event was sent.
 	 * @return time the last refresh event was sent.
 	 */
-	public double getLastRefreshTime() {
+	protected double getLastRefreshTime() {
 		return _lastRefreshTime;
 	}
 	
@@ -153,26 +156,8 @@ public class PerformanceRestrictedSimulatable
 	 * Sets the last time a refresh event was sent.
 	 * @param lastRefreshTime time the last refresh event was sent.
 	 */
-	public void setLastRefreshTime( double lastRefreshTime ) {
+	protected void setLastRefreshTime( double lastRefreshTime ) {
 		_lastRefreshTime = lastRefreshTime;
-	}
-	
-	/**
-	 * Gets the time it takes for us to send a message.  This time is equivalent
-	 * to how far in the future our messages will be scheduled from the current
-	 * time.
-	 */
-	public double getTransitTime() {
-		return _transitTime;
-	}
-	
-	/**
-	 * Sets the time it takes for us to send a message.
-	 * @param transitTime is how long it takes for our message to reach a 
-	 * destination.
-	 */
-	public void setTransitTime( double transitTime ) {
-		_transitTime = transitTime;
 	}
 	
 
@@ -244,7 +229,6 @@ public class PerformanceRestrictedSimulatable
 	
 		// do this for all states.
 		if( message instanceof SimulatableRefreshMessage ) {
-			System.out.println( " got refresh. " );
 			_state = State.FULLY_AWAKE;
 			setLastRefreshTime( e.getEventTime() );
 			resetRemainingOperations();
@@ -263,7 +247,7 @@ public class PerformanceRestrictedSimulatable
 				sendRefreshMessage( e.getEventTime() );
 				
 				// handle event
-				subclassHandle( e );
+				handleEventDelegate( e );
 				break;
 			case PARTIALLY_AWAKE:
 				// handle cost and state
@@ -274,7 +258,7 @@ public class PerformanceRestrictedSimulatable
 					: State.BLOCKED );
 				
 				// handle event
-				subclassHandle( e );
+				handleEventDelegate( e );
 				break;
 			case BLOCKED:
 				// reschedule all
@@ -287,11 +271,23 @@ public class PerformanceRestrictedSimulatable
 
 	/**
 	 * Meant for subclasses of this one to override.  We won't make it abstract
-	 * for the time being to allow this class to be a bit more flexible.
+	 * for the time being to allow this class to be a bit more flexible.  This 
+	 * is a hook into the FSM that controls its own actions!  Use this to 
+	 * maintain the performance restricted functionality of this class.
 	 * @param e the event to handle.
 	 */
-	protected void subclassHandle( IDiscreteScheduledEvent e ) {
-		
+	protected void handleEventDelegate( IDiscreteScheduledEvent e ) {}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.ISimulatable#notifyListeners()
+	 */
+	public void notifyListeners() {
+		switch( getState() ) {
+			case FULLY_AWAKE: break;
+			case PARTIALLY_AWAKE: break;
+			case BLOCKED: break;
+		}
 	}
 	
 	/**
@@ -300,12 +296,11 @@ public class PerformanceRestrictedSimulatable
 	 */
 	protected void sendRefreshMessage( double currentEventTime ) {
 		if( getMaxAllowedOperations() != INFINITY ) {
-			System.out.println("schedule refresh.");
 			getSimulator().schedule(
 				new DefaultDiscreteScheduledEvent<SimulatableRefreshMessage>(
 					this, 
 					this, 
-					currentEventTime + getRefreshInterval() - .1, 
+					currentEventTime + getRefreshInterval(), 
 					getSimulator(), 
 					new SimulatableRefreshMessage(),
 					DefaultDiscreteScheduledEvent.INTERNAL));

@@ -4,9 +4,10 @@ import network.IData;
 import simulation.AbstractSimulatable;
 import simulation.IDiscreteScheduledEvent;
 import simulation.ISimulatable;
+import simulation.PerformanceRestrictedSimulatable;
 
 public class Cache 
-		extends AbstractSimulatable 
+		extends PerformanceRestrictedSimulatable 
 		implements IHardware {
 	
 	protected int _capacity;

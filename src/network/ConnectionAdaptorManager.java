@@ -130,7 +130,6 @@ public class ConnectionAdaptorManager
 	 */
 	public void receive(IPacket packet) {
 		if( getAddress().equals( packet.getDestination() ) ) {
-			System.out.printf("%s CAM pass it up %s.\n", getAddress(), packet);
 			// pass it up
 			receiveFromBelow(packet);
 		} else if ( getAddress().equals( packet.getSource() ) ) {
@@ -174,7 +173,6 @@ public class ConnectionAdaptorManager
 	public void receiveFromBelow(IPacket<IPacket> packet) {
 		AbstractProtocolHandler handler = super.getHandler( packet.getProtocol() );
 		if( handler instanceof Node ) {
-			System.out.println("CAM GIVE TO NOD!");
 			getSimulator().schedule(
 				new DefaultDiscreteScheduledEvent<NodeInMessage>(
 					(ISimulatable)this, 
@@ -184,14 +182,15 @@ public class ConnectionAdaptorManager
 					new NodeInMessage(
 						(IMessage)packet.getContent(), packet.getProtocol())));
 		}
-		//(handler)
-		//handler.handle( packet );
-		//super.getHandler(packet.getProtocol()).handle(packet);
 	}
 
+	
 /// ISimulatable
 	
-	
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.PerformanceRestrictedSimulatable#handleEvent(simulation.IDiscreteScheduledEvent)
+	 */
 	@Override
 	public void handleEvent(IDiscreteScheduledEvent e) {
 		IMessage message = e.getMessage();
@@ -224,7 +223,7 @@ public class ConnectionAdaptorManager
 
 	
 /// Testing
-	
+
 	/**
 	 * Driver/tester.
 	 * @param args N/A

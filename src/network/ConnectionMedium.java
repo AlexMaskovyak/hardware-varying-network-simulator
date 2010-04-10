@@ -13,6 +13,7 @@ import simulation.ISimulatableListener;
 import simulation.ISimulatorEvent;
 import simulation.AbstractSimulatable;
 import simulation.IDiscreteScheduledEvent.IMessage;
+import simulation.PerformanceRestrictedSimulatable;
 
 /**
  * Bidirectional, multicast connection.
@@ -20,7 +21,7 @@ import simulation.IDiscreteScheduledEvent.IMessage;
  *
  */
 public class ConnectionMedium 
-		extends AbstractSimulatable 
+		extends PerformanceRestrictedSimulatable 
 		implements IConnectionMedium, ISimulatable {
 	
 /// Fields
@@ -130,7 +131,6 @@ public class ConnectionMedium
 		if( message instanceof ConnectionMediumMessage ) {
 			ConnectionMediumMessage cmMessage = (ConnectionMediumMessage)message;
 			IPacket packet = cmMessage.getPacket();
-			System.out.printf( "Medium is handling event with %s\n", packet );
 			receive(packet);
 		}
 	}
@@ -152,12 +152,11 @@ public class ConnectionMedium
 	public void send(IConnectionAdaptor sender, IPacket packet) {
 		for( IConnectionAdaptor ca : _adaptors ) {
 			if( !ca.getAddress().equals( packet.getSource() ) ) {
-				System.out.printf("CM sends to %s, %s\n", ca.getAddress(), packet);
 				getSimulator().schedule(
 					new DefaultDiscreteScheduledEvent<IMessage>(
 						(ISimulatable)this, 
 						(ISimulatable)ca, 
-						getSimulator().getTime() + .1, 
+						getSimulator().getTime() + getTransitTime(), 
 						getSimulator(), 
 						new ConnectionAdaptorMessage( packet )));
 			}

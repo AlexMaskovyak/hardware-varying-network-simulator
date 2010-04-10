@@ -11,12 +11,12 @@ public class DefaultDiscreteScheduledEvent<T extends IDiscreteScheduledEvent.IMe
 /// Constants
 	
 	/** normal priority */
-	public static final int EXTERNAL = 0;
+	public static final int EXTERNAL = 1;
 	/** high priority, for those things which absolutely must be done first, 
 	 *  like a wake-up message, or any message a simulatable sends itself, those
 	 *  absolutely should occur first but should arrive at the same 'time' as 
-	 *  other events. */
-	public static final int INTERNAL = 1;
+	 *  other events, note that these follow DEFCON logic. */
+	public static final int INTERNAL = 0;
 	
 /// Fields
 	

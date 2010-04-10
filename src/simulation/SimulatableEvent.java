@@ -22,14 +22,21 @@ public class SimulatableEvent implements ISimulatableEvent {
 		_time = time;
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.ISimulatableEvent#getSource()
+	 */
 	@Override
 	public ISimulatable getSource() {
 		return _source;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.ISimulatableEvent#getEventTime()
+	 */
 	@Override
 	public double getEventTime() {
 		return _time;
 	}
-
 }

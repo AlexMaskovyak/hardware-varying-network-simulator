@@ -19,6 +19,8 @@ public abstract class AbstractSimulatable
 	protected Set<ISimulatableListener> _listeners;	
 	/** simulator to which we are registered. */
 	protected IDiscreteScheduledEventSimulator _simulator;
+	/** time it takes to send a message (how far into the future to schedule it) */
+	protected double _transitTime;
 	
 // Construction
 	
@@ -51,13 +53,13 @@ public abstract class AbstractSimulatable
 	public void removeListener(ISimulatableListener listener) {
 		_listeners.remove(listener);
 	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 * @see simulation.ISimulatable#notify(simulation.ISimulatableEvent)
 	 */
 	@Override
-	public void notify(ISimulatableEvent e) {
+	public void notifyListeners(ISimulatableEvent e) {
 		// copy the set and enumerate over that so that listeners can unregister 
 		// themselves as a part of their computation
 		Set<ISimulatableListener> _listenersCopy = new HashSet<ISimulatableListener>(_listeners);
@@ -106,5 +108,23 @@ public abstract class AbstractSimulatable
 	@Override
 	public boolean canPerformOperation() {
 		return true;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.ISimulatable#getTransitTime()
+	 */
+	@Override
+	public double getTransitTime() {
+		return _transitTime;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.ISimulatable#setTransitTime(double)
+	 */
+	@Override
+	public void setTransitTime( double transitTime ) {
+		_transitTime = transitTime;
 	}
 }
