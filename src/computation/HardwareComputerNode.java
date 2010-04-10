@@ -1,10 +1,16 @@
 package computation;
 
-import network.INode;
-import routing.IAddress;
-import simulation.ISimulatable;
-import simulation.ISimulator;
-import simulation.ISimulatorEvent;
+import computation.algorithms.IAlgorithm;
+import computation.hardware.CPU;
+import computation.hardware.Cache;
+import computation.hardware.Harddrive;
+import computation.hardware.Memory;
+
+import network.entities.INode;
+import network.routing.IAddress;
+import simulation.simulatable.ISimulatable;
+import simulation.simulator.ISimulator;
+import simulation.simulator.listeners.ISimulatorEvent;
 
 /**
  * Hardware computer node has has actual hardware components.

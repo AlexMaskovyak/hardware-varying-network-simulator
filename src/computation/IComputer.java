@@ -2,6 +2,8 @@ package computation;
 
 import javax.management.OperationsException;
 
+import computation.algorithms.IAlgorithm;
+
 /**
  * An object capable of running a distributed algorithm.
  * 

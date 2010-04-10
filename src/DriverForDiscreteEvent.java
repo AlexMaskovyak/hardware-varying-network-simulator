@@ -1,32 +1,32 @@
+import computation.Data;
 import computation.HardwareComputerNode;
-import computation.IAlgorithm;
-import computation.RandomDistributionAlgorithm;
+import computation.IData;
+import computation.algorithms.IAlgorithm;
+import computation.algorithms.RandomDistributionAlgorithm;
 
 import reporting.NodeReporter;
-import simulation.DefaultDiscreteScheduledEvent;
-import simulation.DiscreteScheduledEventSimulator;
-import simulation.IDiscreteScheduledEvent;
-import simulation.IDiscreteScheduledEventSimulator;
-import simulation.ISimulatable;
-import simulation.ISimulatableEvent;
-import simulation.ISimulatableListener;
-import simulation.ISimulator;
-import simulation.PerformanceRestrictedSimulatable;
-import simulation.Simulator;
-import simulation.IDiscreteScheduledEvent.IMessage;
+import simulation.event.DefaultDiscreteScheduledEvent;
+import simulation.event.IDiscreteScheduledEvent;
+import simulation.event.IDiscreteScheduledEvent.IMessage;
+import simulation.simulatable.ISimulatable;
+import simulation.simulatable.PerformanceRestrictedSimulatable;
+import simulation.simulatable.listeners.ISimulatableEvent;
+import simulation.simulatable.listeners.ISimulatableListener;
+import simulation.simulator.DiscreteScheduledEventSimulator;
+import simulation.simulator.IDiscreteScheduledEventSimulator;
+import simulation.simulator.ISimulator;
+import simulation.simulator.Simulator;
 import messages.AlgorithmDoWorkMessage;
-import network.Address;
-import network.ConnectionAdaptor;
-import network.ConnectionMedium;
-import network.Data;
-import network.IConnectionAdaptor;
-import network.IConnectionMedium;
-import network.IData;
-import network.INode;
-import network.IPacket;
-import network.Node;
-import network.NodeSimulatableListener;
-import network.Packet;
+import network.communication.Address;
+import network.communication.IPacket;
+import network.communication.Packet;
+import network.entities.ConnectionAdaptor;
+import network.entities.ConnectionMedium;
+import network.entities.IConnectionAdaptor;
+import network.entities.IConnectionMedium;
+import network.entities.INode;
+import network.entities.Node;
+import network.listeners.NodeSimulatableListener;
 
 /**
  * Creates a simulator from a configuration file and runs a simulation.

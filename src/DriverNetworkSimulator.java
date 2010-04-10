@@ -1,35 +1,37 @@
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import computation.Data;
 import computation.HardwareComputerNode;
 import computation.IComputer;
+import computation.IData;
 import computation.IHardwareComputer;
-import computation.RandomDistributionAlgorithm;
+import computation.algorithms.RandomDistributionAlgorithm;
+
 
 import reporting.NodeReporter;
-import routing.IAddress;
-import simulation.ComputerNetworkSimulator;
-import simulation.DefaultDiscreteScheduledEvent;
-import simulation.IDiscreteScheduledEvent;
-import simulation.ISimulatable;
-import simulation.ISimulatableEvent;
-import simulation.ISimulatableListener;
-import simulation.ISimulator;
-import simulation.NetworkSimulator;
-import simulation.Simulator;
+import simulation.event.DefaultDiscreteScheduledEvent;
+import simulation.event.IDiscreteScheduledEvent;
+import simulation.simulatable.ISimulatable;
+import simulation.simulatable.listeners.ISimulatableEvent;
+import simulation.simulatable.listeners.ISimulatableListener;
+import simulation.simulator.ComputerNetworkSimulator;
+import simulation.simulator.ISimulator;
+import simulation.simulator.NetworkSimulator;
+import simulation.simulator.Simulator;
 import messages.AlgorithmResponseMessage;
 import messages.NodeOutMessage;
-import network.Address;
-import network.ConnectionMedium;
-import network.Data;
-import network.IConnectionMedium;
-import network.IData;
-import network.INode;
-import network.IPacket;
-import network.Node;
-import network.NodeSimulatableListener;
-import network.Packet;
+import network.communication.Address;
+import network.communication.IPacket;
+import network.communication.Packet;
+import network.entities.ConnectionMedium;
+import network.entities.IConnectionMedium;
+import network.entities.INode;
+import network.entities.Node;
+import network.listeners.NodeSimulatableListener;
+import network.routing.IAddress;
 
 /**
  * Creates a simulator from a configuration file and runs a simulation.

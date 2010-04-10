@@ -1,7 +1,7 @@
 package messages;
 
-import network.IPacket;
-import simulation.IDiscreteScheduledEvent.IMessage;
+import network.communication.IPacket;
+import simulation.event.IDiscreteScheduledEvent.IMessage;
 
 /**
  * Messages designed for ConnectionAdaptorManager.

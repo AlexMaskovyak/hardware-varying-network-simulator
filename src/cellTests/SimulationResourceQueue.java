@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.PriorityBlockingQueue;
 
-import simulation.ISimulatable;
+import simulation.simulatable.ISimulatable;
 
 /**
  * Acts as a resource that Simulatables can take and replenish.

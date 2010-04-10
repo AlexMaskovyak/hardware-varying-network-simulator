@@ -1,5 +1,6 @@
 package reporting;
 
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -9,14 +10,16 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import simulation.ISimulatableEvent;
+import computation.IData;
 
-import network.IData;
-import network.INode;
-import network.INodeSimulatableListener;
-import network.Node;
-import network.NodeSimulatableEvent;
-import network.NodeSimulatableListener;
+
+import simulation.simulatable.listeners.ISimulatableEvent;
+
+import network.entities.INode;
+import network.entities.Node;
+import network.listeners.INodeSimulatableListener;
+import network.listeners.NodeSimulatableEvent;
+import network.listeners.NodeSimulatableListener;
 
 /**
  * Aggregates multiple events to create lines in a data file for the activity if
