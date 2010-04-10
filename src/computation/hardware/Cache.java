@@ -45,7 +45,7 @@ public class Cache
 	}
 
 	@Override
-	public void handleEvent(IDiscreteScheduledEvent e) {
+	public void handleEventDelegate(IDiscreteScheduledEvent e) {
 		// TODO Auto-generated method stub
 		
 	}

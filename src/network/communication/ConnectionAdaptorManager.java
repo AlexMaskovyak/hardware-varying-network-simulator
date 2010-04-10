@@ -180,7 +180,7 @@ public class ConnectionAdaptorManager
 				new DefaultDiscreteScheduledEvent<NodeInMessage>(
 					(ISimulatable)this, 
 					(ISimulatable)handler, 
-					getSimulator().getTime() + .00001, 
+					getSimulator().getTime() + getTransitTime(), 
 					getSimulator(), 
 					new NodeInMessage(
 						(IMessage)packet.getContent(), packet.getProtocol())));
@@ -199,7 +199,6 @@ public class ConnectionAdaptorManager
 		IMessage message = e.getMessage();
 		if( message instanceof ConnectionAdaptorManagerMessage ) {
 			IPacket packet = ((ConnectionAdaptorManagerMessage)message).getPacket();
-			System.out.printf("%s CAM handle %s\n", getAddress(), packet );
 			handle(((ConnectionAdaptorManagerMessage)message).getPacket());
 		} 
 	}

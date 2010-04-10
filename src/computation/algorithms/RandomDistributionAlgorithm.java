@@ -112,7 +112,7 @@ public class RandomDistributionAlgorithm
 	public RandomDistributionAlgorithm( IHardwareComputer computer ) {
 		super();
 		_computer = computer;
-		setMaxAllowedOperations( 3 );
+		setMaxAllowedOperations( 20 );
 		setRefreshInterval( 1 );
 		reset();
 	}

@@ -59,6 +59,8 @@ public class Harddrive<T extends IData>
 		_data.put(3, new Data( 3, new byte[] { 0, 1, 1 } ) );
 		_data.put(4, new Data( 4, new byte[] { 1, 0, 0 } ) );
 		_data.put(5, new Data( 5, new byte[] { 1, 0, 1 } ) );
+		super.setTransitTime( 5 );
+		super.setMaxAllowedOperations( 3 );
 	}
 	
 	
@@ -143,10 +145,10 @@ public class Harddrive<T extends IData>
 	
 	/*
 	 * (non-Javadoc)
-	 * @see simulation.AbstractSimulatable#handleEvent(simulation.IDiscreteScheduledEvent)
+	 * @see simulation.simulatable.PerformanceRestrictedSimulatable#handleEventDelegate(simulation.event.IDiscreteScheduledEvent)
 	 */
 	@Override
-	public void handleEvent(IDiscreteScheduledEvent e) {
+	protected void handleEventDelegate( IDiscreteScheduledEvent e ) {
 		IMessage message = e.getMessage();
 		if( message instanceof HarddriveRequestMessage ) {
 			HarddriveRequestMessage hdMessage = (HarddriveRequestMessage)message;
@@ -156,7 +158,7 @@ public class Harddrive<T extends IData>
 				new DefaultDiscreteScheduledEvent<IMessage>(
 					this, 
 					e.getSource(), 
-					getSimulator().getTime() + .0001, 
+					getSimulator().getTime() + getTransitTime(), 
 					getSimulator(), 
 					new AlgorithmResponseMessage(getIndex(index))));
 		} else if( message instanceof HarddriveStoreMessage ) {

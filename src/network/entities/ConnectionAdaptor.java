@@ -39,12 +39,6 @@ public class ConnectionAdaptor
 	protected IConnectionMedium _medium;
 	/** the protocal we should be installed to another handler as... */
 	protected static String DEFAULT_PROTOCAL = "DEFAULT";
-
-	/** operation limit */
-	protected int _operationLimit;
-	/** current operation count. */
-	protected int _operationCount;
-
 	
 // Construction. 
 	
@@ -57,7 +51,6 @@ public class ConnectionAdaptor
 	 */
 	public ConnectionAdaptor() {
 		super();
-		_operationCount = 0;
 	}
 
 	/**
@@ -70,6 +63,9 @@ public class ConnectionAdaptor
 		_node = null;
 		_medium = null;
 		_table = new RoutingTable();
+		setTransitTime( 1 );
+		setMaxAllowedOperations( 5 );
+		setRefreshInterval( 5 );
 	}
 	
 	
@@ -147,7 +143,7 @@ public class ConnectionAdaptor
 				new DefaultDiscreteScheduledEvent<ConnectionMediumMessage>(
 					(ISimulatable)this, 
 					(ISimulatable)_medium, 
-					getSimulator().getTime() + .00001, 
+					getSimulator().getTime() + getTransitTime(), 
 					getSimulator(), 
 					new ConnectionMediumMessage( packet ) ) );
 		}
@@ -188,15 +184,14 @@ public class ConnectionAdaptor
 	 */
 	@Override
 	public String getProtocol() {
-		return ConnectionAdaptor.DEFAULT_PROTOCAL;
+		return ConnectionAdaptor.DEFAULT_PROTOCAL; 
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * @see simulation.ISimulatable#handleEvent(simulation.IDiscreteScheduledEvent)
+	 * 
 	 */
 	@Override
-	public void handleEvent(IDiscreteScheduledEvent e) {
+	public void handleEventDelegate(IDiscreteScheduledEvent e) {
 		IMessage message = e.getMessage();
 		if( message instanceof ConnectionAdaptorMessage ) {
 			ConnectionAdaptorMessage caMessage = ((ConnectionAdaptorMessage)message);
@@ -210,20 +205,8 @@ public class ConnectionAdaptor
 	 */
 	@Override
 	public void handleTickEvent(ISimulatorEvent e) {
-		_operationCount = 0;
 		e.getSimulator().signalDone(this);
 	}
-	
-	/*
-	 * By default we can perform operations.
-	 * (non-Javadoc)
-	 * @see simulation.ISimulatable#canPerformOperation()
-	 */
-	@Override
-	public boolean canPerformOperation() {
-		return _operationCount > 0;
-	}
-
 	
 // Equals
 	
