@@ -24,12 +24,6 @@ public interface ISimulatorListener extends EventListener {
 	public void simulatableUnregisteredUpdate(ISimulatorEvent e);
 	
 	/**
-	 * Time increment event.
-	 * @param e ISimulatorEvent containing information about this event.
-	 */
-	public void tickUpdate(ISimulatorEvent e);
-	
-	/**
 	 * Simulator completing a single step of simulation (tick event and all simulatables completing operation.
 	 * @param e ISimulatorEvent containing information about this event.
 	 */

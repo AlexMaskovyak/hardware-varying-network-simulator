@@ -28,8 +28,8 @@ import simulation.simulatable.ISimulatable;
  *
  */
 public class NetworkSimulator 
-		extends DiscreteScheduledEventSimulator 
-		implements ISimulator, IDiscreteScheduledEventSimulator {
+		extends DESimulator 
+		implements ISimulator, IDESimulator {
 
 /// Fields
 	
@@ -139,15 +139,37 @@ public class NetworkSimulator
 	
 	/**
 	 * Creates a series of Nodes, installs Adaptors, and ConnectionMediums and
-	 * connects them all randomly using the seed as a base.
+	 * connects them all randomly using the seed as a base.  Connectedness is 
+	 * one.  Nodes are guaranteed to only connect to one node other than
+	 * themselves.
 	 * @param seed value to use for connection algorithm.
 	 * @param number of nodes to create and connected.
 	 * @return collection of nodes and mediums.
 	 */
-	public List<ISimulatable> createRandomlyConnectedNodes( int seed, int number ) {
+	public List<ISimulatable> createRandomlyConnectedNodes( 
+			int seed, 
+			int number ) {
+		return createRandomlyConnectedNodes( seed, number, 1 );
+	}
+	
+	/**
+	 * Creates a series of Nodes, installs Adaptors, and ConnectionMediums and
+	 * connects them all randomly using the seed as a base.  Connectedness 
+	 * defines the average number of connections a node is to have with other 
+	 * nodes.  Nodes are guaranteed not to connect to themselves.
+	 * @param seed value to use for connection algorithm.
+	 * @param number of nodes to create and connected.
+	 * @param connectedness of the nodes (how many connections should be created? )
+	 * @return collection of nodes and mediums.
+	 */
+	public List<ISimulatable> createRandomlyConnectedNodes( 
+			int seed, 
+			int number, 
+			int connectedness ) {
 		return connectRandomly( seed, createNodes( number ) );
 	}
-
+	
+	
 	
 /// Anti-factories.
 	

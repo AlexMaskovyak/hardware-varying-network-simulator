@@ -6,7 +6,7 @@ import java.util.Set;
 import simulation.event.IDiscreteScheduledEvent;
 import simulation.simulatable.listeners.ISimulatableEvent;
 import simulation.simulatable.listeners.ISimulatableListener;
-import simulation.simulator.IDiscreteScheduledEventSimulator;
+import simulation.simulator.IDESimulator;
 import simulation.simulator.ISimulator;
 import simulation.simulator.listeners.ISimulatorEvent;
 
@@ -20,16 +20,16 @@ import simulation.simulator.listeners.ISimulatorEvent;
 public abstract class AbstractSimulatable 
 		implements ISimulatable {
 	
-// Fields
+/// Fields
 	
 	/** listeners to be informed of events. */
 	protected Set<ISimulatableListener> _listeners;	
 	/** simulator to which we are registered. */
-	protected IDiscreteScheduledEventSimulator _simulator;
+	protected IDESimulator _simulator;
 	/** time it takes to send a message (how far into the future to schedule it) */
 	protected double _transitTime;
 	
-// Construction
+/// Construction
 	
 	/** Default constructor. */
 	public AbstractSimulatable() {
@@ -41,7 +41,45 @@ public abstract class AbstractSimulatable
 		_listeners = new HashSet<ISimulatableListener>();
 	}
 
-// Listener handling
+	
+/// Field accessor/mutator
+	
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.ISimulatable#setSimulator(simulation.ISimulator)
+	 */
+	public void setSimulator(ISimulator simulator) {
+		_simulator = (IDESimulator) simulator;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.ISimulatable#getSimulator()
+	 */
+	public IDESimulator getSimulator() {
+		return _simulator;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.ISimulatable#getTransitTime()
+	 */
+	@Override
+	public double getTransitTime() {
+		return _transitTime;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.ISimulatable#setTransitTime(double)
+	 */
+	@Override
+	public void setTransitTime( double transitTime ) {
+		_transitTime = transitTime;
+	}
+
+	
+/// Listener handling
 	
 	/*
 	 * (non-Javadoc)
@@ -71,41 +109,15 @@ public abstract class AbstractSimulatable
 		// themselves as a part of their computation
 		Set<ISimulatableListener> _listenersCopy = new HashSet<ISimulatableListener>(_listeners);
 		for( ISimulatableListener listener : _listenersCopy ) {
-			listener.tickHandledUpdate(e);
+			listener.update(e);
 		}
 	}
 
-// Field accessor/mutator
-	
-	/*
-	 * (non-Javadoc)
-	 * @see simulation.ISimulatable#setSimulator(simulation.ISimulator)
-	 */
-	public void setSimulator(ISimulator simulator) {
-		_simulator = (IDiscreteScheduledEventSimulator) simulator;
-	}
-	
-	/*
-	 * (non-Javadoc)
-	 * @see simulation.ISimulatable#getSimulator()
-	 */
-	public IDiscreteScheduledEventSimulator getSimulator() {
-		return _simulator;
-	}
 	
 // Event handling
 	
 	@Override
 	public abstract void handleEvent(IDiscreteScheduledEvent e);
-	
-	/*
-	 * (non-Javadoc)
-	 * @see simulation.ISimulatable#handleTickEvent(simulation.ISimulatorEvent)
-	 */
-	@Override
-	public void handleTickEvent(ISimulatorEvent e) {
-		e.getSimulator().signalDone(this);
-	}
 	
 	/*
 	 * By default we can perform operations.
@@ -115,23 +127,5 @@ public abstract class AbstractSimulatable
 	@Override
 	public boolean canPerformOperation() {
 		return true;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see simulation.ISimulatable#getTransitTime()
-	 */
-	@Override
-	public double getTransitTime() {
-		return _transitTime;
-	}
-	
-	/*
-	 * (non-Javadoc)
-	 * @see simulation.ISimulatable#setTransitTime(double)
-	 */
-	@Override
-	public void setTransitTime( double transitTime ) {
-		_transitTime = transitTime;
 	}
 }

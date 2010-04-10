@@ -18,7 +18,7 @@ import simulation.event.IDiscreteScheduledEvent.IMessage;
 import simulation.simulatable.AbstractSimulatable;
 import simulation.simulatable.ISimulatable;
 import simulation.simulatable.PerformanceRestrictedSimulatable;
-import simulation.simulator.DiscreteScheduledEventSimulator;
+import simulation.simulator.DESimulator;
 
 /**
  * Large storage device.  Typically it come pre-installed with some amount of 
@@ -154,7 +154,6 @@ public class Harddrive<T extends IData>
 		if( message instanceof HarddriveRequestMessage ) {
 			HarddriveRequestMessage hdMessage = (HarddriveRequestMessage)message;
 			int index = hdMessage.getSequence();
-			System.out.println("harddrive request");
 			getSimulator().schedule(
 				new DefaultDiscreteScheduledEvent<IMessage>(
 					this, 
@@ -166,9 +165,7 @@ public class Harddrive<T extends IData>
 			HarddriveStoreMessage hdMessage = (HarddriveStoreMessage)message;
 			int index = hdMessage.getIndex();
 			IData data = hdMessage.getData();
-			setIndex( index, data );
-			System.out.println("harddrive store");
-			
+			setIndex( index, data );			
 		}
 	}
 

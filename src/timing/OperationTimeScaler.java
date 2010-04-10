@@ -28,8 +28,8 @@ import simulation.simulatable.AbstractSimulatable;
 import simulation.simulatable.ISimulatable;
 import simulation.simulatable.listeners.ISimulatableEvent;
 import simulation.simulatable.listeners.ISimulatableListener;
+import simulation.simulator.DESimulator;
 import simulation.simulator.ISimulator;
-import simulation.simulator.Simulator;
 import simulation.simulator.listeners.ISimulatorEvent;
 
 /**
@@ -155,7 +155,7 @@ public class OperationTimeScaler implements IOperationTimeScaler {
 		System.out.println(t6.getScaledPerformance());
 		System.out.println(t7.getScaledPerformance());
 		
-		ISimulator sim = new Simulator();
+		ISimulator sim = new DESimulator();
 		scaler = new OperationTimeScaler();
 		ISimulatable s1 = new TestTimeScalableSimulatable(1000, 1);
 		ISimulatable s2 = new TestTimeScalableSimulatable(500, 2);

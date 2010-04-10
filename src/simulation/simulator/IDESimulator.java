@@ -9,7 +9,7 @@ import simulation.event.IDiscreteScheduledEvent;
  * @author Alex Maskovyak
  *
  */
-public interface IDiscreteScheduledEventSimulator extends ISimulator {
+public interface IDESimulator extends ISimulator, Runnable {
 
 	/**
 	 * Adds a IDiscreteScheduledEvent to the priority queue.

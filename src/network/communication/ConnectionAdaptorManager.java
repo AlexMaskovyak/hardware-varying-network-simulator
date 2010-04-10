@@ -25,7 +25,7 @@ import simulation.event.IDiscreteScheduledEvent.IMessage;
 import simulation.simulatable.ISimulatable;
 import simulation.simulatable.listeners.ISimulatableEvent;
 import simulation.simulatable.listeners.ISimulatableListener;
-import simulation.simulator.DiscreteScheduledEventSimulator;
+import simulation.simulator.DESimulator;
 import simulation.simulator.listeners.ISimulatorEvent;
 
 /**

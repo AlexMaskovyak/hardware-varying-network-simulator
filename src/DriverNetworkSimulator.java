@@ -5,34 +5,18 @@ import java.util.Set;
 
 import computation.Data;
 import computation.HardwareComputerNode;
-import computation.IComputer;
 import computation.IData;
-import computation.IHardwareComputer;
-import computation.algorithms.RandomDistributionAlgorithm;
+import computation.algorithms.DummyAlgorithm;
 
-
-import reporting.NodeReporter;
-import simulation.event.IDiscreteScheduledEvent.IMessage;
 import simulation.event.DefaultDiscreteScheduledEvent;
 import simulation.event.IDiscreteScheduledEvent;
 import simulation.simulatable.ISimulatable;
-import simulation.simulatable.listeners.ISimulatableEvent;
-import simulation.simulatable.listeners.ISimulatableListener;
 import simulation.simulator.ComputerNetworkSimulator;
 import simulation.simulator.ISimulator;
 import simulation.simulator.NetworkSimulator;
-import simulation.simulator.Simulator;
-import messages.AlgorithmResponseMessage;
-import messages.NodeOutMessage;
 import network.communication.Address;
-import network.communication.IPacket;
-import network.communication.Packet;
-import network.entities.ConnectionMedium;
-import network.entities.IConnectionMedium;
 import network.entities.INode;
-import network.entities.Node;
-import network.listeners.NodeSimulatableListener;
-import network.routing.IAddress;
+
 
 /**
  * Creates a simulator from a configuration file and runs a simulation.
@@ -67,10 +51,10 @@ public class DriverNetworkSimulator {
 		
 		Thread t = new Thread((Runnable)sim);
 		t.start();
-		//t.join();
 		sim.start();
+		//sim.start();
 		HardwareComputerNode c = (HardwareComputerNode)n0;
-		RandomDistributionAlgorithm alg = (RandomDistributionAlgorithm)c.getInstalledAlgorithm();
+		DummyAlgorithm alg = (DummyAlgorithm)c.getInstalledAlgorithm();
 		alg.setAddressRange( new Address(1), new Address(5));
 		//n0.send(new IMessage() {}, new Address(7));
 		c.start();
@@ -78,44 +62,5 @@ public class DriverNetworkSimulator {
 		
 		//Thread.currentThread().sleep( 4000);
 		//sim.resume();
-	}
-}
-
-class DiscretePacketEventTest 
-		extends DefaultDiscreteScheduledEvent
-		implements IDiscreteScheduledEvent {
-
-/// Fields
-	
-	/** data to send. */
-	protected IData _data;
-	
-	/**
-	 * 
-	 * @param source
-	 * @param destination
-	 * @param eventTime
-	 * @param simulator
-	 * @param data
-	 */
-	public DiscretePacketEventTest(
-			ISimulatable source,
-			ISimulatable destination, 
-			double eventTime, 
-			ISimulator simulator,
-			IData data) {
-		super(destination, destination, eventTime, simulator, new IMessage() {});
-		_data = data;
-	}
-
-/// IDiscreteSimulatableEvent
-	
-	/*
-	 * (non-Javadoc)
-	 * @see simulation.AbstractDiscreteScheduledEvent#getMessage()
-	 */
-	@Override
-	public IMessage getMessage() {
-		return new IMessage() {};//_data;
 	}
 }

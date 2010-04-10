@@ -101,18 +101,8 @@ public class ConnectionMedium
 		send(null, packet);
 	}
 	
-/// ISimulatable
 	
-	/*
-	 * (non-Javadoc)
-	 * @see simulation.AbstractSimulatable#handleTickEvent(simulation.ISimulatorEvent)
-	 */
-	@Override
-	public void handleTickEvent(ISimulatorEvent o) {
-		//send();
-		// TODO 
-		super.handleTickEvent(o);
-	}
+/// ISimulatable
 
 	/*
 	 * (non-Javadoc)
@@ -202,5 +192,11 @@ public class ConnectionMedium
 		}
 		
 		return _adaptors.equals(theirConnectionAdaptors);
+	}
+
+	@Override
+	public boolean areConnected(INode node1, INode node2) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

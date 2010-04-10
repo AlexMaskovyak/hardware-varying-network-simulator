@@ -48,22 +48,15 @@ public interface ISimulator {
 	 * future simulations.
 	 */
 	public void unregisterSimulatable(ISimulatable simulatable);
-	
-	/**
-	 * Alerts the simulator that a simulatable has completed all operations 
-	 * possible for its time event.
-	 * @param simulatable alerting the simulator.
-	 */
-	public void signalDone(ISimulatable simulatable);
 
 	
 /// simulation operation	
 
 	/**
-	 * Simulate the specified number of steps for all simulatables.
+	 * Simulate up to the specified time and then pause operation.
 	 * @param time steps to simulate.
 	 */
-	public void simulate(int time);
+	public void simulate(double time);
 	
 	/**
 	 * Place the Simulator into the start state, necessary to begin simulation.
@@ -87,9 +80,11 @@ public interface ISimulator {
 	public void stop();
 
 	/**
-	 * Proceeds with the next simulation time event.  Updates time.
+	 * Proceeds with the simulation for the amount of time specified.  Updates 
+	 * time.
+	 * @param step amount of time to step.
 	 */
-	public void step();
+	public void step(double step);
 	
 	/**
 	 * Obtains the current simulation time.

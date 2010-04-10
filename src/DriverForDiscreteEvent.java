@@ -2,7 +2,7 @@ import computation.Data;
 import computation.HardwareComputerNode;
 import computation.IData;
 import computation.algorithms.IAlgorithm;
-import computation.algorithms.RandomDistributionAlgorithm;
+import computation.algorithms.DummyAlgorithm;
 
 import reporting.NodeReporter;
 import simulation.event.DefaultDiscreteScheduledEvent;
@@ -12,10 +12,9 @@ import simulation.simulatable.ISimulatable;
 import simulation.simulatable.PerformanceRestrictedSimulatable;
 import simulation.simulatable.listeners.ISimulatableEvent;
 import simulation.simulatable.listeners.ISimulatableListener;
-import simulation.simulator.DiscreteScheduledEventSimulator;
-import simulation.simulator.IDiscreteScheduledEventSimulator;
+import simulation.simulator.DESimulator;
+import simulation.simulator.IDESimulator;
 import simulation.simulator.ISimulator;
-import simulation.simulator.Simulator;
 import messages.AlgorithmDoWorkMessage;
 import network.communication.Address;
 import network.communication.IPacket;
@@ -46,8 +45,8 @@ public class DriverForDiscreteEvent {
 		//}
 		
 		System.out.println("done");
-		IDiscreteScheduledEventSimulator sim = new DiscreteScheduledEventSimulator();
-		PerformanceRestrictedSimulatable prs = new RandomDistributionAlgorithm();
+		IDESimulator sim = new DESimulator();
+		PerformanceRestrictedSimulatable prs = new DummyAlgorithm();
 		sim.registerSimulatable( prs );
 		sim.schedule(
 			new DefaultDiscreteScheduledEvent<IMessage>(
@@ -202,9 +201,9 @@ class DiscreteEventTest2 implements IDiscreteScheduledEvent {
 	protected INode _node;
 	protected double _time;
 	protected IData _data;
-	protected IDiscreteScheduledEventSimulator _sim;
+	protected IDESimulator _sim;
 	
-	public DiscreteEventTest2(INode node, IDiscreteScheduledEventSimulator sim, double time, IData data) {
+	public DiscreteEventTest2(INode node, IDESimulator sim, double time, IData data) {
 		_node = node;
 		_time = time;
 		_data = data;

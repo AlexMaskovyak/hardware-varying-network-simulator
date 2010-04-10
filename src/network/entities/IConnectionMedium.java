@@ -36,6 +36,14 @@ public interface IConnectionMedium {
 	public IConnectionAdaptor[] getConnectedAdaptors();
 	
 	/**
+	 * Determines whether two nodes are connected by this medium.
+	 * @param node1 endpoint one.
+	 * @param node2 endpoint two.
+	 * @return true if the two are connected by this medium, false otherwise.
+	 */
+	public boolean areConnected(INode node1, INode node2);
+	
+	/**
 	 * Receives data.
 	 * @param packet to receive.
 	 */
