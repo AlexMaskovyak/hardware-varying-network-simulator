@@ -1,5 +1,6 @@
 package timing;
 
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -8,26 +9,28 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import network.Address;
-import network.Data;
-import network.IConnectionAdaptor;
-import network.IConnectionMedium;
-import network.IData;
-import network.INode;
-import network.IPacket;
-import network.NodeSimulatableListener;
-import network.Packet;
+import computation.Data;
+import computation.IData;
+
+
+import network.communication.Address;
+import network.communication.IPacket;
+import network.communication.Packet;
+import network.entities.IConnectionAdaptor;
+import network.entities.IConnectionMedium;
+import network.entities.INode;
+import network.listeners.NodeSimulatableListener;
+import network.routing.IAddress;
 
 import cellTests.Cell;
 
-import routing.IAddress;
-import simulation.AbstractSimulatable;
-import simulation.ISimulatable;
-import simulation.ISimulatableEvent;
-import simulation.ISimulatableListener;
-import simulation.ISimulator;
-import simulation.ISimulatorEvent;
-import simulation.Simulator;
+import simulation.simulatable.AbstractSimulatable;
+import simulation.simulatable.ISimulatable;
+import simulation.simulatable.listeners.ISimulatableEvent;
+import simulation.simulatable.listeners.ISimulatableListener;
+import simulation.simulator.ISimulator;
+import simulation.simulator.Simulator;
+import simulation.simulator.listeners.ISimulatorEvent;
 
 /**
  * Scales scalable objects to perform, at maximum, one operation per tick and

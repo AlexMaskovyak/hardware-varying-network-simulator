@@ -2,13 +2,16 @@ package computation;
 
 import javax.management.OperationsException;
 
-import network.INode;
-import network.IProtocolHandler;
-import network.Node;
+import computation.algorithms.AbstractAlgorithm;
+import computation.algorithms.IAlgorithm;
+
+import network.communication.IProtocolHandler;
+import network.entities.INode;
+import network.entities.Node;
+import network.routing.IAddress;
 
 
-import routing.IAddress;
-import simulation.ISimulatable;
+import simulation.simulatable.ISimulatable;
 
 /**
  * Simulatable Computer Node which has modular hardware components.

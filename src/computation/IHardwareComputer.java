@@ -1,5 +1,10 @@
 package computation;
 
+import computation.hardware.CPU;
+import computation.hardware.Cache;
+import computation.hardware.Harddrive;
+import computation.hardware.Memory;
+
 /**
  * ComputerNode with explicitely assignable hardware components.  CPU, Harddrive, Cache, etc.
  * @author Alex Maskovyak

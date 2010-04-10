@@ -1,8 +1,9 @@
 package messages;
 
-import network.IData;
-import routing.IAddress;
-import simulation.IDiscreteScheduledEvent.IMessage;
+import computation.IData;
+
+import network.routing.IAddress;
+import simulation.event.IDiscreteScheduledEvent.IMessage;
 
 /**
  * Storage message for an algorithm.

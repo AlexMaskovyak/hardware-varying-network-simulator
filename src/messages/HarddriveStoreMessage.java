@@ -1,7 +1,8 @@
 package messages;
 
-import network.IData;
-import simulation.IDiscreteScheduledEvent.IMessage;
+import computation.IData;
+
+import simulation.event.IDiscreteScheduledEvent.IMessage;
 
 /**
  * Message telling Harddrive to store information.

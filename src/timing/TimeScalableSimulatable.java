@@ -1,15 +1,15 @@
 package timing;
 
-import simulation.AbstractSimulatable;
-import simulation.IDiscreteScheduledEvent;
-import simulation.IDiscreteScheduledEventSimulator;
-import simulation.ISimulatable;
-import simulation.ISimulatableEvent;
-import simulation.ISimulatableListener;
-import simulation.ISimulator;
-import simulation.ISimulatorEvent;
-import simulation.PerformanceRestrictedSimulatable;
-import simulation.SimulatableEvent;
+import simulation.event.IDiscreteScheduledEvent;
+import simulation.simulatable.AbstractSimulatable;
+import simulation.simulatable.ISimulatable;
+import simulation.simulatable.PerformanceRestrictedSimulatable;
+import simulation.simulatable.listeners.ISimulatableEvent;
+import simulation.simulatable.listeners.ISimulatableListener;
+import simulation.simulatable.listeners.SimulatableEvent;
+import simulation.simulator.IDiscreteScheduledEventSimulator;
+import simulation.simulator.ISimulator;
+import simulation.simulator.listeners.ISimulatorEvent;
 
 /**
  * Simulatable whose response rate is scalable.  As in, they perform a tick 

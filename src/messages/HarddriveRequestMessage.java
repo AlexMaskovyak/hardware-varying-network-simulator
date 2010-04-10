@@ -1,6 +1,6 @@
 package messages;
 
-import simulation.IDiscreteScheduledEvent.IMessage;
+import simulation.event.IDiscreteScheduledEvent.IMessage;
 
 /**
  *  Messages designed for Harddrive.  Requests information.
