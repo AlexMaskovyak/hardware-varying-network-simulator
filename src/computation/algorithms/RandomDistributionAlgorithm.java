@@ -346,7 +346,8 @@ public class RandomDistributionAlgorithm
 				if( message instanceof AlgorithmDoWorkMessage ) {
 					if( haveMoreToRead() ) {
 						sendDoWork();
-						sendClientRequest( _currentIndex++, getNextRetrievalAddress() );
+						IAddress address = getNextRetrievalAddress();
+						sendClientRequest( _currentIndex++, address );
 					} 
 				} else if( message instanceof AlgorithmResponseMessage ) {
 					_totalClientResponses++;

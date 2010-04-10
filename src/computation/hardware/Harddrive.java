@@ -61,6 +61,7 @@ public class Harddrive<T extends IData>
 		_data.put(5, new Data( 5, new byte[] { 1, 0, 1 } ) );
 		super.setTransitTime( 5 );
 		super.setMaxAllowedOperations( 3 );
+		super.setRefreshInterval( 1 );
 	}
 	
 	

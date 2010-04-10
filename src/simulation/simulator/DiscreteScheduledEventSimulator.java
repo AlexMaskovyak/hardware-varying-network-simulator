@@ -64,6 +64,7 @@ public class DiscreteScheduledEventSimulator
 				IDiscreteScheduledEvent event = _queue.poll();		// get event
 				System.out.println( event.toString() );
 				_currentTime = event.getEventTime();				// update time
+				System.out.println( event.getDestination() );
 				event.getDestination().handleEvent(event);			// get destination and deliver
 				
 				//Thread.currentThread().sleep(200);
