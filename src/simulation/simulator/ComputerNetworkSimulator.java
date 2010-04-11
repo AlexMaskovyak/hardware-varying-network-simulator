@@ -18,6 +18,12 @@ public class ComputerNetworkSimulator
 		extends NetworkSimulator 
 		implements ISimulator {
 
+/// Fields
+	
+	/** path to be used for outputting log files. */
+	protected String _outputPath;
+
+	
 /// Construction
 	
 	/*
@@ -30,11 +36,19 @@ public class ComputerNetworkSimulator
 	}
 
 	/**
-	 * Sets the output path for reporters to store information.
+	 * Sets the output path to which reporters will log information.
 	 * @param outPath for reporters to store their information.
 	 */
 	public void setOutputPath( String outPath ) {
-		
+		_outputPath = outPath;
+	}
+	
+	/**
+	 * Gets the output path to which reporters will log information.
+	 * @return output path for information logging.
+	 */
+	public String getOutputPath() {
+		return _outputPath;
 	}
 	
 	
@@ -46,11 +60,13 @@ public class ComputerNetworkSimulator
 	 */
 	@Override
 	public INode createNode() {
-		HardwareComputerNode result = (HardwareComputerNode) super.createNode();
-		DummyAlgorithm algorithm = new DummyAlgorithm( result );
-		algorithm.addListener( new AlgorithmListener( System.out ) );
-		result.install( (IAlgorithm)algorithm );
-		result.setHarddrive( createHarddrive() );
+		HardwareComputerNode result = null;
+		try { result = (HardwareComputerNode) super.createNode();
+			DummyAlgorithm algorithm = new DummyAlgorithm( result );
+			algorithm.addListener( new AlgorithmListener( getOutputPath(), algorithm ) );
+			result.install( (IAlgorithm)algorithm );
+			result.setHarddrive( createHarddrive() );
+		} catch( Exception e ) { e.printStackTrace(); }
 		return result;
 	}
 	

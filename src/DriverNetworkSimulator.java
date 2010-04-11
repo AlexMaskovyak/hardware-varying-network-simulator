@@ -1,4 +1,6 @@
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -7,6 +9,7 @@ import computation.Data;
 import computation.HardwareComputerNode;
 import computation.IData;
 import computation.algorithms.DummyAlgorithm;
+import configuration.ConfigurationManager;
 
 import simulation.event.DefaultDiscreteScheduledEvent;
 import simulation.event.IDiscreteScheduledEvent;
@@ -25,20 +28,32 @@ import network.entities.INode;
  *
  */
 public class DriverNetworkSimulator {
-
+	
+	
+	
 	/**
 	 * Read in the configuration file.
 	 * @param args
 	 */
 	public static void main(String... args) throws Exception {
-		if( args.length != 0 ) {
-			System.err.println( "java -jar program.jar <path to config file>" );
+		if( args.length != 1 ) {
+			System.err.println( "java -jar hardwareSimulation.jar <path to config file>" );
 		}
+		
+		// inspect parent directory
+		// get last directory with name run_#
+		// increment #
+		
+		ConfigurationManager configManager = new ConfigurationManager( args[ 0 ], "run_" );
+		File outputPath = configManager.makeNewRunDirectory();
+		
 		
 		System.out.println("starting");
 		
 		
-		NetworkSimulator sim = new ComputerNetworkSimulator();
+		ComputerNetworkSimulator sim = new ComputerNetworkSimulator();
+		sim.setOutputPath( outputPath.getAbsolutePath() );
+		
 		//IHardwareComputer n0 = (IHardwareComputer)sim.createNode();
 		//System.out.println("\n");
 		//n0.install( new RandomDistributionAlgorithm( n0 ) );
