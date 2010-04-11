@@ -43,7 +43,7 @@ public class AlgorithmListener
 	public AlgorithmListener(String configDirectory, IAlgorithm algorithm) 
 			throws FileNotFoundException {
 		super( String.format(
-			"%s%s%s.log",
+			"%s%snode_%s.log",
 			configDirectory,
 			File.separator,
 			((INode)algorithm.getComputer()).getAddress()) );
