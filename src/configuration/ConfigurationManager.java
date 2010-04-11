@@ -4,7 +4,8 @@ import java.io.File;
 import java.io.FilenameFilter;
 
 /**
- * Handles the directory management for configuration files.
+ * Handles the directory management for a single configuration file and the runs
+ * that will be run for it.
  * @author Alex Maskovyak
  *
  */
@@ -30,28 +31,34 @@ public class ConfigurationManager {
 
 	/**
 	 * Constructor.  Uses default directory run name of "run_[0-9]+"
+	 * @param configDirectory path to the directory containing the sim runs.
 	 * @param configFile path to the configuration file.
 	 */
-	public ConfigurationManager( String configFile ) {
-		this( configFile, "run_" );
+	public ConfigurationManager( String configDirectory, String configFile ) {
+		this( configDirectory, configFile, "run_" );
+	}
+	
+	/**
+	 * Constructor.  Uses default directory run name of "run_[0-9]+"
+	 * @param configDirectory directory containing the sim runs.
+	 * @param configFile configuration file.
+	 */
+	public ConfigurationManager( File configDirectory, File configFile ) {
+		this( configDirectory, configFile, "run_" );
 	}
 	
 	/**
 	 * Constructor.
+	 * @param configDirectory path to the directory containing the config file,
+	 * and simulation run directories.
 	 * @param configFile path to configuration file.
 	 * @param baseRunName for a simulation run.
 	 */
-	public ConfigurationManager( String configFile, String baseRunName ) {
-		this( new File( configFile ), baseRunName );
-	}
-	
-	/**
-	 * Constructor.
-	 * @param configFile the configuration file.
-	 * @param baseRunName for a simulation run.
-	 */
-	public ConfigurationManager( File configFile, String baseRunName ) {
-		this( configFile, configFile.getParentFile(), baseRunName );
+	public ConfigurationManager( 
+			String configDirectory, 
+			String configFile, 
+			String baseRunName ) {
+		this( new File( configDirectory ), new File( configFile ), baseRunName );
 	}
 	
 	/**
@@ -59,12 +66,9 @@ public class ConfigurationManager {
 	 * @param configFile the configuration file.
 	 * @param configDirectory the directory containing the configuration file
 	 * and simulation run directories.
+	 * @param baseRunName for a simulation run.
 	 */
-	public ConfigurationManager( 
-			File configFile, 
-			File configDirectory,
-			String baseRunName ) {
-		
+	public ConfigurationManager( File configDirectory, File configFile, String baseRunName ) {
 		// assign
 		_configFile = configFile;
 		_configDirectory = configDirectory;
@@ -74,8 +78,8 @@ public class ConfigurationManager {
 		RunFilenameFilter filter = new RunFilenameFilter( _baseRunName );
 		_configDirectory.listFiles( filter );
 		_maxSimRunNumber = filter.getMaxRunNumber();
-	}	
-
+	}
+	
 	
 /// Accessors
 	
@@ -121,6 +125,7 @@ public class ConfigurationManager {
 		return _baseRunName;
 	}
 	
+	
 /// Management
 
 	/**
@@ -144,6 +149,10 @@ public class ConfigurationManager {
 		return null;
 	}
 	
+	
+/// Utility
+	
+	
 /// Tester
 
 	/**
@@ -151,8 +160,9 @@ public class ConfigurationManager {
 	 * @param args N/A
 	 */
 	public static void main(String... args) {
-		String configFile = "C:\\Users\\user\\workspaces\\gradproject\\configurations\\config_1\\config_1.cfg";
-		ConfigurationManager manager = new ConfigurationManager( configFile );
+		String configDirectory = "C:\\Users\\user\\workspaces\\gradproject\\configurations\\config_set_1_adaptor_speed\\config_1\\";
+		String configFile = "C:\\Users\\user\\workspaces\\gradproject\\configurations\\config_set_1_adaptor_speed\\config_1.cfg";
+		ConfigurationManager manager = new ConfigurationManager( configDirectory, configFile );
 		System.out.println( manager.getConfigFile() );
 		System.out.println( manager.getConfigDirectory() );
 		System.out.println( manager.getBaseRunName() );
