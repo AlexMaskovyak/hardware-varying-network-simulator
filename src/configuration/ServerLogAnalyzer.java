@@ -122,7 +122,6 @@ public class ServerLogAnalyzer {
 	 * @see java.lang.Object#toString()
 	 */
 	public String toString() {
-		System.out.println(_dataReceived);
 		return String.format(
 					"%s%f\t%f\t%f\t%f\t%f\t%f\t%f", 
 					(_name != null) ? _name + "\t" : "",
