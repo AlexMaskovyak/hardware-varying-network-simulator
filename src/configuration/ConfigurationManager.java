@@ -186,7 +186,6 @@ public class ConfigurationManager {
 		// runs
 		System.out.println(runDir1.listFiles().length);
 		for( File baseLog : runDir1.listFiles() ) {
-			System.out.println( baseLog.getName() );
 			List<File> logs = getLogsAcrossRunsFor( baseLog.getName() );
 			// 
 			clientAnalyzer.reset();
@@ -242,7 +241,6 @@ public class ConfigurationManager {
 	public List<File> scanForRunDirectories() {
 		_runDirectoryFilter.reset();
 		File[] runDirectories = _runsDirectory.listFiles( _runDirectoryFilter );
-		System.out.println( "rundirectories: " + runDirectories );
 		return Arrays.asList( runDirectories );
 	}
 	

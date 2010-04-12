@@ -86,7 +86,6 @@ public class ClientLogAnalyzer {
 		double totalRemote = 0;
 		for( File f : files ) {
 			reset();
-			System.out.println(f.getAbsolutePath());
 			if( scan( new Scanner( f ) ) ) {
 				logFileTotal++;
 				totalLocal += getTotalLocalTime();
