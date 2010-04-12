@@ -3,13 +3,17 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Collection;
 import java.util.List;
+import java.util.Scanner;
 import java.util.Set;
 
 import computation.Data;
 import computation.HardwareComputerNode;
 import computation.IData;
 import computation.algorithms.DummyAlgorithm;
+import configuration.ClientLogAnalyzer;
 import configuration.ConfigurationManager;
+import configuration.ConfigurationSetManager;
+import configuration.ServerLogAnalyzer;
 
 import simulation.event.DefaultDiscreteScheduledEvent;
 import simulation.event.IDiscreteScheduledEvent;
@@ -36,15 +40,16 @@ public class DriverNetworkSimulator {
 	 * @param args
 	 */
 	public static void main(String... args) throws Exception {
-		if( args.length != 1 ) {
+		if( args.length != 2 ) {
 			System.err.println( "java -jar hardwareSimulation.jar <path to config file>" );
 		}
 		
 		// inspect parent directory
 		// get last directory with name run_#
 		// increment #
+		//ConfigurationSetManager setManager = new ConfigurationSetManager();
 		
-		ConfigurationManager configManager = new ConfigurationManager( args[ 0 ], "run_" );
+		ConfigurationManager configManager = new ConfigurationManager( args[ 0 ], args[ 1 ], "run_" );
 		File outputPath = configManager.makeNewRunDirectory();
 		
 		
@@ -81,7 +86,10 @@ public class DriverNetworkSimulator {
 		c.start();
 		//sim.pause();
 		
-		//Thread.currentThread().sleep( 4000);
+		
+		Thread.currentThread().sleep( 4000 );
+		//configManager.makeAveragesDirectory();
+		
 		//sim.resume();
 	}
 }

@@ -326,10 +326,12 @@ public class DummyAlgorithm
 				if( message instanceof AlgorithmDoWorkMessage ) {
 					// do we have more?
 					if( haveMoreToDistribute() ) {
-						sendDoWork();
 						// read index from harddrive
 						sendHarddriveRequest( _currentIndex++ );
+						notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "DISTR", 0, 0, 0, 0, 1, 0 ) );
 					} 
+					sendDoWork();
+					
 				} else if( message instanceof AlgorithmResponseMessage ) {
 					IData data = ((AlgorithmResponseMessage)message).getData();
 					sendDataToClient( data, getNextStorageAddress() );

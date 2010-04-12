@@ -10,7 +10,7 @@ import network.entities.INode;
 import simulation.simulatable.AbstractSimulatable;
 import simulation.simulatable.listeners.ISimulatableEvent;
 import simulation.simulatable.listeners.ISimulatableListener;
-import simulation.simulatable.listeners.ReportingAbstractSimulatableListener;
+import simulation.simulatable.listeners.ReportingSimulatableListener;
 
 /**
  * A nice little class to display what is happening to a node.
@@ -18,7 +18,7 @@ import simulation.simulatable.listeners.ReportingAbstractSimulatableListener;
  *
  */
 public class NodeSimulatableListener 
-		extends ReportingAbstractSimulatableListener
+		extends ReportingSimulatableListener
 		implements ISimulatableListener, INodeSimulatableListener {
 
 	/**

@@ -16,7 +16,7 @@ import simulation.simulatable.listeners.ISimulatableListener;
  * @author Alex Maskovyak
  *
  */
-public abstract class ReportingAbstractSimulatableListener 
+public class ReportingSimulatableListener 
 		implements ISimulatableListener {
 	
 /// Protected Fields
@@ -32,38 +32,49 @@ public abstract class ReportingAbstractSimulatableListener
 	 * @param logPath path to the file to which to output.
 	 * @throws FileNotFoundException if the file at the path cannot be found.
 	 */
-	public ReportingAbstractSimulatableListener( String logPath ) 
+	public ReportingSimulatableListener( String logPath ) 
 			throws FileNotFoundException {
 		this( new File( logPath ) );
 	}
 	
 	/**
-	 * 
-	 * @param logfile
-	 * @throws FileNotFoundException 
+	 * Constructor.
+	 * @param logfile to which to write.
+	 * @throws FileNotFoundException if the file at the path cannot be found.
 	 */
-	public ReportingAbstractSimulatableListener( File logfile ) 
+	public ReportingSimulatableListener( File logfile ) 
 			throws FileNotFoundException {
 		this( new FileOutputStream( logfile ) );
 	}
 	
 	/**
-	 * Default constructor.
-	 * @param out to which to display debug.
+	 * Constructor.
+	 * @param out stream to which to display debug.
 	 */
-	public ReportingAbstractSimulatableListener(OutputStream out) {
-		_out = 
+	public ReportingSimulatableListener(OutputStream out) {
+		this(
 			new PrintWriter(
 				new BufferedWriter(
-					new OutputStreamWriter(out)));
+					new OutputStreamWriter(out))));
 	}
 	
 	/**
-	 * This should be overridden by subclasses.
-	 * @param e event of which to be notified.
+	 * Constructor.
+	 * @param writer to which to write output.
 	 */
-	public void update(ISimulatableEvent e) {
-		_out.write( e.toString() );
+	public ReportingSimulatableListener(PrintWriter writer) {
+		setWriter( writer );
+	}
+
+
+/// Accessor/Mutator
+	
+	/**
+	 * Sets the writer to be used for reporting.
+	 * @param writer to be used.
+	 */
+	public void setWriter(PrintWriter writer) {
+		_out = writer;
 	}
 	
 	/**
@@ -72,5 +83,16 @@ public abstract class ReportingAbstractSimulatableListener
 	 */
 	protected PrintWriter getWriter() {
 		return _out;
+	}
+	
+	
+/// ISimulatable
+	
+	/**
+	 * This should be overridden by subclasses.
+	 * @param e event of which to be notified.
+	 */
+	public void update(ISimulatableEvent e) {
+		_out.write( e.toString() );
 	}
 }

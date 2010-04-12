@@ -1,7 +1,13 @@
 package configuration;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Scanner;
 
 /**
  * Handles the directory management for a single configuration file and the runs
@@ -14,14 +20,20 @@ public class ConfigurationManager {
 /// Fields
 	
 	/** directory holding the configuration file. */
-	protected File _configDirectory;
+	protected File _runsDirectory;
 	/** file with configuration information. */
 	protected File _configFile;
 	/** directory which will hold the current run's output. */
 	protected File _currentRunDirectory;
+	/** all runs directories. */
+	protected List<File> _runDirectories;
+	
 	/** base name for a simulation run, this value gets incremented as additional
 	 * runs occur. */
 	protected String _baseRunName;
+	/** filter to use/reuse for finding run directories. */
+	protected RunDirectoryFilter _runDirectoryFilter;
+	
 	
 	/** maximum run number for this configuration directory. */
 	protected int _maxSimRunNumber;
@@ -31,53 +43,59 @@ public class ConfigurationManager {
 
 	/**
 	 * Constructor.  Uses default directory run name of "run_[0-9]+"
-	 * @param configDirectory path to the directory containing the sim runs.
+	 * @param runsDirectory path to the directory containing the sim runs.
 	 * @param configFile path to the configuration file.
 	 */
-	public ConfigurationManager( String configDirectory, String configFile ) {
-		this( configDirectory, configFile, "run_" );
+	public ConfigurationManager( String runsDirectory, String configFile ) {
+		this( runsDirectory, configFile, "run_" );
 	}
 	
 	/**
 	 * Constructor.  Uses default directory run name of "run_[0-9]+"
-	 * @param configDirectory directory containing the sim runs.
+	 * @param runsDirectory directory containing the sim runs.
 	 * @param configFile configuration file.
 	 */
-	public ConfigurationManager( File configDirectory, File configFile ) {
-		this( configDirectory, configFile, "run_" );
+	public ConfigurationManager( File runsDirectory, File configFile ) {
+		this( runsDirectory, configFile, "run_" );
 	}
 	
 	/**
 	 * Constructor.
-	 * @param configDirectory path to the directory containing the config file,
+	 * @param runsDirectory path to the directory containing the config file,
 	 * and simulation run directories.
 	 * @param configFile path to configuration file.
 	 * @param baseRunName for a simulation run.
 	 */
 	public ConfigurationManager( 
-			String configDirectory, 
+			String runsDirectory, 
 			String configFile, 
 			String baseRunName ) {
-		this( new File( configDirectory ), new File( configFile ), baseRunName );
+		this( new File( runsDirectory ), new File( configFile ), baseRunName );
 	}
 	
 	/**
 	 * Constructor.
 	 * @param configFile the configuration file.
-	 * @param configDirectory the directory containing the configuration file
+	 * @param runsDirectory the directory containing the configuration file
 	 * and simulation run directories.
 	 * @param baseRunName for a simulation run.
 	 */
-	public ConfigurationManager( File configDirectory, File configFile, String baseRunName ) {
+	public ConfigurationManager( File runsDirectory, File configFile, String baseRunName ) {
 		// assign
 		_configFile = configFile;
-		_configDirectory = configDirectory;
+		_runsDirectory = runsDirectory;
 		_baseRunName = baseRunName;
 		
-		// get the maximum run for this directory
-		RunFilenameFilter filter = new RunFilenameFilter( _baseRunName );
-		_configDirectory.listFiles( filter );
-		_maxSimRunNumber = filter.getMaxRunNumber();
+		// init
+		init();
+		
+		refreshValues();
+	}
+	
+	/** Externalize instantiation. */
+	protected void init() {
+		_runDirectories = new ArrayList<File>();
+		_runDirectoryFilter = new RunDirectoryFilter( _baseRunName );
 	}
 	
 	
@@ -95,8 +113,8 @@ public class ConfigurationManager {
 	 * Obtains the configuration directory being managed.
 	 * @return configuration directory.
 	 */
-	public File getConfigDirectory() {
-		return _configDirectory;
+	public File getRunsDirectory() {
+		return _runsDirectory;
 	}
 	
 	/**
@@ -138,7 +156,7 @@ public class ConfigurationManager {
 			new File( 
 				String.format( 
 					"%s%s%s%d", 
-					_configDirectory.getAbsolutePath(), 
+					_runsDirectory.getAbsolutePath(), 
 					File.separator, 
 					getBaseRunName(), 
 					getMaxRunNumber() + 1 ) );
@@ -148,26 +166,114 @@ public class ConfigurationManager {
 		}
 		return null;
 	}
+
+	/**
+	 * Runs the RunAnalyzer which in turn runs the LogAnalyzers.  This will 
+	 * create aggregated data files of this run in the sum directory of the 
+	 * configuration directory.
+	 * @throws FileNotFoundException if a file cannot be found by the scanner.
+	 */
+	public void makeAveragesDirectory() throws FileNotFoundException {
+		// check if the averages directory exists
+		
+		// create analyzer
+		ClientLogAnalyzer clientAnalyzer = new ClientLogAnalyzer();
+		ServerLogAnalyzer serverAnalyzer = new ServerLogAnalyzer();
+		File runDir1 = _runDirectories.get( 0 );
+		StringBuilder serverLines = new StringBuilder();
+		
+		// for each file in this run directory, find all in that series across
+		// runs
+		System.out.println(runDir1.listFiles().length);
+		for( File baseLog : runDir1.listFiles() ) {
+			System.out.println( baseLog.getName() );
+			List<File> logs = getLogsAcrossRunsFor( baseLog.getName() );
+			// 
+			clientAnalyzer.reset();
+			if( clientAnalyzer.average( logs ) ) {
+				clientAnalyzer.output( 
+					new File( 
+						String.format( 
+							"%s%savg%sclient.log",
+							_runsDirectory, 
+							File.separator, 
+							File.separator ) ) );
+			}
+			serverAnalyzer.reset();
+			serverAnalyzer.average( logs ); 
+			serverLines.append( serverAnalyzer );
+			serverLines.append("\n");
+		}
+		PrintWriter writer = 
+			new PrintWriter(
+				new File( 
+					String.format( 
+						"%s%savg%sserver.log",
+						_runsDirectory, 
+						File.separator, 
+						File.separator ) ) );
+		writer.write( serverLines.toString() );
+		writer.flush();
+		writer.close();
+	}
 	
+	/**
+	 * Gets a list of files that correspond to the filename provided across all
+	 * runs.
+	 * @param fileName corresponding to one node's log.
+	 * @return all log files associated with this particular filename across all
+	 * runs.
+	 */
+	public List<File> getLogsAcrossRunsFor( String fileName ) {
+		List<File> logsForFilename = new ArrayList<File>();
+		for( File runDir : _runDirectories ) {
+			File logFile = new File( String.format( "%s%s%s", runDir.getAbsolutePath(), File.separator, fileName ) );
+			logsForFilename.add( logFile );
+		}
+		return logsForFilename;
+	}
 	
 /// Utility
+
+	/**
+	 * Gets a list of run directories.
+	 * @return list of run directories.
+	 */
+	public List<File> scanForRunDirectories() {
+		_runDirectoryFilter.reset();
+		File[] runDirectories = _runsDirectory.listFiles( _runDirectoryFilter );
+		System.out.println( "rundirectories: " + runDirectories );
+		return Arrays.asList( runDirectories );
+	}
 	
+	/**
+	 * Refreshes the values being managed.  Ensures that the directories we are
+	 * refereing are up to date, etc.
+	 */
+	public void refreshValues() {
+		_runDirectories.clear();
+		_runDirectories.addAll( scanForRunDirectories() );
+		_maxSimRunNumber = _runDirectoryFilter.getMaxRunNumber();
+	}
+
 	
 /// Tester
 
 	/**
 	 * Test driver.
 	 * @param args N/A
+	 * @throws FileNotFoundException 
 	 */
-	public static void main(String... args) {
-		String configDirectory = "C:\\Users\\user\\workspaces\\gradproject\\configurations\\config_set_1_adaptor_speed\\config_1\\";
+	public static void main(String... args) throws FileNotFoundException {
+		String runsDirectory = "C:\\Users\\user\\workspaces\\gradproject\\configurations\\config_set_1_adaptor_speed\\config_1\\";
 		String configFile = "C:\\Users\\user\\workspaces\\gradproject\\configurations\\config_set_1_adaptor_speed\\config_1.cfg";
-		ConfigurationManager manager = new ConfigurationManager( configDirectory, configFile );
+		ConfigurationManager manager = new ConfigurationManager( runsDirectory, configFile );
 		System.out.println( manager.getConfigFile() );
-		System.out.println( manager.getConfigDirectory() );
+		System.out.println( manager.getRunsDirectory() );
 		System.out.println( manager.getBaseRunName() );
 		System.out.println( manager.getMaxRunNumber() );
-		System.out.println( manager.makeNewRunDirectory() );
+		manager.makeAveragesDirectory();
+		//System.out.println( manager.makeNewRunDirectory() );
 	}
 	
 }
@@ -178,7 +284,7 @@ public class ConfigurationManager {
  * @author Alex Maskovyak
  *
  */
-class RunFilenameFilter implements FilenameFilter {
+class RunDirectoryFilter implements FilenameFilter {
 
 /// Fields
 	
@@ -194,7 +300,7 @@ class RunFilenameFilter implements FilenameFilter {
 	 * Default constructor. 
 	 * @param baseName to identify.
 	 */
-	public RunFilenameFilter(String baseName) {
+	public RunDirectoryFilter(String baseName) {
 		_baseName = baseName;
 		reset();
 	}

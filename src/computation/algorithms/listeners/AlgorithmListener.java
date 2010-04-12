@@ -13,7 +13,7 @@ import simulation.event.IDiscreteScheduledEvent;
 import simulation.simulatable.AbstractSimulatable;
 import simulation.simulatable.listeners.ISimulatableEvent;
 import simulation.simulatable.listeners.ISimulatableListener;
-import simulation.simulatable.listeners.ReportingAbstractSimulatableListener;
+import simulation.simulatable.listeners.ReportingSimulatableListener;
 
 /**
  * Listener for Algorithm events.
@@ -21,16 +21,23 @@ import simulation.simulatable.listeners.ReportingAbstractSimulatableListener;
  *
  */
 public class AlgorithmListener 
-		extends ReportingAbstractSimulatableListener
+		extends ReportingSimulatableListener
 		implements IAlgorithmListener, ISimulatableListener {
 
+	
+/// State delegate
+	
+	/** listener to which to delegate, this is a state-pattern where */
+	protected AlgorithmListener _delegate;
+	
+	
 /// Control values
 	
 	/** determine whether to output the header, or if it has already been 
 	 * output. */
 	protected boolean _outputHeader;
-
-
+	
+	
 /// Construction
 	
 	/**
