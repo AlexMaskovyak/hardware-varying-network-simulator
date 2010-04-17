@@ -21,6 +21,7 @@ import messages.ConnectionAdaptorManagerOutMessage;
 import messages.NodeInMessage;
 import messages.NodeOutMessage;
 import network.communication.AbstractProtocolHandler;
+import network.communication.Address;
 import network.communication.ConnectionAdaptorManager;
 import network.communication.IPacket;
 import network.communication.Packet;
@@ -58,7 +59,7 @@ public class Node
 	 * Default constructor.
 	 */
 	public Node() {
-		super();
+		this( new Address(0) );
 	}
 	
 	/**
@@ -67,8 +68,7 @@ public class Node
 	 */
 	public Node(IAddress address) {
 		super();
-		_address = address;
-		_manager.setAddress(address);
+		setAddress( address );
 		_manager.install(this, AbstractProtocolHandler.DEFAULT_PROTOCAL);
 	}
 	
@@ -91,6 +91,16 @@ public class Node
 	@Override
 	public IAddress getAddress() {
 		return _address;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see network.entities.INode#setAddress(network.routing.IAddress)
+	 */
+	@Override
+	public void setAddress( IAddress address ) {
+		_address = address;
+		_manager.setAddress(address);
 	}
 	
 	/*

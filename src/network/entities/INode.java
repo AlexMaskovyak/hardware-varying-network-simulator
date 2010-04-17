@@ -41,6 +41,12 @@ public interface INode
 	public IAddress getAddress();
 	
 	/**
+	 * Sets the identifier of this Node.
+	 * @param identifier to assign this node.
+	 */
+	public void setAddress( IAddress address );
+	
+	/**
 	 * Receives data across a specific connection.
 	 * @param packet to have this node receive.
 	 */

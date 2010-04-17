@@ -27,8 +27,6 @@ public class ConnectionAdaptor
 
 // Fields
 	
-	/** allows for selection of next hop for a packet. */
-	protected IRoutingTable _table;
 	/** address of this connection. */
 	protected IAddress _address;
 	/** manager in charge of us. */
@@ -42,13 +40,7 @@ public class ConnectionAdaptor
 	
 // Construction. 
 	
-	/**
-	 * Constructor.
-	 * @param node onto which this ConnectionAdaptor is installed.
-	 * @param connection onto which we are to be connected for transmission.
-	 * @param manager which is to manage this adaptor.
-	 * @param address associated with this adapator.
-	 */
+	/** Constructor. */
 	public ConnectionAdaptor() {
 		super();
 	}
@@ -62,7 +54,6 @@ public class ConnectionAdaptor
 		_manager = null;
 		_node = null;
 		_medium = null;
-		_table = new RoutingTable();
 		setTransitTime( 1 );
 		setMaxAllowedOperations( 5 );
 		setRefreshInterval( 5 );
@@ -86,7 +77,6 @@ public class ConnectionAdaptor
 	@Override
 	public void setAddress(IAddress address) {
 		_address = address;
-		_table = new RoutingTable( address );
 	}
 	
 	/*
