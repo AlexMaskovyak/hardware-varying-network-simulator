@@ -5,13 +5,22 @@ options {
   output = AST;
 }
 
+tokens {
+  	JAVA_INSTANTIATE;
+  	CLONE;
+}
+
 @header {
 	package configuration.language;  
+	import network.entities.Node;
 }
 
 @lexer::header {
 	package configuration.language;
+	import network.entities.Node;
 }
+
+
 
 // top-level items
 script
@@ -23,12 +32,21 @@ statement
 	;
 
 assign
-	:	NAME ASSIGN value -> ^( ASSIGN NAME value )
+	:	NAME ASSIGN value ';' -> ^( ASSIGN NAME value )
 	;
 
+
+/**
+*	Handles values.
+*/
 value
-	: 	NUMBER | NAME // | expression
+	: 	
+		'java' NAME -> ^( JAVA_INSTANTIATE NAME )
+	|	'clone' NAME -> ^( CLONE NAME )
+	|	NUMBER
+	| 	NAME // | expression
 	;
+
 
 terminator: NEWLINE | EOF;
 
@@ -44,7 +62,7 @@ ASSIGN: '=';
 LEFT_PAREN: '(';
 RIGHT_PAREN: ')';
 SIGN: '+' | '-';
-NAME: LETTER (LETTER | DIGIT | '_')*;
+NAME: LETTER ( LETTER | DIGIT | '_' | '.' )*;
 STRING_LITERAL: '"' NONCONTROL_CHAR* '"';
 
 fragment NONCONTROL_CHAR: LETTER | DIGIT | SYMBOL | SPACE;

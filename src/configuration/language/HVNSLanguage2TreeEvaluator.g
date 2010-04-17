@@ -6,12 +6,18 @@ options {
   ASTLabelType = CommonTree;
 }
 
+tokens {
+  	JAVA_ASSIGN;
+}
+
 @header {
   package configuration.language;
   import java.util.Map;
   import java.util.HashMap;
   import java.util.TreeMap;
   import simulation.simulator.DESimulator;
+  import network.entities.Node;
+  import network.entities.PublicCloneable;
 }
 
 @members {
@@ -52,6 +58,50 @@ options {
 		
 		return result;
 	}
+	
+	/**
+	 * Creates an instance of the class name specified.
+	 * @param className to instantiate.
+	 * @return new instance of the class specified.
+	 */
+	public static Object instantiate( CommonTree classNameNode ) {
+		String className = classNameNode.getText();
+		try {
+			Class theClass = Class.forName( className );
+			Object instance = theClass.newInstance();
+			return instance;
+		} catch( Exception e ) {
+			throw new RuntimeException(
+				String.format(
+					"Cannot convert \"\%s\" to a double.", 
+					className ) ); 
+		}
+	}	
+	
+	/**
+	 * Creates an instance of the class name specified.
+	 * @param className to instantiate.
+	 * @return new instance of the class specified.
+	 */
+	public Object clone( CommonTree nameNode ) {
+		Object object = getVariable( nameNode );
+		String name = nameNode.getText();
+		try {
+			if( object instanceof PublicCloneable ) {
+				Object result = ((PublicCloneable)object).clone();
+				return result;
+			} 
+			throw new RuntimeException(
+				String.format(
+					"Clone not supported by \"\%s\".  Invalid operation.", 
+					name ) ); 
+		} catch( Exception e ) {
+			throw new RuntimeException(
+				String.format(
+					"Clone not supported by \"\%s\".  Invalid operation.", 
+					name ) ); 
+		}
+	}	
 }
 
 script returns [ Object result ]
@@ -69,10 +119,14 @@ assign returns [ Object result ]
 		}
 	;
 
+
 value returns [ Object result ]
-	:	NUMBER { $result = toDouble( $NUMBER ); }
+	:	^(JAVA_INSTANTIATE NAME) { $result = instantiate( $NAME ); }
+	|	^(CLONE NAME) { $result = clone( $NAME ); }
+	|	NUMBER { $result = toDouble( $NUMBER ); }
 	|	NAME { $result = getVariable( $NAME ); }
 	;
+	
 
 /*evaluator returns [ DESimulator result ]
 	:	
@@ -83,14 +137,14 @@ value returns [ Object result ]
 		{ variables.put( $IDENT.text, e ); }
 	;
 */
-singleAssignmentDecl returns [ String name ]
-	:	'var' IDENTIFIER { $name=$IDENTIFIER.text; }
-	;
+//singleAssignmentDecl returns [ String name ]
+//	:	'var' IDENTIFIER { $name=$IDENTIFIER.text; }
+//	;
 	
-arrayAssignmentDecl returns [ String name ]
-	:	'var' IDENTIFIER '[' INTEGER '..' INTEGER ']' { $name=$IDENTIFIER.text; }
-	;
-	
+//arrayAssignmentDecl returns [ String name ]
+//	:	'var' IDENTIFIER '[' INTEGER '..' INTEGER ']' { $name=$IDENTIFIER.text; }
+//	;
+//	
 
 	
 

@@ -39,7 +39,7 @@ import network.routing.IAddress;
  */
 public class Node 
 		extends AbstractProtocolHandler<IPacket> 
-		implements INode, ISimulatable, Comparable<INode> {
+		implements INode, ISimulatable, Comparable<INode>, PublicCloneable {
 
 /// Fields	
 	
@@ -297,5 +297,18 @@ public class Node
 	@Override
 	public void handle(IPacket packetLikeObject) {
 		receive( packetLikeObject );
+	}
+
+	
+// PublicCloneable 
+	
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#clone()
+	 */
+	@Override
+	public Object clone() {
+		Node node = new Node();
+		return node;
 	}
 }

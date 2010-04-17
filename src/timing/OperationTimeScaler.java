@@ -262,4 +262,10 @@ class TestTimeScalableSimulatable
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public void setAddress(IAddress address) {
+		// TODO Auto-generated method stub
+		
+	}
 }
