@@ -93,6 +93,9 @@ public class ConnectionAdaptorManager
 	public void setAddress(IAddress address) {
 		_address = address;
 		_table = new RoutingTable(address);
+		for( IConnectionAdaptor adaptor : _adaptors ) {
+			adaptor.setAddress( address );
+		}
 	}
 	
 /// Methods
