@@ -5,7 +5,7 @@ package network.entities;
  * @author Alex Maskovyak
  *
  */
-public interface PublicCloneable extends Cloneable {
+public interface IPublicCloneable extends Cloneable {
 
 	public Object clone();
 }
