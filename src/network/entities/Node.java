@@ -53,6 +53,8 @@ public class Node
 	protected IAddress _address;
 	/** manages all of our connections. */
 	protected ConnectionAdaptorManager _manager;
+	/** baseline Adapator to clone for new connections. */
+	protected IConnectionAdaptor _baseAdaptor;
 
 /// Construction.
 	
