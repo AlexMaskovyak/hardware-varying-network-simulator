@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import network.entities.IPublicCloneable;
+import network.entities.Node;
 
 import computation.Data;
 import computation.IData;
@@ -185,5 +186,19 @@ public class Harddrive<T extends IData>
 	
 	public Object clone() {
 		return super.clone();
+	}
+	
+	
+// PublicCloneable 
+
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.simulatable.PerformanceRestrictedSimulatable#createNew()
+	 */
+	@Override
+	protected PerformanceRestrictedSimulatable createNew() {
+		Harddrive result = new Harddrive();
+		result.setCapacity( this.getCapacity() );
+		return result;
 	}
 }

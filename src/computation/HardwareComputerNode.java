@@ -65,7 +65,7 @@ public class HardwareComputerNode
 	protected void init() {
 		super.init();
 		_cpu = null;
-		_cache = null;
+		setCache( new Cache() );
 		setHarddrive( new Harddrive() );
 		_memory = null;
 	}
@@ -170,18 +170,22 @@ public class HardwareComputerNode
 		super.setSimulator( simulator );
 		if( getHarddrive() != null ) {
 			getHarddrive().setSimulator( simulator );
+			getCache().setSimulator( simulator );
 		}
 	}
 
 	
-// PublicCloneable 
-
+/// PublicCloneable 
+	
 	/*
 	 * (non-Javadoc)
 	 * @see simulation.simulatable.PerformanceRestrictedSimulatable#createNew()
 	 */
 	@Override
 	protected PerformanceRestrictedSimulatable createNew() {
-		return new HardwareComputerNode();	
+		HardwareComputerNode result = new HardwareComputerNode(); //super.clone();
+		result.setHarddrive( (Harddrive)this.getHarddrive().clone() );
+		result.setCache( (Cache)this.getCache().clone() );
+		return result;
 	}
 }

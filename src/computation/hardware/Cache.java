@@ -1,5 +1,6 @@
 package computation.hardware;
 
+import network.entities.Node;
 import computation.IData;
 
 import simulation.event.IDiscreteScheduledEvent;
@@ -60,5 +61,19 @@ public class Cache
 	public void setBandwitdh(int bandwidth) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	
+// PublicCloneable 
+
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.simulatable.PerformanceRestrictedSimulatable#createNew()
+	 */
+	@Override
+	protected PerformanceRestrictedSimulatable createNew() {
+		Cache result = new Cache();
+		result.setCapacity( this.getCapacity() );
+		return result;
 	}
 }
