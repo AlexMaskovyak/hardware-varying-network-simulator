@@ -14,7 +14,7 @@ import network.routing.IAddress;
  *
  */
 public interface INode 
-		extends Comparable<INode> {
+		extends Comparable<INode>, IPublicCloneable {
 
 	/**
 	 * Adds an adaptor to this node.

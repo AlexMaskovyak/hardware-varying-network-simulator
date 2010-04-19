@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import network.entities.IPublicCloneable;
+
 import computation.Data;
 import computation.IData;
 
@@ -29,7 +31,7 @@ import simulation.simulator.DESimulator;
  */
 public class Harddrive<T extends IData> 
 		extends PerformanceRestrictedSimulatable 
-		implements IHardware, ISimulatable, Iterable<T> {
+		implements IHardware, ISimulatable, Iterable<T>, IPublicCloneable {
 
 /// Fields
 	
@@ -179,5 +181,9 @@ public class Harddrive<T extends IData>
 	public void setBandwitdh(int bandwidth) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	public Object clone() {
+		return super.clone();
 	}
 }

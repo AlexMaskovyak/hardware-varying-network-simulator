@@ -25,6 +25,15 @@ public class ComputerNetworkSimulator
 
 	
 /// Construction
+
+	/** Constructor. */
+	public ComputerNetworkSimulator() {
+		
+	}
+	
+	//public ComputerNetworkSimulator() {
+		
+	//}
 	
 	/*
 	 * (non-Javadoc)
@@ -32,7 +41,7 @@ public class ComputerNetworkSimulator
 	 */
 	protected void init() {
 		super.init();
-		_baseline = new HardwareComputerNode();
+		_baseNode = new HardwareComputerNode();
 	}
 
 	/**

@@ -9,7 +9,8 @@ import network.communication.IPacket;
  * @author Alex Maskovyak
  *
  */
-public interface IConnectionMedium {
+public interface IConnectionMedium 
+		extends IPublicCloneable {
 
 	/**
 	 * Connects a series of adaptors.

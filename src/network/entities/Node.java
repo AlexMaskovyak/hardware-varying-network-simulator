@@ -8,6 +8,7 @@ import simulation.event.IDiscreteScheduledEvent;
 import simulation.event.IDiscreteScheduledEvent.IMessage;
 import simulation.simulatable.AbstractSimulatable;
 import simulation.simulatable.ISimulatable;
+import simulation.simulatable.PerformanceRestrictedSimulatable;
 import simulation.simulatable.listeners.ISimulatableEvent;
 import simulation.simulatable.listeners.ISimulatableListener;
 import simulation.simulator.DESimulator;
@@ -39,7 +40,7 @@ import network.routing.IAddress;
  */
 public class Node 
 		extends AbstractProtocolHandler<IPacket> 
-		implements INode, ISimulatable, Comparable<INode>, PublicCloneable {
+		implements INode, ISimulatable, Comparable<INode>, IPublicCloneable {
 
 /// Fields	
 	
@@ -69,7 +70,7 @@ public class Node
 	public Node(IAddress address) {
 		super();
 		setAddress( address );
-		_manager.install(this, AbstractProtocolHandler.DEFAULT_PROTOCAL);
+		_manager.install( this, AbstractProtocolHandler.DEFAULT_PROTOCAL );
 	}
 	
 	/**
@@ -188,8 +189,6 @@ public class Node
 		_manager.setSimulator( simulator );
 	}
 	
-	boolean doit = true;
-	
 	/*
 	 * (non-Javadoc)
 	 * @see simulation.AbstractSimulatable#handleEvent(simulation.IDiscreteScheduledEvent)
@@ -301,14 +300,13 @@ public class Node
 
 	
 // PublicCloneable 
-	
+
 	/*
 	 * (non-Javadoc)
-	 * @see java.lang.Object#clone()
+	 * @see simulation.simulatable.PerformanceRestrictedSimulatable#createNew()
 	 */
 	@Override
-	public Object clone() {
-		Node node = new Node();
-		return node;
+	protected PerformanceRestrictedSimulatable createNew() {
+		return new Node();	
 	}
 }

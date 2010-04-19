@@ -7,8 +7,10 @@ import computation.hardware.Harddrive;
 import computation.hardware.Memory;
 
 import network.entities.INode;
+import network.entities.Node;
 import network.routing.IAddress;
 import simulation.simulatable.ISimulatable;
+import simulation.simulatable.PerformanceRestrictedSimulatable;
 import simulation.simulator.ISimulator;
 import simulation.simulator.listeners.ISimulatorEvent;
 
@@ -169,5 +171,17 @@ public class HardwareComputerNode
 		if( getHarddrive() != null ) {
 			getHarddrive().setSimulator( simulator );
 		}
+	}
+
+	
+// PublicCloneable 
+
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.simulatable.PerformanceRestrictedSimulatable#createNew()
+	 */
+	@Override
+	protected PerformanceRestrictedSimulatable createNew() {
+		return new HardwareComputerNode();	
 	}
 }

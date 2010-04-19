@@ -5,8 +5,6 @@ import network.communication.ConnectionAdaptorManager;
 import network.communication.IPacket;
 import network.communication.IProtocolHandler;
 import network.routing.IAddress;
-import network.routing.IRoutingTable;
-import network.routing.RoutingTable;
 import messages.ConnectionAdaptorMessage;
 import messages.ConnectionMediumMessage;
 
@@ -14,7 +12,7 @@ import simulation.event.DefaultDiscreteScheduledEvent;
 import simulation.event.IDiscreteScheduledEvent;
 import simulation.event.IDiscreteScheduledEvent.IMessage;
 import simulation.simulatable.ISimulatable;
-import simulation.simulator.listeners.ISimulatorEvent;
+import simulation.simulatable.PerformanceRestrictedSimulatable;
 
 /**
  * Allows for the transmission of information to ConnectionAdaptors.
@@ -213,5 +211,17 @@ public class ConnectionAdaptor
 			( getConnectedNode() == adaptor.getConnectedNode() ) // same node
 			&& ( getAddress().equals( adaptor.getAddress() )	// equal address
 			&& ( getConnectedMedium() == adaptor.getConnectedMedium() ) ); // same medium
+	}
+	
+	
+// PublicCloneable 
+
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.simulatable.PerformanceRestrictedSimulatable#createNew()
+	 */
+	@Override
+	protected PerformanceRestrictedSimulatable createNew() {
+		return new ConnectionAdaptor();	
 	}
 }

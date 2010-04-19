@@ -12,6 +12,7 @@ import network.routing.IAddress;
 
 
 import simulation.simulatable.ISimulatable;
+import simulation.simulatable.PerformanceRestrictedSimulatable;
 
 /**
  * Simulatable Computer Node which has modular hardware components.
@@ -115,5 +116,17 @@ public class ComputerNode
 	@Override
 	public INode createNew(IAddress address) {
 		return new ComputerNode(address);
+	}
+
+	
+// PublicCloneable 
+
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.simulatable.PerformanceRestrictedSimulatable#createNew()
+	 */
+	@Override
+	protected PerformanceRestrictedSimulatable createNew() {
+		return new ComputerNode();	
 	}
 }

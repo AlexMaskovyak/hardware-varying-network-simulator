@@ -9,7 +9,8 @@ import network.routing.IAddress;
  * @author Alex Maskovyak
  *
  */
-public interface IConnectionAdaptor<T> extends IProtocolHandler<T> {
+public interface IConnectionAdaptor<T> 
+		extends IProtocolHandler<T>, IPublicCloneable {
 
 	/**
 	 * Obtains this adaptor's address.
