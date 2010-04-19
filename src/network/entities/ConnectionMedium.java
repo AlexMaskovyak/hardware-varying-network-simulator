@@ -210,4 +210,15 @@ public class ConnectionMedium
 		return _adaptors.equals(theirConnectionAdaptors);
 	}
 
+	
+// PublicCloneable 
+
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.simulatable.PerformanceRestrictedSimulatable#createNew()
+	 */
+	@Override
+	protected PerformanceRestrictedSimulatable createNew() {
+		return new ConnectionMedium();	
+	}
 }

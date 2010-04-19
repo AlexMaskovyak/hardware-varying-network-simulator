@@ -1,5 +1,6 @@
 package simulation.simulatable;
 
+import network.entities.IPublicCloneable;
 import messages.SimulatableRefreshMessage;
 import simulation.event.DefaultDiscreteScheduledEvent;
 import simulation.event.IDiscreteScheduledEvent;
@@ -24,7 +25,7 @@ import simulation.event.IDiscreteScheduledEvent.IMessage;
  */
 public class PerformanceRestrictedSimulatable 
 		extends AbstractSimulatable
-		implements ISimulatable {
+		implements ISimulatable, IPublicCloneable {
 	
 	
 /// Constants
@@ -322,5 +323,32 @@ public class PerformanceRestrictedSimulatable
 				e.getMessage(),
 				DefaultDiscreteScheduledEvent.EXTERNAL);
 		getSimulator().schedule( rescheduledEvent );
+	}
+	
+
+/// IPublicCloneable
+
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#clone()
+	 */
+	@Override
+	public Object clone() {
+		PerformanceRestrictedSimulatable clone = createNew();
+		clone.setMaxAllowedOperations( this.getMaxAllowedOperations() );
+		clone.setRefreshInterval( this.getRefreshInterval() );
+		clone.setTransitTime( this.getTransitTime() );
+		return clone;
+	}
+	
+	/**
+	 * Creates a new performance restricted simulatable.  The intentions of this
+	 * method is to be overriden by subclasses.  This overriden method will be
+	 * called by our clone method to create the new object, and then the 
+	 * relevant attributes of a performance restricted simulatable will be set.
+	 * @return a new version of the subclass.
+	 */
+	protected PerformanceRestrictedSimulatable createNew() {
+		return new PerformanceRestrictedSimulatable();	
 	}
 }

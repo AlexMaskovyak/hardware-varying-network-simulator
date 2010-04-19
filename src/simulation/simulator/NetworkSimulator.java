@@ -36,7 +36,11 @@ public class NetworkSimulator
 	/** universal simple router for all nodes. */
 	protected CentralRouter _router;
 	/** baseline type to clone for production. */
-	protected INode _baseline;
+	protected INode _baseNode;
+	/** baseline adaptor type to clone for production. */
+	protected IConnectionAdaptor _baseAdaptor;
+	/** baseline medium type to clone for production. */
+	protected IConnectionMedium _baseMedium;
 	/** address creating entity. */
 	protected AddressCreator _addressCreator;
 	
@@ -52,14 +56,17 @@ public class NetworkSimulator
 		super.init();
 		_addressCreator = AddressCreator.getInstance();
 		_router = CentralRouter.getInstance();
-		_baseline = new Node();
+		_baseNode = new Node();
+		_baseAdaptor = new ConnectionAdaptor();
+		_baseMedium = new ConnectionMedium();
 	}
 
 /// Factory methods
 	
 	/** creates a Node and adds it to the simulator. */
 	public INode createNode() {
-		INode node = _baseline.createNew(_addressCreator.createUnique());
+		INode node = (INode)_baseNode.clone();   //createNew(_addressCreator.createUnique());
+		node.setAddress( _addressCreator.createUnique() );
 		try { ((ISimulatable)node).addListener( new NodeReporter(node, "C:\\tests") ); } 
 		catch (Exception e) { e.printStackTrace(); }
 		registerSimulatable((ISimulatable)node);
@@ -68,14 +75,14 @@ public class NetworkSimulator
 	
 	/** creates an adaptor and adds it to the simulator. */
 	public IConnectionAdaptor createAdaptor() {
-		IConnectionAdaptor adaptor = new ConnectionAdaptor();
+		IConnectionAdaptor adaptor = (IConnectionAdaptor)_baseAdaptor.clone();//new ConnectionAdaptor();
 		registerSimulatable((ISimulatable)adaptor);
 		return adaptor;
 	}
 	
 	/** creates a connection medium and adds it to the simulator. */
 	public IConnectionMedium createConnectionMedium() {
-		IConnectionMedium medium = new ConnectionMedium();
+		IConnectionMedium medium = (IConnectionMedium)_baseMedium.clone(); //new ConnectionMedium();
 		registerSimulatable((ISimulatable)medium);
 		return medium;
 	}
