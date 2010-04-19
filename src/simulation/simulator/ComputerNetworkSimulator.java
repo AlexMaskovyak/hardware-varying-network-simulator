@@ -22,28 +22,21 @@ public class ComputerNetworkSimulator
 	
 	/** path to be used for outputting log files. */
 	protected String _outputPath;
-
+	
 	
 /// Construction
 
-	/** Constructor. */
-	public ComputerNetworkSimulator() {
-		
-	}
-	
-	//public ComputerNetworkSimulator() {
-		
-	//}
-	
 	/*
 	 * (non-Javadoc)
 	 * @see network.NetworkSimulator#init()
 	 */
 	protected void init() {
 		super.init();
-		_baseNode = new HardwareComputerNode();
+		setBaseNode( new HardwareComputerNode() );
 	}
 
+/// Accessors/Mutators
+	
 	/**
 	 * Sets the output path to which reporters will log information.
 	 * @param outPath for reporters to store their information.

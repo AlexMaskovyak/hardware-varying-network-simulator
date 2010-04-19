@@ -56,16 +56,68 @@ public class NetworkSimulator
 		super.init();
 		_addressCreator = AddressCreator.getInstance();
 		_router = CentralRouter.getInstance();
-		_baseNode = new Node();
-		_baseAdaptor = new ConnectionAdaptor();
-		_baseMedium = new ConnectionMedium();
+		setBaseNode( new Node() );
+		setBaseAdaptor( new ConnectionAdaptor() );
+		setBaseMedium( new ConnectionMedium() );
 	}
 
+	
+/// Accessors/Mutators
+	
+	/**
+	 * Sets the base node type to use for construction/factory purposes.
+	 * @param baseNode to use in factory methods.
+	 */
+	public void setBaseNode( INode baseNode ) {
+		_baseNode = baseNode;
+	}
+	
+	/**
+	 * Gets the base node type to use for constructin/factory purposes.
+	 * @return base Node to use for factory methods.
+	 */
+	public INode getBaseNode() {
+		return _baseNode;
+	}
+	
+	/**
+	 * Sets the base adaptor type to use for construction/factory purposes.
+	 * @param baseAdaptor to use in factory methods.
+	 */
+	public void setBaseAdaptor( IConnectionAdaptor baseAdaptor ) {
+		_baseAdaptor = baseAdaptor;
+	}
+	
+	/**
+	 * Gets the base adaptor type to use for construction/factory purposes.
+	 * @return base adaptor to use in factory methods.
+	 */
+	public IConnectionAdaptor getBaseAdaptor() {
+		return _baseAdaptor;
+	}
+	
+	/**
+	 * Sets the base medium to use for construction/factory purposes.
+	 * @param baseMedium to use in factory methods.
+	 */
+	public void setBaseMedium( IConnectionMedium baseMedium ) {
+		_baseMedium = baseMedium;
+	}
+	
+	/**
+	 * Gets the base medium to use for construction/factory purposes.
+	 * @return the base medium to use in factory methods.
+	 */
+	public IConnectionMedium getBaseMedium() {
+		return _baseMedium;
+	}
+	
+	
 /// Factory methods
 	
 	/** creates a Node and adds it to the simulator. */
 	public INode createNode() {
-		INode node = (INode)_baseNode.clone();   //createNew(_addressCreator.createUnique());
+		INode node = (INode)getBaseNode().clone();
 		node.setAddress( _addressCreator.createUnique() );
 		try { ((ISimulatable)node).addListener( new NodeReporter(node, "C:\\tests") ); } 
 		catch (Exception e) { e.printStackTrace(); }
@@ -75,14 +127,14 @@ public class NetworkSimulator
 	
 	/** creates an adaptor and adds it to the simulator. */
 	public IConnectionAdaptor createAdaptor() {
-		IConnectionAdaptor adaptor = (IConnectionAdaptor)_baseAdaptor.clone();//new ConnectionAdaptor();
+		IConnectionAdaptor adaptor = (IConnectionAdaptor)getBaseAdaptor().clone();
 		registerSimulatable((ISimulatable)adaptor);
 		return adaptor;
 	}
 	
 	/** creates a connection medium and adds it to the simulator. */
 	public IConnectionMedium createConnectionMedium() {
-		IConnectionMedium medium = (IConnectionMedium)_baseMedium.clone(); //new ConnectionMedium();
+		IConnectionMedium medium = (IConnectionMedium)getBaseMedium();
 		registerSimulatable((ISimulatable)medium);
 		return medium;
 	}
