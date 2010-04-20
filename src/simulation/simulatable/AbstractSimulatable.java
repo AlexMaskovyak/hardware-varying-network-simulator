@@ -78,6 +78,14 @@ public abstract class AbstractSimulatable
 		_transitTime = transitTime;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.ISimulatable#setTransitTime(double)
+	 */
+	public void setTransitTime( Double transitTime ) {
+		_transitTime = transitTime;
+	}
+	
 	
 /// Listener handling
 	

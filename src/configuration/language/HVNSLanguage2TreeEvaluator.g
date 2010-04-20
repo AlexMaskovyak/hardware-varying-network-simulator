@@ -82,6 +82,25 @@ tokens {
 	}
 	
 	/**
+	* Creates an integer object from the string contained in the node.
+	* @param numberNode containing the number value.
+	* @return int of the value.
+	* @throws RuntimeException if the value could not be converted to a Double.
+	*/ 
+	public static Integer toInteger( CommonTree numberNode ) {  
+		Integer result = 0;
+		String value = numberNode.getText();
+		try {
+			result = Integer.parseInt( value );
+	    } catch( NumberFormatException e ) {
+			throw new RuntimeException( 
+				String.format( "Cannot convert \"\%s\" to a double.", value ) );
+	    }
+		
+		return result;
+	}	
+	
+	/**
 	 * Creates an instance of the class name specified.
 	 * @param className to instantiate.
 	 * @return new instance of the class specified.
@@ -185,6 +204,7 @@ tokens {
 			Method method = target.getClass().getMethod( name, classArray );
 			method.invoke( target, parameters );
 		} catch( Exception e ) {
+			e.printStackTrace();
 			throw new RuntimeException( 
 				String.format( 
 					"Cannot invoke method \"\%s\" on type \"\%s\".", 
@@ -204,7 +224,7 @@ statement returns [ Object result ]
 
 assign returns [ Object result ]
 	:	^(ASSIGN NAME v=expression ) {
-			setVariable( $NAME.text, $v.result );
+			setVariable( $NAME.text, $v.result ); 
 			$result = v;
 		}
 	;
@@ -219,26 +239,36 @@ connect returns [ Object result ]
 			System.out.println("connect"); 
 			getSimulator().connectAsMesh( getNodes( $names ) );  
 		}
+	| 	^(RANDOM_CONNECT_OP (names+=NAME)+) { 
+			System.out.println("connect"); 
+			getSimulator().connectRandomly( getNodes( $names ) );  
+		}
+	| 	^(RING_CONNECT_OP (names+=NAME)+) { 
+			System.out.println("connect"); 
+			getSimulator().connectAsRing( getNodes( $names ) );   
+		}
 	;
 
 expression returns [ Object result ]
-	:	^('+' op1=expression op2=expression) { $result = (Double)op1 + (Double)op2; } 
-	| 	^('-' op1=expression op2=expression) { $result = (Double)op1 - (Double)op2; }
-	|   ^('*' op1=expression op2=expression) { $result = (Double)op1 * (Double)op2; }
-	|	^('/' op1=expression op2=expression) { $result = (Double)op1 / (Double)op2; }
-	|	^('%' op1=expression op2=expression) { $result = (Double)op1 \% (Double)op2; }
-	|	^(NEGATION e=expression) { $result = -(Double)e; }  
+	:	^('+' op1=expression op2=expression) { try { $result = (Double)op1 + (Double)op2; } catch( Exception exception ) { $result = (Integer)op1 + (Integer)op2;  } } 
+	| 	^('-' op1=expression op2=expression) { try { $result = (Double)op1 - (Double)op2; } catch( Exception exception ) { $result = (Integer)op1 - (Integer)op2;  } }
+	|   ^('*' op1=expression op2=expression) { try { $result = (Double)op1 * (Double)op2; } catch( Exception exception ) { $result = (Integer)op1 * (Integer)op2;  } }
+	|	^('/' op1=expression op2=expression) { try { $result = (Double)op1 / (Double)op2; } catch( Exception exception ) { $result = (Integer)op1 / (Integer)op2;  } }
+	|	^('%' op1=expression op2=expression) { try { $result = (Double)op1 \% (Double)op2; } catch( Exception exception ) { $result = (Integer)op1 \% (Integer)op2;  } }
+	|	^(NEGATION e=expression) { try { $result = -(Double)e; } catch( Exception exception ) { $result = -(Integer)e; }  }  
 	|	^(JAVA_INSTANTIATE NAME) { $result = instantiate( $NAME ); } 
 	|	^(CLONE NAME) { $result = clone( $NAME ); }	
-	//|	^(JAVA_INVOKE target=NAME name=expression arg=expression) { 
-	//		invokeObjectMethod( $target.text, name, arg);
-	//		$result =  }
+	|	^(JAVA_INVOKE target=expression name=NAME arg=expression) { 
+			invokeObjectMethod( target, $name.text, arg);
+			$result =  target; }
 	|	NAME	{ $result = getVariable( $NAME ); }
-	|	NUMBER	{ $result = toDouble( $NUMBER ); }
+	|	FLOAT { $result = toDouble( $FLOAT ); }
+	|	INTEGER { $result = toInteger( $INTEGER); }
 	;
 
 value returns [ Object result ]
-	:	NUMBER { $result = toDouble( $NUMBER ); }
+	:	FLOAT { $result = toDouble( $FLOAT ); }
+	|	INTEGER { $result = toInteger( $INTEGER); }
 	|	NAME { $result = getVariable( $NAME ); } 
 	;
 	

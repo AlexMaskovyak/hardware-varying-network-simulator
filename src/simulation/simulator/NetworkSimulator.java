@@ -201,12 +201,26 @@ public class NetworkSimulator
 	 * connects them all randomly using the seed as a base.  Connectedness is 
 	 * one.  Nodes are guaranteed to only connect to one node other than
 	 * themselves.
+	 * @param number of nodes to create and connected.
+	 * @return collection of nodes and mediums.
+	 */
+	public List<ISimulatable> createRandomlyConnectedNodes( 
+			int number ) {
+		return createRandomlyConnectedNodes( System.nanoTime(), number, 1 );
+	}
+
+	
+	/**
+	 * Creates a series of Nodes, installs Adaptors, and ConnectionMediums and
+	 * connects them all randomly using the seed as a base.  Connectedness is 
+	 * one.  Nodes are guaranteed to only connect to one node other than
+	 * themselves.
 	 * @param seed value to use for connection algorithm.
 	 * @param number of nodes to create and connected.
 	 * @return collection of nodes and mediums.
 	 */
 	public List<ISimulatable> createRandomlyConnectedNodes( 
-			int seed, 
+			long seed, 
 			int number ) {
 		return createRandomlyConnectedNodes( seed, number, 1 );
 	}
@@ -222,7 +236,7 @@ public class NetworkSimulator
 	 * @return collection of nodes and mediums.
 	 */
 	public List<ISimulatable> createRandomlyConnectedNodes( 
-			int seed, 
+			long seed, 
 			int number, 
 			int connectedness ) {
 		return connectRandomly( seed, createNodes( number ) );
@@ -434,7 +448,19 @@ public class NetworkSimulator
 	 * @param nodes to connected.
 	 * @return list of all ISimulatables connected (all nodes, all mediums).
 	 */
-	public List<ISimulatable> connectRandomly( int seed, INode... nodes ) {
+	public List<ISimulatable> connectRandomly( INode... nodes ) {
+		return connectRandomly( System.nanoTime(), nodes );
+	}
+	
+	/**
+	 * Connects all nodes in a random fashion.  All nodes will be reachable.  
+	 * Repeated calls of this method with the same seed will produce the same
+	 * resultant tree.
+	 * @param seed to use for random node connection selection.
+	 * @param nodes to connected.
+	 * @return list of all ISimulatables connected (all nodes, all mediums).
+	 */
+	public List<ISimulatable> connectRandomly( long seed, INode... nodes ) {
 		Random r = new Random(seed);
 		List<ISimulatable> result = 
 			new ArrayList<ISimulatable>( (2 * nodes.length) - 1);

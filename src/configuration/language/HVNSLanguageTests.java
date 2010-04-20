@@ -43,6 +43,16 @@ public class HVNSLanguageTests {
 	 */
 	public static void main(String... args) throws RecognitionException, IOException {
 		HVNSLanguageTests tester = new HVNSLanguageTests();
+		HardwareComputerNode node = new HardwareComputerNode();
+		/*for( Method m : node.getClass().getMethods() ) {
+			System.out.println(m.getName() + " ");
+			for( Class t : m.getParameterTypes() ) {
+				System.out.print( t.getName() + " ");
+			}
+			System.out.println();
+		}*/
+		tester.invokeObjectMethod( node, "setMaxAllowedOperations", 10);
+		
 		tester.testAssignment();
 		//tester.testValue();
 		tester.testAssignAndValue();
@@ -113,7 +123,7 @@ public class HVNSLanguageTests {
 	 * @throws IOException if a problem occurs reading the input.
 	 */
 	public void testAssignment() throws RecognitionException, IOException {
-		Double expectedValue = new Double( 13 );
+		Double expectedValue = new Double( 13 ); 
 		CommonTree ast = 
 			ConfigurationFileProcessor.getAST( 
 				new StringReader( 
@@ -194,18 +204,19 @@ public class HVNSLanguageTests {
 	public void testJavaInstantiation() throws RecognitionException, IOException {
 		String line = 
 			String.format(
-				"%s javaNode = java computation.HardwareComputerNode { setMaxAllowedOperations : 10; setRefreshInterval : 1; }; %s",
+				"%s javaNode = java computation.HardwareComputerNode { setMaxAllowedOperations : 10;  }; %s",
 				_configBegin, _configEnd );
 		CommonTree ast = 
 			ConfigurationFileProcessor.getAST( 
 				new StringReader( line ) );
 		_treeParser = 
 			new HVNSLanguage2TreeEvaluator( new CommonTreeNodeStream( ast ) );
+		System.out.println( ast.toStringTree() );
 		_treeParser.script();
 		HardwareComputerNode node = 
 			(HardwareComputerNode)_treeParser.getVariable( "javaNode" );
 		System.out.printf( 
-			( node != null && node.getMaxAllowedOperations() == 10 && node.getRefreshInterval() == 1 )
+			( node != null && node.getMaxAllowedOperations() == 10 )
 			? "Test Java Instantiation and Method Invocation Success!\n" 
 			: "Test Java Instantiation and Method Invocation Failure.\n");
 	}
@@ -283,7 +294,7 @@ public class HVNSLanguageTests {
 		_treeParser = 
 			new HVNSLanguage2TreeEvaluator( new CommonTreeNodeStream( ast ) );
 		_treeParser.script();
-		Double result = (Double)_treeParser.getVariable( "mathVar" );
+		Integer result = (Integer)_treeParser.getVariable( "mathVar" );
 		
 		System.out.printf( 
 			( result == -16 )
@@ -318,6 +329,34 @@ public class HVNSLanguageTests {
 		//	( result == -16 )
 		//	? "Test Math Success!\n" 
 		//	: "Test Math Failure\n.");
+	}
+	
+	/**
+	 * Invokes the method of the specified name with the provided parameter.
+	 * @param target on which to invoke the method.
+	 * @param name of the method to invoke.
+	 * @param parameters to pass into the method.
+	 */
+	public void invokeObjectMethod( Object target, String name, Object... parameters ) {
+		try {
+			List<Class> parameterClasses = new ArrayList<Class>();
+		
+			if( parameters != null ) {
+				for( Object parameter : parameters ) {
+					parameterClasses.add( parameter.getClass() );
+				}
+			}
+			Class[] classArray = new Class[ parameterClasses.size() ];
+			classArray = parameterClasses.toArray( classArray );
+			Method method = target.getClass().getMethod( name, classArray );
+			method.invoke( target, parameters );
+		} catch( Exception e ) {
+			e.printStackTrace();
+			throw new RuntimeException( 
+				String.format( 
+					"Cannot invoke method \"%s\" on type \"%s\".", 
+					name, target.getClass().getName() ) );
+		}
 	}
 }
 	
