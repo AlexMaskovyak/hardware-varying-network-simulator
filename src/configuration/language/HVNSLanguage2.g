@@ -71,7 +71,7 @@ assign
 *	Calls to getter methods and object fields.
 */
 innerAssign
-	:	LEFT_BRACE ( NAME COLON expression SEMI )+ RIGHT_BRACE -> ^( NAME expression )+
+	:	LEFT_BRACE ( NAME COLON expression SEMI )+ RIGHT_BRACE -> ( NAME expression )+
 	;
 
 /**
@@ -79,11 +79,14 @@ innerAssign
 */
 value
 	: 	'java' NAME -> ^( JAVA_INSTANTIATE NAME )
-	|	'java' NAME inner=innerAssign -> ^( JAVA_INVOKE ^( JAVA_INSTANTIATE NAME ) ^($inner) )+
+	|	'java' NAME in=innerAssign -> ^( JAVA_INVOKE ^(JAVA_INSTANTIATE NAME) $in )
+	//|	'java' NAME inner=innerAssign -> ^( ^(JAVA_INVOKE) ^( JAVA_INSTANTIATE NAME ) )
 	|	'clone' NAME -> ^( CLONE NAME )
 	|	NAME 
 	|	LEFT_PAREN! expression RIGHT_PAREN!
-	|	NUMBER
+	|	FLOAT
+	|	INTEGER 
+//	|	NUMBER
 // | expression
 	;
 
@@ -159,11 +162,11 @@ fragment SPACE: ' ' | '\t';
 fragment SYMBOL: '!' | '#'..'/' | ':'..'@' | '['..']' | '{'..'~';
 
 // numerics
-NUMBER: INTEGER | FLOAT;
+// NUMBER: INTEGER | FLOAT;
 fragment DIGIT: '0'..'9';
 fragment NON_ZERO_DIGIT: '1'..'9';
-fragment FLOAT: INTEGER '.' DIGIT+;
-fragment INTEGER: NON_ZERO_DIGIT DIGIT*;
+FLOAT: INTEGER '.' DIGIT+;
+INTEGER: NON_ZERO_DIGIT DIGIT*;
 
 // spacing
 fragment NEWLINE: ('\r'? '\n')+;

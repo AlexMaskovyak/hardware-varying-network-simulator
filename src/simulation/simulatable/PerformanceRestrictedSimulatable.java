@@ -112,6 +112,14 @@ public class PerformanceRestrictedSimulatable
 	}
 	
 	/**
+	 * Sets the number of allowed operations between refreshes.
+	 * @param maxAllowedOperations between refreshes.
+	 */
+	public void setMaxAllowedOperations( Integer maxAllowedOperations ) {
+		_maxAllowedOperations = maxAllowedOperations;
+	}
+	
+	/**
 	 * Gets the minimum time allowed between refresh events.
 	 * @return minimum time allowed between refresh events.
 	 */
@@ -127,7 +135,15 @@ public class PerformanceRestrictedSimulatable
 		_refreshInterval = refreshInterval;
 	}
 	
-
+	/**
+	 * Sets the minimum time allowed between refresh events.
+	 * @param refreshInterval time between refresh events.
+	 */
+	public void setRefreshInterval( Double refreshInterval ) {
+		_refreshInterval = refreshInterval;
+	}
+	
+	
 /// Protected Accessors/Mutators
 	
 	/**
