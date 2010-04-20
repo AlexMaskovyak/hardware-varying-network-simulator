@@ -8,6 +8,8 @@ import java.util.List;
 
 import javax.swing.tree.TreeNode;
 
+import network.entities.IConnectionMedium;
+import network.entities.INode;
 import network.entities.Node;
 
 import org.antlr.runtime.ANTLRStringStream;
@@ -18,12 +20,14 @@ import org.antlr.runtime.TokenStream;
 import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.CommonTreeNodeStream;
 
+import simulation.simulator.ComputerNetworkSimulator;
+
 import computation.HardwareComputerNode;
 
 import configuration.ConfigurationFileProcessor;
 import configuration.language.HVNSLanguage2Parser.script_return;
 
-
+import org.progeeks.util.MethodIndex;
 
 /**
  * Provides testing for Tree Rules.
@@ -33,6 +37,33 @@ import configuration.language.HVNSLanguage2Parser.script_return;
 public class HVNSLanguageTests {
 
 /// Tester
+	/**
+	 * Invokes the method of the specified name with the provided parameter.
+	 * @param target on which to invoke the method.
+	 * @param name of the method to invoke.
+	 * @param parameters to pass into the method.  
+	 */
+	public static void invokeObjectMethod( Object target, String name, Object... parameters ) {
+		try {
+			List<Class> parameterClasses = new ArrayList<Class>();
+		
+			if( parameters != null ) {
+				for( Object parameter : parameters ) {
+					parameterClasses.add( parameter.getClass() );
+				}
+			}
+			Class[] classArray = new Class[ parameterClasses.size() ];
+			classArray = parameterClasses.toArray( classArray );
+			Method method = target.getClass().getMethod( name, INode.class );
+			method.invoke( target, parameters );
+		} catch( Exception e ) {
+			e.printStackTrace();
+			throw new RuntimeException( 
+				String.format( 
+					"Cannot invoke method \"%s\" on type \"%s\".", 
+					name, target.getClass().getName() ) );
+		}
+	}
 	
 	/**
 	 * Test driver.
@@ -43,15 +74,16 @@ public class HVNSLanguageTests {
 	 */
 	public static void main(String... args) throws RecognitionException, IOException {
 		HVNSLanguageTests tester = new HVNSLanguageTests();
+		ComputerNetworkSimulator simulator = new ComputerNetworkSimulator();
 		HardwareComputerNode node = new HardwareComputerNode();
-		/*for( Method m : node.getClass().getMethods() ) {
-			System.out.println(m.getName() + " ");
-			for( Class t : m.getParameterTypes() ) {
-				System.out.print( t.getName() + " ");
-			}
-			System.out.println();
-		}*/
-		tester.invokeObjectMethod( node, "setMaxAllowedOperations", 10);
+		simulator.setBaseNode(node);
+		
+		MethodIndex blah = MethodIndex.getMethodIndex(simulator.getClass(), true);
+		Method method = blah.findMethod( "setBaseNode", new Class[] { node.getClass() });
+		if( method != null ) {
+			System.out.println( "Wow!");
+		}
+		invokeObjectMethod( simulator, "setBaseNode", node );
 		
 		tester.testAssignment();
 		//tester.testValue();
@@ -60,28 +92,9 @@ public class HVNSLanguageTests {
 		tester.testMultiAssign();
 		tester.testMath();
 		tester.testJavaInstantiation();
+		tester.testSimulatorSetup();
 		tester.testConnect();
 	}
-
-	/**
-	 * Obtains the method of the specified name for the given object.
-	 * @param object to be interrogated.
-	 * @param name of the method to obtain.
-	 * @return method of the specified name.
-	 */
-	public Method getObjectMethod( Object object, String name ) {
-		try {
-			return object.getClass().getMethod( name, Object.class );
-		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (NoSuchMethodException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
-	}
-	
 
 	
 /// Fields
@@ -204,19 +217,19 @@ public class HVNSLanguageTests {
 	public void testJavaInstantiation() throws RecognitionException, IOException {
 		String line = 
 			String.format(
-				"%s javaNode = java computation.HardwareComputerNode { setMaxAllowedOperations : 10;  }; %s",
+				"%s javaNode = java computation.HardwareComputerNode { setMaxAllowedOperations : 10; setRefreshInterval : 1.0; }; %s",
 				_configBegin, _configEnd );
 		CommonTree ast = 
 			ConfigurationFileProcessor.getAST( 
 				new StringReader( line ) );
 		_treeParser = 
 			new HVNSLanguage2TreeEvaluator( new CommonTreeNodeStream( ast ) );
-		System.out.println( ast.toStringTree() );
+		//System.out.println( ast.toStringTree() );
 		_treeParser.script();
 		HardwareComputerNode node = 
 			(HardwareComputerNode)_treeParser.getVariable( "javaNode" );
 		System.out.printf( 
-			( node != null && node.getMaxAllowedOperations() == 10 )
+			( node != null && node.getMaxAllowedOperations() == 10 && node.getRefreshInterval() == 1.0 )
 			? "Test Java Instantiation and Method Invocation Success!\n" 
 			: "Test Java Instantiation and Method Invocation Failure.\n");
 	}
@@ -228,9 +241,9 @@ public class HVNSLanguageTests {
 	 * @throws IOException if a problem occurs reading the input.
 	 */
 	public void testCloneInstantiation() throws RecognitionException, IOException {
-		String className = "network.entities.Node";
+		String className = "computation.HardwareComputerNode";
 		String line = String.format(
-				"%s original = java %s; cloned = clone original; %s", 
+				"%s original = java %s { setMaxAllowedOperations : 10; setRefreshInterval : 1.0; } ; cloned = clone original; %s", 
 				_configBegin,
 				className,
 				_configEnd );
@@ -243,7 +256,11 @@ public class HVNSLanguageTests {
 		Object original = _treeParser.getVariable( "original" );
 		Object cloned = _treeParser.getVariable( "cloned" );
 		System.out.printf( 
-			( original instanceof Node && cloned instanceof Node && original != cloned )
+			( original instanceof HardwareComputerNode 
+					&& cloned instanceof HardwareComputerNode 
+					&& original != cloned 
+					&& ((HardwareComputerNode)original).getMaxAllowedOperations() == 10 
+					&& ((HardwareComputerNode)cloned).getMaxAllowedOperations() == 10 )
 			? "Test java and clone Instantiation Success!\n" 
 			: "Test java and clone Instantiation Failure\n.");
 	}	
@@ -256,7 +273,7 @@ public class HVNSLanguageTests {
 	 */
 	public void testMultiAssign() throws RecognitionException, IOException {
 		String line = String.format(
-			"%s hey, you, there = java network.entities.Node; %s",
+			"%s hey, you, there = java computation.HardwareComputerNode { setMaxAllowedOperations : 10; }; %s",
 			_configBegin, _configEnd );
 		CommonTree ast = 
 			ConfigurationFileProcessor.getAST( 
@@ -265,14 +282,17 @@ public class HVNSLanguageTests {
 			new HVNSLanguage2TreeEvaluator( new CommonTreeNodeStream( ast ) );
 		_treeParser.script();
 		
-		Object first = _treeParser.getVariable( "hey" );
-		Object second = _treeParser.getVariable( "you" );
-		Object third = _treeParser.getVariable( "there" );
+		HardwareComputerNode first = (HardwareComputerNode)_treeParser.getVariable( "hey" );
+		HardwareComputerNode second = (HardwareComputerNode)_treeParser.getVariable( "you" );
+		HardwareComputerNode third = (HardwareComputerNode)_treeParser.getVariable( "there" );
 		
 		System.out.printf( 
 			( first != null && first != second && first != third 
 				&& second != null && second != third
-				&& third != null )
+				&& third != null 
+				&& (first.getMaxAllowedOperations() == second.getMaxAllowedOperations()) 
+				&& (second.getMaxAllowedOperations() == third.getMaxAllowedOperations())
+				&& third.getMaxAllowedOperations() == 10 )
 			? "Test Multi-Assignment Success!\n" 
 			: "Test Multi-Assignment Instantiation Failure\n.");
 	}
@@ -308,6 +328,38 @@ public class HVNSLanguageTests {
 	 * expectations.
 	 * @throws IOException if a problem occurs reading the input.
 	 */
+	public void testSimulatorSetup() throws RecognitionException, IOException {
+		String className = "computation.HardwareComputerNode";
+		String line = String.format(
+				"%s original = java %s { setMaxAllowedOperations : 10; setRefreshInterval : 1.0; }; medium = java network.entities.ConnectionMedium; simulator { setBaseNode : original; setBaseMediumm : medium; }; %s",
+				_configBegin,
+				className,
+				_configEnd );
+		CommonTree ast = 
+			ConfigurationFileProcessor.getAST( 
+				new StringReader( line ) );
+		_treeParser = 
+			new HVNSLanguage2TreeEvaluator( new CommonTreeNodeStream( ast ) );
+		System.out.println( ast.toStringTree() );
+		_treeParser.script();
+		ComputerNetworkSimulator simulator = _treeParser.getSimulator();
+		INode baseNode = simulator.getBaseNode();
+		INode originalNode = (INode)_treeParser.getVariable( "original" );
+		
+		IConnectionMedium baseMedium = simulator.getBaseMedium();
+		IConnectionMedium originalMedium  = (IConnectionMedium)_treeParser.getVariable( "medium" );
+		System.out.printf( 
+			( baseNode == originalNode && baseMedium == originalMedium )
+			? "Test Simulator set Baseline Success!\n" 
+			: "Test Simulator set Baseline Failure\n.");
+	}	
+	
+	/**
+	 * Test the value rule ensuring that it returns the value expected.
+	 * @throws RecognitionException if the string does not meet the rule's 
+	 * expectations.
+	 * @throws IOException if a problem occurs reading the input.
+	 */
 	public void testConnect() throws RecognitionException, IOException {
 		String line = 
 			String.format(
@@ -322,41 +374,13 @@ public class HVNSLanguageTests {
 			new HVNSLanguage2TreeEvaluator( new CommonTreeNodeStream( ast ) );
 		_treeParser.script();
 
-		System.out.println(ast.toStringTree());
+		//System.out.println(ast.toStringTree());
 		//CommonTree tree = new CommonTree();
 		
 		//System.out.printf( 
 		//	( result == -16 )
 		//	? "Test Math Success!\n" 
 		//	: "Test Math Failure\n.");
-	}
-	
-	/**
-	 * Invokes the method of the specified name with the provided parameter.
-	 * @param target on which to invoke the method.
-	 * @param name of the method to invoke.
-	 * @param parameters to pass into the method.
-	 */
-	public void invokeObjectMethod( Object target, String name, Object... parameters ) {
-		try {
-			List<Class> parameterClasses = new ArrayList<Class>();
-		
-			if( parameters != null ) {
-				for( Object parameter : parameters ) {
-					parameterClasses.add( parameter.getClass() );
-				}
-			}
-			Class[] classArray = new Class[ parameterClasses.size() ];
-			classArray = parameterClasses.toArray( classArray );
-			Method method = target.getClass().getMethod( name, classArray );
-			method.invoke( target, parameters );
-		} catch( Exception e ) {
-			e.printStackTrace();
-			throw new RuntimeException( 
-				String.format( 
-					"Cannot invoke method \"%s\" on type \"%s\".", 
-					name, target.getClass().getName() ) );
-		}
 	}
 }
 	

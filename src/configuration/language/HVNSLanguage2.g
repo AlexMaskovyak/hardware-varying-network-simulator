@@ -3,6 +3,7 @@ grammar HVNSLanguage2;
 options {
   language = Java;
   output = AST;
+  backtrack = true;
 }
 
 tokens {
@@ -11,6 +12,7 @@ tokens {
   	CLONE;
   	NEGATION;
   	SERIES_CONNECT_OP;
+  	BUS_CONNECT_OP;
   	MESH_CONNECT_OP;
   	RANDOM_CONNECT_OP;
   	RING_CONNECT_OP;
@@ -38,7 +40,7 @@ script
 	:	'config'! NAME!
 		'begin'!
 		simulatorAssignment
-		( statement | value )* 
+		( statement )* 
 		'end'! EOF!
 	;
 
@@ -46,7 +48,7 @@ script
 *	Special assignment for the simulator to use.
 */
 simulatorAssignment
-	:	sim='simulator' ASSIGN ( expression ) SEMI -> ^( ASSIGN NAME[$sim] expression )
+	:	NAME ASSIGN ( expression ) SEMI { "simulator".equals($NAME.text ) }? -> ^( ASSIGN NAME["simulator"] expression )
 	;
 
 /**
@@ -55,9 +57,11 @@ simulatorAssignment
 statement
 	:	assign 
 	|	seriesConnectStatement
+	|	busConnectStatement
 	|	meshConnectStatement
 	|	randomConnectStatement
 	|	ringConnectStatement
+	|	value SEMI -> ^( value )
 	;
 
 /**
@@ -70,7 +74,7 @@ assign
 /**
 *	Calls to getter methods and object fields.
 */
-innerAssign
+innerAssigns
 	:	LEFT_BRACE ( NAME COLON expression SEMI )+ RIGHT_BRACE -> ( NAME expression )+
 	;
 
@@ -79,16 +83,20 @@ innerAssign
 */
 value
 	: 	'java' NAME -> ^( JAVA_INSTANTIATE NAME )
-	|	'java' NAME in=innerAssign -> ^( JAVA_INVOKE ^(JAVA_INSTANTIATE NAME) $in )
-	//|	'java' NAME inner=innerAssign -> ^( ^(JAVA_INVOKE) ^( JAVA_INSTANTIATE NAME ) )
+	|	'java' NAME in=innerAssigns -> ^( JAVA_INVOKE ^(JAVA_INSTANTIATE NAME) $in )
 	|	'clone' NAME -> ^( CLONE NAME )
 	|	NAME 
+	|	NAME in=innerAssigns -> ^( JAVA_INVOKE NAME $in )
 	|	LEFT_PAREN! expression RIGHT_PAREN!
 	|	FLOAT
 	|	INTEGER 
 //	|	NUMBER
 // | expression
 	;
+
+//function[CommonTree begin]
+//	:	begin=( 'java' NAME innerAssign+ ) end=innerAssign -> ^( JAVA_INVOKE function[$begin] $end )
+//	;
 
 /**
 *	Addition and subtraction operations.
@@ -103,10 +111,16 @@ expression
 mult:	unary ( ( '*'^ | '/'^ ) unary )*
 	;
 
+/**
+*	Handles unary positive and negative operators for numerics.
+*/
 unary
 	:   ('+'! | negation^)* value  // --2  (- ( - 2 )
 	;
 
+/**
+*	Convert unary '-' to a negation token.
+*/
 negation
 	:	'-' -> NEGATION
 	;
@@ -117,19 +131,23 @@ seriesConnectStatement
 		//LEFT_PAREN '+' (names+=NAME)+ RIGHT_PAREN ';' { System.out.println( $names ); } -> SERIES_CONNECT_OP $names
 		//LEFT_PAREN '+' (names+=NAME)+ RIGHT_PAREN ';' { System.out.println( $names ); } -> ^(SERIES_CONNECT_OP $names)
 		//LEFT_PAREN '+' NAME+ RIGHT_PAREN ';' { System.out.println( $NAME ); } -> ^(SERIES_CONNECT_OP NAME )
-		LEFT_PAREN '+' NAME+ RIGHT_PAREN SEMI { System.out.println( $NAME ); } -> ^( SERIES_CONNECT_OP NAME+ )
+		LEFT_PAREN '+' NAME+ RIGHT_PAREN SEMI -> ^( SERIES_CONNECT_OP NAME+ )
+	;
+
+busConnectStatement
+	:	LEFT_PAREN '*' NAME+ RIGHT_PAREN SEMI -> ^( BUS_CONNECT_OP NAME+ )
 	;
 
 meshConnectStatement
-	:	LEFT_PAREN '#' NAME+ RIGHT_PAREN SEMI { System.out.println( $NAME ); } -> ^( MESH_CONNECT_OP NAME+ )
+	:	LEFT_PAREN '#' NAME+ RIGHT_PAREN SEMI -> ^( MESH_CONNECT_OP NAME+ )
 	;
 	
 randomConnectStatement
-	:	LEFT_PAREN '&' NAME+ RIGHT_PAREN SEMI { System.out.println( $NAME ); } -> ^( RANDOM_CONNECT_OP NAME+ )
+	:	LEFT_PAREN '&' NAME+ RIGHT_PAREN SEMI -> ^( RANDOM_CONNECT_OP NAME+ )
 	;
 
 ringConnectStatement
-	:	LEFT_PAREN '@' NAME+ RIGHT_PAREN SEMI { System.out.println( $NAME ); } -> ^( RING_CONNECT_OP NAME+ )
+	:	LEFT_PAREN '@' NAME+ RIGHT_PAREN SEMI -> ^( RING_CONNECT_OP NAME+ )
 	;
 
 

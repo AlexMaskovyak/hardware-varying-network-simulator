@@ -21,6 +21,7 @@ tokens {
   	import network.entities.INode;
   	import network.entities.Node;
   	import network.entities.IPublicCloneable;
+  	import org.progeeks.util.MethodIndex;
 }
 
 @members {
@@ -114,7 +115,7 @@ tokens {
 		} catch( Exception e ) {
 			throw new RuntimeException(
 				String.format(
-					"Cannot convert \"\%s\" to a double.", 
+					"Cannot instantiate class named: \"\%s\".", 
 					className ) ); 
 		}
 	}	
@@ -151,9 +152,7 @@ tokens {
 	 */
 	public List<Object> getVariables( List<Object> nameNodes ) {
 		List<Object> variables = new ArrayList<Object>();
-		System.out.println( nameNodes.size() + " " + nameNodes );
 		for( Object nameNode : nameNodes ) {
-			System.out.println( nameNode );
 			variables.add( getVariable( (CommonTree)nameNode ) );
 		}
 		return variables;
@@ -188,7 +187,7 @@ tokens {
 	 * Invokes the method of the specified name with the provided parameter.
 	 * @param target on which to invoke the method.
 	 * @param name of the method to invoke.
-	 * @param parameters to pass into the method.
+	 * @param parameters to pass into the method.  
 	 */
 	public void invokeObjectMethod( Object target, String name, Object... parameters ) {
 		try {
@@ -201,7 +200,9 @@ tokens {
 			}
 			Class[] classArray = new Class[ parameterClasses.size() ];
 			classArray = parameterClasses.toArray( classArray );
-			Method method = target.getClass().getMethod( name, classArray );
+			MethodIndex index = MethodIndex.getMethodIndex( target.getClass(), true );
+			Method method = index.findMethod( name, classArray );
+			//Method method = target.getClass().getMethod( name, classArray );
 			method.invoke( target, parameters );
 		} catch( Exception e ) {
 			e.printStackTrace();
@@ -214,11 +215,12 @@ tokens {
 }
 
 script
-	:	statement* EOF
+	:	statement* EOF 
 	;
 
 statement returns [ Object result ]
 	:	e=assign { $result = e; }
+	|	e=expression { $result = e; }
 	|	e=connect { $result = e; } 
 	;
 
@@ -226,70 +228,54 @@ assign returns [ Object result ]
 	:	^(ASSIGN NAME v=expression ) {
 			setVariable( $NAME.text, $v.result ); 
 			$result = v;
-		}
+		} 
 	;
 
 connect returns [ Object result ]
 	:	//^(SERIES_CONNECT_OP (names+=NAME)+) { System.out.println("connect"); $result = getVariables( $names ); } 
 		^(SERIES_CONNECT_OP (names+=NAME)+) { 
-			System.out.println("connect"); 
-			getSimulator().connectAsSeries( getNodes( $names ) );  
+			getSimulator().connectAsSeries( getNodes( $names ) ); 
+		}
+	| 	^(BUS_CONNECT_OP (names+=NAME)+) { 
+			getSimulator().connectAsMesh( getNodes( $names ) );  
 		}
 	| 	^(MESH_CONNECT_OP (names+=NAME)+) { 
-			System.out.println("connect"); 
 			getSimulator().connectAsMesh( getNodes( $names ) );  
 		}
 	| 	^(RANDOM_CONNECT_OP (names+=NAME)+) { 
-			System.out.println("connect"); 
 			getSimulator().connectRandomly( getNodes( $names ) );  
 		}
 	| 	^(RING_CONNECT_OP (names+=NAME)+) { 
-			System.out.println("connect"); 
 			getSimulator().connectAsRing( getNodes( $names ) );   
 		}
 	;
 
 expression returns [ Object result ]
+	scope {
+  		List expressionList;
+  		List argList;
+	}
+	@init { $expression::expressionList = new ArrayList(); $expression::argList = new ArrayList(); }	
 	:	^('+' op1=expression op2=expression) { try { $result = (Double)op1 + (Double)op2; } catch( Exception exception ) { $result = (Integer)op1 + (Integer)op2;  } } 
 	| 	^('-' op1=expression op2=expression) { try { $result = (Double)op1 - (Double)op2; } catch( Exception exception ) { $result = (Integer)op1 - (Integer)op2;  } }
 	|   ^('*' op1=expression op2=expression) { try { $result = (Double)op1 * (Double)op2; } catch( Exception exception ) { $result = (Integer)op1 * (Integer)op2;  } }
 	|	^('/' op1=expression op2=expression) { try { $result = (Double)op1 / (Double)op2; } catch( Exception exception ) { $result = (Integer)op1 / (Integer)op2;  } }
 	|	^('%' op1=expression op2=expression) { try { $result = (Double)op1 \% (Double)op2; } catch( Exception exception ) { $result = (Integer)op1 \% (Integer)op2;  } }
 	|	^(NEGATION e=expression) { try { $result = -(Double)e; } catch( Exception exception ) { $result = -(Integer)e; }  }  
-	|	^(JAVA_INSTANTIATE NAME) { $result = instantiate( $NAME ); } 
+	|	^(JAVA_INSTANTIATE NAME) { $result = instantiate( $NAME ); }   
 	|	^(CLONE NAME) { $result = clone( $NAME ); }	
-	|	^(JAVA_INVOKE target=expression name=NAME arg=expression) { 
-			invokeObjectMethod( target, $name.text, arg);
-			$result =  target; }
-	|	NAME	{ $result = getVariable( $NAME ); }
-	|	FLOAT { $result = toDouble( $FLOAT ); }
+	|	^(JAVA_INVOKE target=expression ( n=NAME e=expression { $expression::expressionList.add($n.text); $expression::argList.add(e); } )+ ) {
+			for( int i = 0 ; i < $expression::expressionList.size(); ++i ) {
+				invokeObjectMethod( 
+					target, 
+					(String)$expression::expressionList.get(i),  
+					$expression::argList.get(i) );
+			}
+			$result = target;
+			
+		}
+	| 	NAME	{ $result = getVariable( $NAME ); }
+	|	FLOAT 	{ $result = toDouble( $FLOAT ); }
 	|	INTEGER { $result = toInteger( $INTEGER); }
-	;
-
-value returns [ Object result ]
-	:	FLOAT { $result = toDouble( $FLOAT ); }
-	|	INTEGER { $result = toInteger( $INTEGER); }
-	|	NAME { $result = getVariable( $NAME ); } 
-	;
+	; 
 	
-
-/*evaluator returns [ DESimulator result ]
-	:	
-	;
-*/
-/*assignment
-	:	 ^(':=' IDENT e=expression)
-		{ variables.put( $IDENT.text, e ); }
-	;
-*/
-//singleAssignmentDecl returns [ String name ]
-//	:	'var' IDENTIFIER { $name=$IDENTIFIER.text; }
-//	;
-	
-//arrayAssignmentDecl returns [ String name ]
-//	:	'var' IDENTIFIER '[' INTEGER '..' INTEGER ']' { $name=$IDENTIFIER.text; }
-//	;
-//	
-
-	
-
