@@ -1,6 +1,8 @@
 package computation.algorithms;
 
+import network.entities.IPublicCloneable;
 import computation.IComputer;
+import computation.IData;
 import computation.IHardwareComputer;
 
 /**
@@ -8,8 +10,15 @@ import computation.IHardwareComputer;
  * @author Alex Maskovyak
  *
  */
-public interface IAlgorithm {
+public interface IAlgorithm extends IPublicCloneable {
 
+	/**
+	 * Sets the initial data which is to be distributed and then read back from
+	 * the network servers.
+	 * @param data to set for distribution and reading.
+	 */
+	public void setInitialData( IData... data );
+	
 	/**
 	 * Places data on the network.
 	 */
@@ -17,7 +26,7 @@ public interface IAlgorithm {
 	
 	/**
 	 * Allows this algorithm access to the hardware it is installed upon.
-	 * @param computer
+	 * @param computer on which we are loaded.
 	 */
 	public void install(IComputer computer);
 

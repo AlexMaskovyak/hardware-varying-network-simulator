@@ -1,6 +1,7 @@
 package simulation.simulator;
 
 import computation.HardwareComputerNode;
+import computation.algorithms.AbstractAlgorithm;
 import computation.algorithms.IAlgorithm;
 import computation.algorithms.DummyAlgorithm;
 import computation.algorithms.listeners.AlgorithmListener;
@@ -22,6 +23,12 @@ public class ComputerNetworkSimulator
 	
 	/** path to be used for outputting log files. */
 	protected String _outputPath;
+	/** base algorithm to use for construction/factories. */
+	protected IAlgorithm _baseAlgorithm;
+	/** base harddrive to use for construction/factories. */
+	protected Harddrive _baseHarddrive;
+	/** base cache to use for construction/factories. */
+	protected Cache _baseCache;
 	
 	
 /// Construction
@@ -32,11 +39,15 @@ public class ComputerNetworkSimulator
 	 */
 	protected void init() {
 		super.init();
+		setBaseAlgorithm( new DummyAlgorithm() );
 		setBaseNode( new HardwareComputerNode() );
+		setBaseHarddrive( new Harddrive() );
+		setBaseCache( new Cache() );
 	}
 
-/// Accessors/Mutators
 	
+/// Accessors/Mutators
+
 	/**
 	 * Sets the output path to which reporters will log information.
 	 * @param outPath for reporters to store their information.
@@ -53,6 +64,56 @@ public class ComputerNetworkSimulator
 		return _outputPath;
 	}
 	
+	/**
+	 * Sets the base algorithm which will be used for construction/factory 
+	 * methods.
+	 * @param algorithm to install onto nodes. 
+	 */
+	public void setBaseAlgorithm(IAlgorithm algorithm) {
+		_baseAlgorithm = algorithm;
+	}
+
+	/**
+	 * Gets the base algorithm which will be used for construction/factory 
+	 * methods.
+	 * @return algorithm to install onto nodes.
+	 */
+	public IAlgorithm getBaseAlgorithm() {
+		return _baseAlgorithm;
+	}
+	
+	/**
+	 * Sets the base harddrive to be used in construction/factory methods.
+	 * @param baseHarddrive to use as a base in factory methods.
+	 */
+	public void setBaseHarddrive( Harddrive baseHarddrive ) {
+		_baseHarddrive = baseHarddrive;
+	}
+	
+	/**
+	 * Gets the base harddrive to be used in construction/factory methods.
+	 * @return base harddrive to use as a base in factory methods.
+	 */
+	public Harddrive getBaseHarddrive() {
+		return _baseHarddrive;
+	}
+	
+	/**
+	 * Sets the base cache to be used in construction/factory methods.
+	 * @param baseCache to use as a base in factory methods.
+	 */
+	public void setBaseCache( Cache baseCache ) {
+		_baseCache = baseCache;
+	}
+	
+	/**
+	 * Gets the base cache to be use in construction/factory methods.
+	 * @return base cache for factory use.
+	 */
+	public Cache getBaseCache() {
+		return _baseCache;
+	}
+	
 	
 /// Factory methods
 	
@@ -63,9 +124,12 @@ public class ComputerNetworkSimulator
 	@Override
 	public INode createNode() {
 		HardwareComputerNode result = null;
-		try { result = (HardwareComputerNode) super.createNode();
-			DummyAlgorithm algorithm = new DummyAlgorithm( result );
-			algorithm.addListener( new AlgorithmListener( getOutputPath(), algorithm ) );
+		try { 
+			result = (HardwareComputerNode) super.createNode();
+			IAlgorithm algorithm = (IAlgorithm)getBaseAlgorithm().clone();
+			algorithm.install( result );
+			((AbstractAlgorithm)algorithm).addListener( 
+				new AlgorithmListener( getOutputPath(), algorithm ) );
 			result.install( (IAlgorithm)algorithm );
 			result.setHarddrive( createHarddrive() );
 		} catch( Exception e ) { e.printStackTrace(); }
@@ -77,7 +141,7 @@ public class ComputerNetworkSimulator
 	 * @return default harddrive.
 	 */
 	public Harddrive createHarddrive() {
-		Harddrive harddrive = new Harddrive();
+		Harddrive harddrive = (Harddrive)getBaseHarddrive().clone();
 		registerSimulatable( harddrive );
 		return harddrive;
 	}
@@ -87,7 +151,7 @@ public class ComputerNetworkSimulator
 	 * @return default cache;
 	 */
 	public Cache createCache() {
-		Cache cache = new Cache();
+		Cache cache = (Cache)getBaseCache().clone();
 		registerSimulatable( cache );
 		return cache;
 	}

@@ -1,7 +1,6 @@
 package computation.algorithms;
 
-import java.util.Iterator;
-
+import computation.IComputer;
 import computation.IData;
 import computation.IHardwareComputer;
 import computation.algorithms.listeners.AlgorithmEvent;
@@ -12,9 +11,7 @@ import messages.AlgorithmResponseMessage;
 import messages.AlgorithmStoreMessage;
 import messages.HarddriveRequestMessage;
 import messages.HarddriveStoreMessage;
-import messages.NodeInMessage;
 import messages.NodeOutMessage;
-import network.communication.AbstractProtocolHandler;
 import network.communication.Address;
 import network.entities.INode;
 import network.routing.IAddress;
@@ -22,12 +19,9 @@ import network.routing.IAddress;
 import simulation.event.DefaultDiscreteScheduledEvent;
 import simulation.event.IDiscreteScheduledEvent;
 import simulation.event.IDiscreteScheduledEvent.IMessage;
-import simulation.simulatable.AbstractSimulatable;
 import simulation.simulatable.ISimulatable;
 import simulation.simulatable.PerformanceRestrictedSimulatable;
-import simulation.simulatable.listeners.ISimulatableEvent;
-import simulation.simulatable.listeners.ISimulatableListener;
-import simulation.simulator.listeners.ISimulatorEvent;
+
 
 /**
  * Distributes data to random ComputerNodes on the network and then reads back 
@@ -101,6 +95,10 @@ public class DummyAlgorithm
 	/** address of the server */
 	protected IAddress _knownServerAddress;
 	
+	/** number of servers to use */
+	protected int _serverCount;
+	
+	
 /// Construction
 	
 	/** Default constructor. */
@@ -130,16 +128,8 @@ public class DummyAlgorithm
 		_role = Role.SERVER;
 	}
 	
-
-/// Accesors
 	
-	/**
-	 * Get the computer on which we are loaded.
-	 * @return computer on which we are loaded.
-	 */
-	public IHardwareComputer getComputer() {
-		return _computer;
-	}
+/// Accesors / Mutators
 	
 	/**
 	 * Sets the range of addresses available for use.
@@ -167,6 +157,24 @@ public class DummyAlgorithm
 	 */
 	public IAddress getNextRetrievalAddress() {
 		return getNextStorageAddress();
+	}
+	
+	/**
+	 * Gets the count of servers this algorithm is to set up, distribute to, and
+	 * read back from.
+	 * @return number of servers to be set up.
+	 */
+	public int getServerCount() {
+		return _serverCount;
+	}
+	
+	/**
+	 * Sets the count of servers this algorithm is to set up, distribute to, and
+	 * read back from.
+	 * @param serverCount to use.
+	 */
+	public void setServerCount( int serverCount ) {
+		_serverCount = serverCount;
 	}
 	
 	
@@ -200,6 +208,15 @@ public class DummyAlgorithm
 	@Override
 	public void distribute() {
 		distribute( 1, 5 );
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see computation.algorithms.IAlgorithm#setInitialData(computation.IData[])
+	 */
+	@Override
+	public void setInitialData(IData... data) {
+		
 	}
 	
 	/**
@@ -457,4 +474,20 @@ public class DummyAlgorithm
 					address,
 					getProtocol())));
 	}
+	
+	
+
+/// IPublicCloneable
+	
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.simulatable.PerformanceRestrictedSimulatable#createNew()
+	 */
+	@Override
+	protected PerformanceRestrictedSimulatable createNew() {
+		DummyAlgorithm result = new DummyAlgorithm();
+		result.setServerCount( this.getServerCount() );
+		return result;
+	}
+
 }

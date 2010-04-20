@@ -1,10 +1,14 @@
 package computation.algorithms;
 
 import computation.IComputer;
+import computation.IData;
 import computation.IHardwareComputer;
+import computation.hardware.Harddrive;
 
 import simulation.event.IDiscreteScheduledEvent;
+import simulation.simulatable.PerformanceRestrictedSimulatable;
 import network.communication.AbstractProtocolHandler;
+import network.entities.IPublicCloneable;
 
 /**
  * Abstract algorithm is a protocol handler which can be chained/installed on 
@@ -14,7 +18,7 @@ import network.communication.AbstractProtocolHandler;
  */
 public abstract class AbstractAlgorithm
 		extends AbstractProtocolHandler
-		implements IAlgorithm {
+		implements IAlgorithm, IPublicCloneable {
 
 /// Fields
 	
@@ -69,7 +73,16 @@ public abstract class AbstractAlgorithm
 	public void install(IComputer computer) {
 		_computer = (IHardwareComputer)computer;
 	}
-
+	
+	/*
+	 * (non-Javadoc)
+	 * @see computation.algorithms.IAlgorithm#getComputer()
+	 */
+	@Override
+	public IHardwareComputer getComputer() {
+		return _computer;
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * @see computation.IAlgorithm#read()
@@ -79,8 +92,4 @@ public abstract class AbstractAlgorithm
 		System.out.println("READ");
 	}
 
-
-	public IHardwareComputer getComputer() {
-		return null;
-	}
 }

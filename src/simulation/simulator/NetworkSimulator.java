@@ -357,9 +357,13 @@ public class NetworkSimulator
 				INode first = unconnected.poll();
 				INode second = unconnected.peek();
 				try { result.add( (ISimulatable)connect( first, second ) ); } 
-				catch (InvalidObjectException e) { /* cannot occur */ }
+				catch (InvalidObjectException e) { e.printStackTrace(); /* cannot occur */ }
 			}
 		}
+		
+		System.out.println("connect as series success!");
+		
+		
 		return result;
 	}
 	
