@@ -2,6 +2,8 @@
 import java.io.File;
 import java.util.List;
 
+import org.apache.log4j.PropertyConfigurator;
+
 import computation.HardwareComputerNode;
 import computation.algorithms.DummyAlgorithm;
 import configuration.ConfigurationManager;
@@ -27,6 +29,7 @@ public class DriverNetworkSimulator {
 	 * @param args
 	 */
 	public static void main(String... args) throws Exception {
+		PropertyConfigurator.configure("log4j.properties"); // disable it
 		if( args.length != 2 ) {
 			System.err.println( "java -jar hardwareSimulation.jar <path to config file>" );
 		}
@@ -36,20 +39,33 @@ public class DriverNetworkSimulator {
 		// increment #
 		//ConfigurationSetManager setManager = new ConfigurationSetManager();
 		
-		ConfigurationManager configManager = new ConfigurationManager( args[ 0 ], args[ 1 ], "run_" );
+		ConfigurationManager configManager = new ConfigurationManager( args[ 0 ], args[ 0 ] + File.separator + args[ 1 ], "run_" );
 		File outputPath = configManager.makeNewRunDirectory();
 		
 		
 		System.out.println("starting");
 		
 		
-		ComputerNetworkSimulator sim = new ComputerNetworkSimulator();
+		ComputerNetworkSimulator sim = configManager.configureSimulator(); //new ComputerNetworkSimulator();
 		sim.setOutputPath( outputPath.getAbsolutePath() );
+		sim.addAlgorithmListeners();
+		
+		Thread t = new Thread((Runnable)sim);
+		t.start();
+		sim.start();
+		//sim.start();
+		HardwareComputerNode c = (HardwareComputerNode)sim.getClient();
+		DummyAlgorithm alg = (DummyAlgorithm)c.getInstalledAlgorithm();
+		//sim.getDataAmount();
+		//alg.setInitialData(data)
+		alg.setAddressRange( new Address(1), new Address(5));
+		//n0.send(new IMessage() {}, new Address(7));
+		c.start();
 		
 		//IHardwareComputer n0 = (IHardwareComputer)sim.createNode();
 		//System.out.println("\n");
 		//n0.install( new RandomDistributionAlgorithm( n0 ) );
-		List<ISimulatable> simulatables = sim.createRandomlyConnectedNodes( 200, 100 ); //sim.createSeriesOfConnectedNodes(8);
+		/*List<ISimulatable> simulatables = sim.createRandomlyConnectedNodes( 200, 100 ); //sim.createSeriesOfConnectedNodes(8);
 		System.out.println(simulatables.size());
 		INode n0 = null;
 		for( ISimulatable simulatable : simulatables ) {
@@ -78,5 +94,7 @@ public class DriverNetworkSimulator {
 		//configManager.makeAveragesDirectory();
 		
 		//sim.resume();
+		 * 
+		 */
 	}
 }
