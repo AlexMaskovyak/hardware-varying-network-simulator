@@ -1,6 +1,8 @@
 package simulation.simulator;
 
+import simulation.simulatable.ISimulatable;
 import computation.HardwareComputerNode;
+import computation.IComputer;
 import computation.algorithms.AbstractAlgorithm;
 import computation.algorithms.IAlgorithm;
 import computation.algorithms.DummyAlgorithm;
@@ -29,6 +31,11 @@ public class ComputerNetworkSimulator
 	protected Harddrive _baseHarddrive;
 	/** base cache to use for construction/factories. */
 	protected Cache _baseCache;
+	
+	/** designated client node. */
+	protected IComputer _client;
+	/** amount of information for the client to distribute. */
+	protected int _clientDistributionAmount;
 	
 	
 /// Construction
@@ -115,6 +122,39 @@ public class ComputerNetworkSimulator
 	}
 	
 	
+/// Utility
+	
+	/**
+	 * Adds an algorithm listener to the specified node if an output path has
+	 * been previously specified.
+	 * @param node to whose Algorithm is to have a listener installed.
+	 */
+	public void addAlgorithmListener( INode node ) {
+		try {
+			HardwareComputerNode cNode = (HardwareComputerNode)node;
+
+			if( getOutputPath() != null ) {
+				AbstractAlgorithm algorithm = 
+					(AbstractAlgorithm)cNode.getInstalledAlgorithm();
+				algorithm.addListener( 
+					new AlgorithmListener( getOutputPath(), algorithm ) );
+			}
+		} catch( Exception e ) { e.printStackTrace(); }
+	}
+	
+	/**
+	 * Adds algorithm listeners to all nodes being simulated.  Useful if we 
+	 * don't know what the output path is going to be until later.
+	 */
+	public void addAlgorithmListeners() {
+		for( ISimulatable simulatable : this ) {
+			if( simulatable instanceof HardwareComputerNode ) {
+				addAlgorithmListener( (HardwareComputerNode)simulatable );
+			}
+		}
+	}
+	
+	
 /// Factory methods
 	
 	/*
@@ -128,9 +168,8 @@ public class ComputerNetworkSimulator
 			result = (HardwareComputerNode) super.createNode();
 			IAlgorithm algorithm = (IAlgorithm)getBaseAlgorithm().clone();
 			algorithm.install( result );
-			((AbstractAlgorithm)algorithm).addListener( 
-				new AlgorithmListener( getOutputPath(), algorithm ) );
 			result.install( (IAlgorithm)algorithm );
+			addAlgorithmListener( result );
 			result.setHarddrive( createHarddrive() );
 		} catch( Exception e ) { e.printStackTrace(); }
 		return result;
