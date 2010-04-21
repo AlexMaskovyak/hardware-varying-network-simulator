@@ -1,6 +1,8 @@
 package simulation.simulator;
 
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -174,6 +176,21 @@ public abstract class AbstractSimulator
 			_lock.unlock();
 		}
 	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Iterable#iterator()
+	 */
+	@Override
+	public Iterator<ISimulatable> iterator() {
+		_lock.lock();
+		try {
+			return _simulatables.iterator();
+		} finally {
+			_lock.unlock();
+		}
+	}
+	
 	
 	
 /// Methods

@@ -1,8 +1,8 @@
-tree grammar HVNSLanguage2TreeEvaluator;
+tree grammar HVNSLanguageTreeEvaluator;
 
 options {
   language = Java;
-  tokenVocab = HVNSLanguage2;
+  tokenVocab = HVNSLanguage;
   ASTLabelType = CommonTree;
 }
 
@@ -16,6 +16,7 @@ tokens {
   	import java.util.Map;
   	import java.util.HashMap;
   	import java.util.TreeMap;
+  	import simulation.simulator.ISimulator;
   	import simulation.simulator.DESimulator;
   	import simulation.simulator.ComputerNetworkSimulator;
   	import network.entities.INode;
@@ -214,16 +215,19 @@ tokens {
 	}
 }
 
-script
-	:	statement* EOF 
+/** Top-level grouping of statements which are to be evaluated. */
+script returns [ ComputerNetworkSimulator simulator ]
+	:	statement* EOF { simulator=getSimulator(); }
 	;
 
+/** All statements supported by this TreeEvaluator. */
 statement returns [ Object result ]
-	:	e=assign { $result = e; }
-	|	e=expression { $result = e; }
-	|	e=connect { $result = e; } 
+	:	e=assign { $result = e; }		// all assignments
+	|	e=expression { $result = e; }	// expression/value statements
+	|	e=connect { $result = e; } 		// orders to connect Nodes
 	;
 
+/** Handles assignments, including the internal simulator assignment. */
 assign returns [ Object result ]
 	:	^(ASSIGN NAME v=expression ) {
 			setVariable( $NAME.text, $v.result ); 
@@ -231,9 +235,9 @@ assign returns [ Object result ]
 		} 
 	;
 
+/** Connection requests for groupings of nodes. */
 connect returns [ Object result ]
-	:	//^(SERIES_CONNECT_OP (names+=NAME)+) { System.out.println("connect"); $result = getVariables( $names ); } 
-		^(SERIES_CONNECT_OP (names+=NAME)+) { 
+	:	^(SERIES_CONNECT_OP (names+=NAME)+) { 
 			getSimulator().connectAsSeries( getNodes( $names ) ); 
 		}
 	| 	^(BUS_CONNECT_OP (names+=NAME)+) { 
@@ -250,6 +254,7 @@ connect returns [ Object result ]
 		}
 	;
 
+/** All numeric and object related expressions occur here.  */
 expression returns [ Object result ]
 	scope {
   		List expressionList;
@@ -262,7 +267,21 @@ expression returns [ Object result ]
 	|	^('/' op1=expression op2=expression) { try { $result = (Double)op1 / (Double)op2; } catch( Exception exception ) { $result = (Integer)op1 / (Integer)op2;  } }
 	|	^('%' op1=expression op2=expression) { try { $result = (Double)op1 \% (Double)op2; } catch( Exception exception ) { $result = (Integer)op1 \% (Integer)op2;  } }
 	|	^(NEGATION e=expression) { try { $result = -(Double)e; } catch( Exception exception ) { $result = -(Integer)e; }  }  
-	|	^(JAVA_INSTANTIATE NAME) { $result = instantiate( $NAME ); }   
+	|	obj=object 	{ $result = obj; }
+	| 	val=value 	{ $result = val; }
+	|	cre=creation{ $result = cre; }
+	; 
+
+/** object creation and variable returns. */
+value returns [ Object result ] 
+	:	NAME	{ $result = getVariable( $NAME ); }
+	|	FLOAT 	{ $result = toDouble( $FLOAT ); } 
+	|	INTEGER { $result = toInteger( $INTEGER); }
+	;
+	
+/** handles java object instantiation, cloning, and method invocation. */
+object returns [ Object result ] 
+	:	^(JAVA_INSTANTIATE NAME) { $result = instantiate( $NAME ); }   
 	|	^(CLONE NAME) { $result = clone( $NAME ); }	
 	|	^(JAVA_INVOKE target=expression ( n=NAME e=expression { $expression::expressionList.add($n.text); $expression::argList.add(e); } )+ ) {
 			for( int i = 0 ; i < $expression::expressionList.size(); ++i ) {
@@ -272,10 +291,12 @@ expression returns [ Object result ]
 					$expression::argList.get(i) );
 			}
 			$result = target;
-			
 		}
-	| 	NAME	{ $result = getVariable( $NAME ); }
-	|	FLOAT 	{ $result = toDouble( $FLOAT ); }
-	|	INTEGER { $result = toInteger( $INTEGER); }
-	; 
-	
+	;
+
+/** Access to factory methods for easy network entity creation. */
+creation returns [ Object result ]
+	:	^(SIMULATOR_CREATE NODE) { $result = getSimulator().createNode(); }
+	|	^(SIMULATOR_CREATE MEDIUM) { $result = getSimulator().createConnectionMedium(); }
+	|	^(SIMULATOR_CREATE ADAPTOR) { $result = getSimulator().createAdaptor(); }
+	;

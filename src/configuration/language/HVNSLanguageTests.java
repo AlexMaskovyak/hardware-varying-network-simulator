@@ -2,32 +2,24 @@ package configuration.language;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.tree.TreeNode;
-
 import network.entities.IConnectionMedium;
 import network.entities.INode;
-import network.entities.Node;
 
-import org.antlr.runtime.ANTLRStringStream;
-import org.antlr.runtime.CharStream;
-import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.TokenStream;
 import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.CommonTreeNodeStream;
+import org.apache.log4j.PropertyConfigurator;
 
+import simulation.simulatable.ISimulatable;
 import simulation.simulator.ComputerNetworkSimulator;
 
 import computation.HardwareComputerNode;
 
 import configuration.ConfigurationFileProcessor;
-import configuration.language.HVNSLanguage2Parser.script_return;
 
-import org.progeeks.util.MethodIndex;
 
 /**
  * Provides testing for Tree Rules.
@@ -36,34 +28,8 @@ import org.progeeks.util.MethodIndex;
  */
 public class HVNSLanguageTests {
 
+	
 /// Tester
-	/**
-	 * Invokes the method of the specified name with the provided parameter.
-	 * @param target on which to invoke the method.
-	 * @param name of the method to invoke.
-	 * @param parameters to pass into the method.  
-	 */
-	public static void invokeObjectMethod( Object target, String name, Object... parameters ) {
-		try {
-			List<Class> parameterClasses = new ArrayList<Class>();
-		
-			if( parameters != null ) {
-				for( Object parameter : parameters ) {
-					parameterClasses.add( parameter.getClass() );
-				}
-			}
-			Class[] classArray = new Class[ parameterClasses.size() ];
-			classArray = parameterClasses.toArray( classArray );
-			Method method = target.getClass().getMethod( name, INode.class );
-			method.invoke( target, parameters );
-		} catch( Exception e ) {
-			e.printStackTrace();
-			throw new RuntimeException( 
-				String.format( 
-					"Cannot invoke method \"%s\" on type \"%s\".", 
-					name, target.getClass().getName() ) );
-		}
-	}
 	
 	/**
 	 * Test driver.
@@ -73,18 +39,8 @@ public class HVNSLanguageTests {
 	 * @throws IOException if a problem occurs reading the input.
 	 */
 	public static void main(String... args) throws RecognitionException, IOException {
+		PropertyConfigurator.configure("log4j.properties"); // disable it
 		HVNSLanguageTests tester = new HVNSLanguageTests();
-		ComputerNetworkSimulator simulator = new ComputerNetworkSimulator();
-		HardwareComputerNode node = new HardwareComputerNode();
-		simulator.setBaseNode(node);
-		
-		MethodIndex blah = MethodIndex.getMethodIndex(simulator.getClass(), true);
-		Method method = blah.findMethod( "setBaseNode", new Class[] { node.getClass() });
-		if( method != null ) {
-			System.out.println( "Wow!");
-		}
-		invokeObjectMethod( simulator, "setBaseNode", node );
-		
 		tester.testAssignment();
 		//tester.testValue();
 		tester.testAssignAndValue();
@@ -100,11 +56,11 @@ public class HVNSLanguageTests {
 /// Fields
 	
 	/** scanner. */
-	protected HVNSLanguage2Lexer _lexer;
+	protected HVNSLanguageLexer _lexer;
 	/** parser. */
-	protected HVNSLanguage2Parser _parser;
+	protected HVNSLanguageParser _parser;
 	/** tree evaluator. */
-	protected HVNSLanguage2TreeEvaluator _treeParser;
+	protected HVNSLanguageTreeEvaluator _treeParser;
 
 	protected String _configBegin = 
 		"config Configuration1" +
@@ -123,7 +79,7 @@ public class HVNSLanguageTests {
 	}
 	
 	protected void init() {
-		_lexer = new HVNSLanguage2Lexer();
+		_lexer = new HVNSLanguageLexer();
 	}
 	
 	
@@ -144,15 +100,15 @@ public class HVNSLanguageTests {
 						_configBegin, 
 						expectedValue,
 						_configEnd  )) );
-		HVNSLanguage2TreeEvaluator treeParser = 
-			new HVNSLanguage2TreeEvaluator( new CommonTreeNodeStream( ast ) );
+		HVNSLanguageTreeEvaluator treeParser = 
+			new HVNSLanguageTreeEvaluator( new CommonTreeNodeStream( ast ) );
 		treeParser.script();
 		try {
 			Object result = treeParser.getVariable( "stuff" );
 			System.out.printf( 
 				(expectedValue.equals( result ) )
 				? "Test Assignment/Value Success!\n" 
-				: "Test Assignment/Value Failure\n.");
+				: "Test Assignment/Value Failure.\n");
 		} catch( Exception e ) {
 			e.printStackTrace();
 		}
@@ -199,13 +155,13 @@ public class HVNSLanguageTests {
 						"%s stuff = 13; myStuff = %f; yourStuff = myStuff; %s",
 						_configBegin, expectedValue, _configEnd ) ) );
 		_treeParser = 
-			new HVNSLanguage2TreeEvaluator( new CommonTreeNodeStream( ast ) );
+			new HVNSLanguageTreeEvaluator( new CommonTreeNodeStream( ast ) );
 		_treeParser.script();
 		Object finalAssignment = _treeParser.getVariable( "yourStuff" );
 		System.out.printf( 
 				( expectedValue.equals( finalAssignment ) )
 				? "Test Assign Several Values Success!\n" 
-				: "Test Assign Several Values Failure\n.");
+				: "Test Assign Several Values Failure.\n");
 	}
 	
 	/**
@@ -223,7 +179,7 @@ public class HVNSLanguageTests {
 			ConfigurationFileProcessor.getAST( 
 				new StringReader( line ) );
 		_treeParser = 
-			new HVNSLanguage2TreeEvaluator( new CommonTreeNodeStream( ast ) );
+			new HVNSLanguageTreeEvaluator( new CommonTreeNodeStream( ast ) );
 		//System.out.println( ast.toStringTree() );
 		_treeParser.script();
 		HardwareComputerNode node = 
@@ -251,7 +207,7 @@ public class HVNSLanguageTests {
 			ConfigurationFileProcessor.getAST( 
 				new StringReader( line ) );
 		_treeParser = 
-			new HVNSLanguage2TreeEvaluator( new CommonTreeNodeStream( ast ) );
+			new HVNSLanguageTreeEvaluator( new CommonTreeNodeStream( ast ) );
 		_treeParser.script();
 		Object original = _treeParser.getVariable( "original" );
 		Object cloned = _treeParser.getVariable( "cloned" );
@@ -262,7 +218,7 @@ public class HVNSLanguageTests {
 					&& ((HardwareComputerNode)original).getMaxAllowedOperations() == 10 
 					&& ((HardwareComputerNode)cloned).getMaxAllowedOperations() == 10 )
 			? "Test java and clone Instantiation Success!\n" 
-			: "Test java and clone Instantiation Failure\n.");
+			: "Test java and clone Instantiation Failure.\n");
 	}	
 	
 	/**
@@ -279,7 +235,7 @@ public class HVNSLanguageTests {
 			ConfigurationFileProcessor.getAST( 
 				new StringReader( line ) );
 		_treeParser = 
-			new HVNSLanguage2TreeEvaluator( new CommonTreeNodeStream( ast ) );
+			new HVNSLanguageTreeEvaluator( new CommonTreeNodeStream( ast ) );
 		_treeParser.script();
 		
 		HardwareComputerNode first = (HardwareComputerNode)_treeParser.getVariable( "hey" );
@@ -293,8 +249,8 @@ public class HVNSLanguageTests {
 				&& (first.getMaxAllowedOperations() == second.getMaxAllowedOperations()) 
 				&& (second.getMaxAllowedOperations() == third.getMaxAllowedOperations())
 				&& third.getMaxAllowedOperations() == 10 )
-			? "Test Multi-Assignment Success!\n" 
-			: "Test Multi-Assignment Instantiation Failure\n.");
+			? "Test Multi-Assignment Instantiation Success!\n" 
+			: "Test Multi-Assignment Instantiation Failure.\n");
 	}
 	
 	/**
@@ -312,14 +268,14 @@ public class HVNSLanguageTests {
 			ConfigurationFileProcessor.getAST( 
 				new StringReader( line ) );
 		_treeParser = 
-			new HVNSLanguage2TreeEvaluator( new CommonTreeNodeStream( ast ) );
+			new HVNSLanguageTreeEvaluator( new CommonTreeNodeStream( ast ) );
 		_treeParser.script();
 		Integer result = (Integer)_treeParser.getVariable( "mathVar" );
 		
 		System.out.printf( 
 			( result == -16 )
 			? "Test Math Success!\n" 
-			: "Test Math Failure\n.");
+			: "Test Math Failure.\n");
 	}
 	
 	/**
@@ -331,7 +287,7 @@ public class HVNSLanguageTests {
 	public void testSimulatorSetup() throws RecognitionException, IOException {
 		String className = "computation.HardwareComputerNode";
 		String line = String.format(
-				"%s original = java %s { setMaxAllowedOperations : 10; setRefreshInterval : 1.0; }; medium = java network.entities.ConnectionMedium; simulator { setBaseNode : original; setBaseMediumm : medium; }; %s",
+				"%s original = java %s { setMaxAllowedOperations : 10; setRefreshInterval : 1.0; }; medium = java network.entities.ConnectionMedium; simulator { setBaseNode : original; setBaseMedium : medium; }; %s",
 				_configBegin,
 				className,
 				_configEnd );
@@ -339,8 +295,8 @@ public class HVNSLanguageTests {
 			ConfigurationFileProcessor.getAST( 
 				new StringReader( line ) );
 		_treeParser = 
-			new HVNSLanguage2TreeEvaluator( new CommonTreeNodeStream( ast ) );
-		System.out.println( ast.toStringTree() );
+			new HVNSLanguageTreeEvaluator( new CommonTreeNodeStream( ast ) );
+		//System.out.println( ast.toStringTree() );
 		_treeParser.script();
 		ComputerNetworkSimulator simulator = _treeParser.getSimulator();
 		INode baseNode = simulator.getBaseNode();
@@ -351,7 +307,7 @@ public class HVNSLanguageTests {
 		System.out.printf( 
 			( baseNode == originalNode && baseMedium == originalMedium )
 			? "Test Simulator set Baseline Success!\n" 
-			: "Test Simulator set Baseline Failure\n.");
+			: "Test Simulator set Baseline Failure.\n");
 	}	
 	
 	/**
@@ -363,24 +319,43 @@ public class HVNSLanguageTests {
 	public void testConnect() throws RecognitionException, IOException {
 		String line = 
 			String.format(
-				"%s nodeOne, nodeTwo, nodeThree, nodeFour = java network.entities.Node; %s %s",
+				"%s nodeOne, nodeTwo, nodeThree, nodeFour = make Node; %s %s",
 				_configBegin,
 				"(+ nodeOne nodeTwo nodeThree nodeFour);",
 				_configEnd );
 		CommonTree ast = 
 			ConfigurationFileProcessor.getAST( 
 				new StringReader( line ) );
-		_treeParser = 
-			new HVNSLanguage2TreeEvaluator( new CommonTreeNodeStream( ast ) );
-		_treeParser.script();
-
 		//System.out.println(ast.toStringTree());
-		//CommonTree tree = new CommonTree();
+		_treeParser = 
+			new HVNSLanguageTreeEvaluator( new CommonTreeNodeStream( ast ) );
+		ComputerNetworkSimulator simulator = _treeParser.script();
 		
-		//System.out.printf( 
-		//	( result == -16 )
-		//	? "Test Math Success!\n" 
-		//	: "Test Math Failure\n.");
+		List<IConnectionMedium> mediums = new ArrayList<IConnectionMedium>();
+		for( ISimulatable simulatable : simulator ) {
+			if( simulatable instanceof IConnectionMedium ) {
+				mediums.add( (IConnectionMedium)simulatable );
+			}
+		}
+		
+		boolean oneTwoConnected = false;
+		boolean twoThreeConnected = false;
+		boolean threeFourConnected = false;
+		
+		INode one = (INode)_treeParser.getVariable( "nodeOne" );
+		INode two = (INode)_treeParser.getVariable( "nodeTwo" );
+		INode three = (INode)_treeParser.getVariable( "nodeThree" );
+		INode four = (INode)_treeParser.getVariable( "nodeFour" );
+		
+		for( IConnectionMedium medium : mediums ) {
+			oneTwoConnected = (!oneTwoConnected) ? medium.areConnected( one, two ) : oneTwoConnected;
+			twoThreeConnected = (!twoThreeConnected) ? medium.areConnected( two, three ) : twoThreeConnected;
+			threeFourConnected = (!threeFourConnected) ? medium.areConnected( three, four ) : threeFourConnected;
+		}
+		
+		System.out.printf( 
+			( oneTwoConnected && twoThreeConnected && threeFourConnected )
+			? "Test Connect Success!\n" 
+			: "Test Connect Failure.\n");
 	}
 }
-	

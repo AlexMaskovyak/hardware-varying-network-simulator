@@ -1,5 +1,7 @@
 package simulation.simulator;
 
+import java.util.Iterator;
+
 import simulation.simulatable.ISimulatable;
 import simulation.simulator.listeners.ISimulatorEvent;
 import simulation.simulator.listeners.ISimulatorListener;
@@ -11,7 +13,7 @@ import simulation.simulator.listeners.ISimulatorListener;
  * @author Alex Maskovyak
  *
  */
-public interface ISimulator {
+public interface ISimulator extends Iterable<ISimulatable> {
 
 /// listener management
 	

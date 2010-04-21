@@ -374,10 +374,6 @@ public class NetworkSimulator
 				catch (InvalidObjectException e) { e.printStackTrace(); /* cannot occur */ }
 			}
 		}
-		
-		System.out.println("connect as series success!");
-		
-		
 		return result;
 	}
 	

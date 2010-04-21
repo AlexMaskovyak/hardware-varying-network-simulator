@@ -11,9 +11,9 @@ import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.CommonTreeNodeStream;
 
-import configuration.language.HVNSLanguage2Lexer;
-import configuration.language.HVNSLanguage2Parser;
-import configuration.language.HVNSLanguage2TreeEvaluator;
+import configuration.language.HVNSLanguageLexer;
+import configuration.language.HVNSLanguageParser;
+import configuration.language.HVNSLanguageTreeEvaluator;
 
 
 /**
@@ -24,6 +24,8 @@ import configuration.language.HVNSLanguage2TreeEvaluator;
  */
 public class ConfigurationFileProcessor {
 
+/// Driver
+	
 	/**
 	 * Configuration / Simulation Driver.
 	 * @param args [configuration file path]
@@ -38,14 +40,18 @@ public class ConfigurationFileProcessor {
 			System.err.println( 
 				"usage: java configuration.ConfigurationFileProcessor [file-name]" );
 		} else {
-			new ConfigurationFileProcessor().processFile( args[ 0 ] );
+			ConfigurationFileProcessor.processFile( args[ 0 ] );
 		}
 	}
+	
 
+/// Construction
+	
 	/** Default constructor. */
-	public ConfigurationFileProcessor() {
-		
-	}
+	public ConfigurationFileProcessor() {}
+	
+	
+/// Utility
 	
 	/**
 	 * Creates a new AST for the configuration file and processes the tree.
@@ -84,9 +90,9 @@ public class ConfigurationFileProcessor {
 	 */
 	public static CommonTree getAST(Reader reader) 
 			throws IOException, RecognitionException {
-		HVNSLanguage2Parser tokenParser = 
-			new HVNSLanguage2Parser( getTokenStream( reader ) );
-		HVNSLanguage2Parser.script_return result = tokenParser.script();
+		HVNSLanguageParser tokenParser = 
+			new HVNSLanguageParser( getTokenStream( reader ) );
+		HVNSLanguageParser.script_return result = tokenParser.script();
 		reader.close();
 		return (CommonTree)result.getTree();
 	}
@@ -99,8 +105,8 @@ public class ConfigurationFileProcessor {
 	 */
 	public static CommonTokenStream getTokenStream( Reader reader ) 
 			throws IOException {
-		HVNSLanguage2Lexer lexer = 
-			new HVNSLanguage2Lexer( new ANTLRReaderStream( reader ) );
+		HVNSLanguageLexer lexer = 
+			new HVNSLanguageLexer( new ANTLRReaderStream( reader ) );
 		return new CommonTokenStream( lexer );
 	}
 	
@@ -111,8 +117,8 @@ public class ConfigurationFileProcessor {
 	 * of the structure on the CommonTree.
 	 */
 	public static void processAST(CommonTree ast) throws RecognitionException {
-		HVNSLanguage2TreeEvaluator treeParser = 
-			new HVNSLanguage2TreeEvaluator( new CommonTreeNodeStream( ast ) );
+		HVNSLanguageTreeEvaluator treeParser = 
+			new HVNSLanguageTreeEvaluator( new CommonTreeNodeStream( ast ) );
 		treeParser.script();
 	}
 }
