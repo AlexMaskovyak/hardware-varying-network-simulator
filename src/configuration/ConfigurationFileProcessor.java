@@ -11,6 +11,8 @@ import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.CommonTreeNodeStream;
 
+import simulation.simulator.ComputerNetworkSimulator;
+
 import configuration.language.HVNSLanguageLexer;
 import configuration.language.HVNSLanguageParser;
 import configuration.language.HVNSLanguageTreeEvaluator;
@@ -61,9 +63,9 @@ public class ConfigurationFileProcessor {
 	 * @throws IOException if a problem occurs reading from the configuration
 	 * source.
 	 */
-	public static void processFile( String filePath ) 
+	public static ComputerNetworkSimulator processFile( String filePath ) 
 			throws RecognitionException, IOException {
-		processFile( new File( filePath ) );
+		return processFile( new File( filePath ) );
 	}
 	
 	/**
@@ -74,10 +76,10 @@ public class ConfigurationFileProcessor {
 	 * @throws IOException if a problem occurs reading from the configuration
 	 * source.
 	 */
-	public static void processFile( File filePath ) 
+	public static ComputerNetworkSimulator processFile( File filePath ) 
 			throws RecognitionException, IOException {
 		CommonTree ast = getAST( new FileReader( filePath ) );
-		processAST( ast );
+		return processAST( ast );
 	}
 
 	/**
@@ -116,9 +118,9 @@ public class ConfigurationFileProcessor {
 	 * @throws RecognitionException if a problem occurs recognizing the aspects
 	 * of the structure on the CommonTree.
 	 */
-	public static void processAST(CommonTree ast) throws RecognitionException {
+	public static ComputerNetworkSimulator processAST(CommonTree ast) throws RecognitionException {
 		HVNSLanguageTreeEvaluator treeParser = 
 			new HVNSLanguageTreeEvaluator( new CommonTreeNodeStream( ast ) );
-		treeParser.script();
+		return treeParser.script();
 	}
 }
