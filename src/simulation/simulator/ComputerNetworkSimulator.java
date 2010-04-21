@@ -121,6 +121,42 @@ public class ComputerNetworkSimulator
 		return _baseCache;
 	}
 	
+	/**
+	 * Sets the client computer which is to begin distribution.
+	 * @param client computer which is to distribute/read data to/from the
+	 * network.
+	 */
+	public void setClient( IComputer client ) {
+		_client = client;
+	}
+	
+	/**
+	 * Gets the client computer responsible for distribution start.
+	 * @return client computer which is to distribute/read data to/from the
+	 * network.
+	 */
+	public IComputer getClient() {
+		return _client;
+	}
+	
+	/**
+	 * Sets the amount of data the client node is to generate, send, and then
+	 * read back from the network.
+	 * @param dataAmount for the client to generate, send, and read.
+	 */
+	public void setDataAmount( int dataAmount ) {
+		_clientDistributionAmount = dataAmount;
+	}
+	
+	/**
+	 * Gets the amount of data the client node is to generate, send, and then
+	 * read back from the network.
+	 * @return amount of data the client is to send/receive.
+	 */
+	public int getDataAmount() {
+		return _clientDistributionAmount;
+	}
+	
 	
 /// Utility
 	

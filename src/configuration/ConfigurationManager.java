@@ -3,11 +3,18 @@ package configuration;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
+
+import org.antlr.runtime.RecognitionException;
+
+import simulation.simulator.ComputerNetworkSimulator;
+
+import computation.HardwareComputerNode;
 
 /**
  * Handles the directory management for a single configuration file and the runs
@@ -37,7 +44,9 @@ public class ConfigurationManager {
 	
 	/** maximum run number for this configuration directory. */
 	protected int _maxSimRunNumber;
-
+	/** constructs a simulator via a configuration file. */
+	protected ConfigurationFileProcessor _configFileProcessor;
+	
 
 /// Construction
 
@@ -96,6 +105,7 @@ public class ConfigurationManager {
 	protected void init() {
 		_runDirectories = new ArrayList<File>();
 		_runDirectoryFilter = new RunDirectoryFilter( _baseRunName );
+		_configFileProcessor = new ConfigurationFileProcessor();
 	}
 	
 	
@@ -141,6 +151,23 @@ public class ConfigurationManager {
 	 */
 	public String getBaseRunName() {
 		return _baseRunName;
+	}
+
+	/**
+	 * Creates a simulator from the configuration file specified.
+	 * @return ComputerNetworkSimulator constructed from a HVNS language file,
+	 * null if a problem occurred accessing, reading, scanning, parsing or 
+	 * acting upon the directives in the file.
+	 */
+	public ComputerNetworkSimulator configureSimulator() {
+		try {
+			return _configFileProcessor.processFile( _configFile );
+		} catch (RecognitionException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 	
