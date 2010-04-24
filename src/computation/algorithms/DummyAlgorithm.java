@@ -62,7 +62,7 @@ public class DummyAlgorithm
 	/** reference to the computer we are running upon. */
 	protected IHardwareComputer _computer;
 	/** data to send */
-	protected IData _data;
+	protected IData[] _data;
 	
 	
 	/** state of the server, if we are a server. */
@@ -95,8 +95,7 @@ public class DummyAlgorithm
 	/** address of the server */
 	protected IAddress _knownServerAddress;
 	
-	/** number of servers to use */
-	protected int _serverCount;
+
 	
 	
 /// Construction
@@ -112,8 +111,8 @@ public class DummyAlgorithm
 	public DummyAlgorithm( IHardwareComputer computer ) {
 		super();
 		_computer = computer;
-		setMaxAllowedOperations( 20 );
-		setRefreshInterval( 1 );
+		//setMaxAllowedOperations( 20 );
+		//setRefreshInterval( 1 );
 		reset();
 	}
 	
@@ -157,24 +156,6 @@ public class DummyAlgorithm
 	 */
 	public IAddress getNextRetrievalAddress() {
 		return getNextStorageAddress();
-	}
-	
-	/**
-	 * Gets the count of servers this algorithm is to set up, distribute to, and
-	 * read back from.
-	 * @return number of servers to be set up.
-	 */
-	public int getServerCount() {
-		return _serverCount;
-	}
-	
-	/**
-	 * Sets the count of servers this algorithm is to set up, distribute to, and
-	 * read back from.
-	 * @param serverCount to use.
-	 */
-	public void setServerCount( int serverCount ) {
-		_serverCount = serverCount;
 	}
 	
 	
@@ -317,6 +298,7 @@ public class DummyAlgorithm
 		// information requested from memory has arrived
 		else if( message instanceof AlgorithmResponseMessage ) {
 			notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "SERVER", 1, 0, 0, 1, 0, 0) );
+			System.out.println("server send!");
 			AlgorithmResponseMessage aMessage = (AlgorithmResponseMessage)message;
 			getSimulator().schedule(
 				new DefaultDiscreteScheduledEvent<IMessage>(
@@ -346,8 +328,8 @@ public class DummyAlgorithm
 						// read index from harddrive
 						sendHarddriveRequest( _currentIndex++ );
 						notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "DISTR", 0, 0, 0, 0, 1, 0 ) );
+						sendDoWork();
 					} 
-					sendDoWork();
 					
 				} else if( message instanceof AlgorithmResponseMessage ) {
 					IData data = ((AlgorithmResponseMessage)message).getData();
@@ -373,6 +355,7 @@ public class DummyAlgorithm
 						IAddress address = getNextRetrievalAddress();
 						sendClientRequest( _currentIndex++, address );
 						notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "READ", 0, 0, 0, 0, 1, 0));
+						System.out.println("send remote read");
 					} 
 				} else if( message instanceof AlgorithmResponseMessage ) {
 					_totalClientResponses++;
@@ -381,6 +364,9 @@ public class DummyAlgorithm
 					
 					if( _totalClientResponses == ( _endIndex - _startIndex + 1 ) ) {
 						System.out.println("hurray.");
+					}
+					if( _totalClientResponses > ( _endIndex - _startIndex + 1 ) ) {
+						System.out.println("additional invalid response.");
 					}
 				}
 				break;
@@ -487,7 +473,7 @@ public class DummyAlgorithm
 	protected PerformanceRestrictedSimulatable createNew() {
 		DummyAlgorithm result = new DummyAlgorithm();
 		result.setServerCount( this.getServerCount() );
+		result.setDataAmount( this.getDataAmount() );
 		return result;
 	}
-
 }

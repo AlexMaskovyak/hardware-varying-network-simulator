@@ -237,11 +237,11 @@ assign returns [ Object result ]
 
 /** Connection requests for groupings of nodes. */
 connect returns [ Object result ]
-	:	^(SERIES_CONNECT_OP (names+=NAME)+) { 
+	:	^(SERIES_CONNECT_OP (names+=NAME)+) {
 			getSimulator().connectAsSeries( getNodes( $names ) ); 
 		}
 	| 	^(BUS_CONNECT_OP (names+=NAME)+) { 
-			getSimulator().connectAsMesh( getNodes( $names ) );  
+			getSimulator().connectAsBus( getNodes( $names ) );  
 		}
 	| 	^(MESH_CONNECT_OP (names+=NAME)+) { 
 			getSimulator().connectAsMesh( getNodes( $names ) );  

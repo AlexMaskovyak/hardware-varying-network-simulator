@@ -188,4 +188,16 @@ public class HardwareComputerNode
 		result.setCache( (Cache)this.getCache().clone() );
 		return result;
 	}
+	
+
+/// Display
+
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return String.format( "Node[%s]", getAddress() );
+	}
 }

@@ -18,11 +18,11 @@ public interface ISimulatorListener extends EventListener {
 	public void simulatableRegisteredUpdate(ISimulatorEvent e);
 	
 	/**
-	 * ISimulatable unregistered fromt his simulator.
+	 * ISimulatable unregistered from this simulator.
 	 * @param e ISimulatorEvent containing information about this event.
 	 */
 	public void simulatableUnregisteredUpdate(ISimulatorEvent e);
-	
+		
 	/**
 	 * Simulator completing a single step of simulation (tick event and all simulatables completing operation.
 	 * @param e ISimulatorEvent containing information about this event.

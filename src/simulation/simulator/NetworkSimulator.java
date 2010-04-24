@@ -134,8 +134,9 @@ public class NetworkSimulator
 	
 	/** creates a connection medium and adds it to the simulator. */
 	public IConnectionMedium createConnectionMedium() {
-		IConnectionMedium medium = (IConnectionMedium)getBaseMedium();
+		IConnectionMedium medium = (IConnectionMedium)getBaseMedium().clone();
 		registerSimulatable((ISimulatable)medium);
+		System.out.println("create medium");
 		return medium;
 	}
 	

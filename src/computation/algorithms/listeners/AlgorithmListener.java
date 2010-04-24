@@ -79,10 +79,13 @@ public class AlgorithmListener
 			String.format("%s %f %d %d %d %d %d %d\n", 
 				e.getEpoch(), 
 				e.getEventTime(),
+				
 				e.getDataSent(),
 				e.getDataReceived(), 
+				
 				e.getControlSent(),
 				e.getControlReceived(),
+				
 				e.getDataStored(),
 				e.getDataRetrieved() ) );
 		getWriter().flush();
