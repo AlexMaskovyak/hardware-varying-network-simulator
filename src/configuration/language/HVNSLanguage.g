@@ -9,7 +9,6 @@ options {
 tokens {
   	JAVA_INSTANTIATE;
 	MULTI_ASSIGN;
-  	CLONE;
   	NEGATION;
   	SERIES_CONNECT_OP;
   	BUS_CONNECT_OP;
@@ -37,9 +36,7 @@ tokens {
 ///	PARSER
 ///
 
-/**
-*	Start-rule.  
-*/
+/** Start-rule.  */
 script
 	:	'config'! NAME!
 		'begin'!
@@ -72,7 +69,7 @@ assign
 	;
 
 /**
-*	Calls to getter methods and object fields.
+*	Calls to setter methods and object fields.
 */
 innerAssigns
 	:	LEFT_BRACE ( NAME COLON expression SEMI )+ RIGHT_BRACE -> ( NAME expression )+
@@ -82,13 +79,13 @@ innerAssigns
 *	Handles value creation, including insantiation.
 */
 value
-	: 	'make' 'Node' -> ^( SIMULATOR_CREATE NODE )
-	|	'make' 'Medium' -> ^( SIMULATOR_CREATE MEDIUM )
-	|	'make' 'Adaptor' -> ^( SIMULATOR_CREATE ADAPTOR )
-	|	'java' NAME -> ^( JAVA_INSTANTIATE NAME )
-	|	'java' NAME in=innerAssigns -> ^( JAVA_INVOKE ^(JAVA_INSTANTIATE NAME) $in )
-	|	'clone' NAME -> ^( CLONE NAME )
-	|	'clone' NAME in=innerAssigns -> ^( JAVA_INVOKE ^(CLONE NAME) $in )
+	: 	MAKE 'Node' -> ^( SIMULATOR_CREATE NODE )
+	|	MAKE 'Medium' -> ^( SIMULATOR_CREATE MEDIUM )
+	|	MAKE 'Adaptor' -> ^( SIMULATOR_CREATE ADAPTOR )
+	|	JAVA NAME -> ^( JAVA_INSTANTIATE NAME )
+	|	JAVA NAME in=innerAssigns -> ^( JAVA_INVOKE ^(JAVA_INSTANTIATE NAME) $in )
+	|	CLONE NAME -> ^( CLONE NAME )
+	|	CLONE NAME in=innerAssigns -> ^( JAVA_INVOKE ^(CLONE NAME) $in )
 	|	NAME 
 	|	NAME in=innerAssigns -> ^( JAVA_INVOKE NAME $in )
 	|	LEFT_PAREN! expression RIGHT_PAREN!
@@ -114,7 +111,7 @@ mult:	unary ( ( '*'^ | '/'^ ) unary )*
 *	Handles unary positive and negative operators for numerics.
 */
 unary
-	:   ('+'! | negation^)* value  // --2  (- ( - 2 )
+	:   ('+'! | negation^)* value
 	;
 
 /**
@@ -147,7 +144,7 @@ nodeConnectOperator
 //	LEXER
 //
 
-// special control cahra
+// control charaacters
 ASSIGN: '=';
 LEFT_PAREN: '(';
 RIGHT_PAREN: ')';
@@ -157,25 +154,27 @@ COLON: ':';
 COMMA: ',';
 SEMI: ';';
 
-// strings
+// keywords
+CLONE: 'clone';
+MAKE: 'make';
+JAVA: 'java';
+
+// names and strings
 NAME: LETTER ( LETTER | DIGIT | '_' | '.' )*;
-STRING_LITERAL: '"' NONCONTROL_CHAR* '"';
-fragment NONCONTROL_CHAR: LETTER | DIGIT | SYMBOL | SPACE;
 fragment LETTER: LOWER | UPPER;
 fragment LOWER: 'a'..'z';
 fragment UPPER: 'A'..'Z';
-fragment SPACE: ' ' | '\t';
-fragment SYMBOL: '!' | '#'..'/' | ':'..'@' | '['..']' | '{'..'~';
 
 // numerics
+INTEGER: NON_ZERO_DIGIT DIGIT*;
+FLOAT: INTEGER '.' DIGIT+;
 fragment DIGIT: '0'..'9';
 fragment NON_ZERO_DIGIT: '1'..'9';
-FLOAT: INTEGER '.' DIGIT+;
-INTEGER: NON_ZERO_DIGIT DIGIT*;
 
 // spacing
+WHITESPACE: ( SPACE | NEWLINE )+ { $channel = HIDDEN; };
 fragment NEWLINE: ('\r'? '\n')+;
-WHITESPACE: (' ' | '\t' | NEWLINE )+ { $channel = HIDDEN; };
+fragment SPACE: ' ' | '\t';
 
 // comments
 SINGLE_COMMENT: '//' ~('\r' | '\n')* NEWLINE { skip(); };

@@ -7,6 +7,10 @@ import java.util.concurrent.locks.Condition;
 import simulation.event.DiscreteScheduleEventComparator;
 import simulation.event.IDiscreteScheduledEvent;
 import simulation.simulatable.ISimulatable;
+import simulation.simulator.listeners.DESimulatorEvent;
+import simulation.simulator.listeners.IDESimulatorListener;
+import simulation.simulator.listeners.ISimulatorEvent;
+import simulation.simulator.listeners.ISimulatorListener;
 
 /**
  * The work-horse of the Discrete Event Simulator.
@@ -89,9 +93,28 @@ public class DESimulator
 					
 					IDiscreteScheduledEvent event = _queue.poll();	// get event
 					setTime( event.getEventTime() );				// update time
+					notifyListeners( new DESimulatorEvent( this, getTime(), event ) );
 					event.getDestination().handleEvent(event);		// get destination and deliver
-					
+
 				} catch( Exception e ) { /* interrupt exceptions kick us here and then to condition check. */ }
+			}
+		} finally {
+			_lock.unlock();
+		}
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.ISimulator#notifyListeners(simulation.ISimulatorEvent)
+	 */
+	@Override
+	public void notifyListeners(ISimulatorEvent o) {
+		_lock.lock();
+		try {
+			for(ISimulatorListener listener : _listeners) {
+				if( listener instanceof IDESimulatorListener ) {
+					((IDESimulatorListener)listener).update( o );
+				}
 			}
 		} finally {
 			_lock.unlock();

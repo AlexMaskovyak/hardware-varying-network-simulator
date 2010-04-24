@@ -225,7 +225,18 @@ public class ConnectionAdaptorManager
 	public String getProtocol() {
 		return ConnectionAdaptorManager.PROTOCAL;
 	}
+	
 
+/// Display
+	
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return String.format( "AdaptorManager[%s]", getAddress() );
+	}
 	
 /// Testing
 

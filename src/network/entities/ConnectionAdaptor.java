@@ -224,4 +224,11 @@ public class ConnectionAdaptor
 	protected PerformanceRestrictedSimulatable createNew() {
 		return new ConnectionAdaptor();	
 	}
+
+
+/// Display
+	
+	public String toString() {
+		return String.format("Adaptor[%s]", getAddress());
+	}
 }

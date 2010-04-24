@@ -24,7 +24,11 @@ public abstract class AbstractAlgorithm
 	
 	/** computer to use. */
 	protected IHardwareComputer _computer;
-	
+	/** number of servers to use */
+	protected int _serverCount;
+	/** amount of data the client is to distribute. */
+	protected int _clientDistributionAmount;
+
 	
 /// Construction.
 	
@@ -91,5 +95,40 @@ public abstract class AbstractAlgorithm
 	public void read() {
 		System.out.println("READ");
 	}
+	
+	/**
+	 * Gets the count of servers this algorithm is to set up, distribute to, and
+	 * read back from.
+	 * @return number of servers to be set up.
+	 */
+	public int getServerCount() {
+		return _serverCount;
+	}
+	
+	/**
+	 * Sets the count of servers this algorithm is to set up, distribute to, and
+	 * read back from.
+	 * @param serverCount to use.
+	 */
+	public void setServerCount( int serverCount ) {
+		_serverCount = serverCount;
+	}
 
+	/**
+	 * Sets the amount of data the client node is to generate, send, and then
+	 * read back from the network.
+	 * @param dataAmount for the client to generate, send, and read.
+	 */
+	public void setDataAmount( int dataAmount ) {
+		_clientDistributionAmount = dataAmount;
+	}
+	
+	/**
+	 * Gets the amount of data the client node is to generate, send, and then
+	 * read back from the network.
+	 * @return amount of data the client is to send/receive.
+	 */
+	public int getDataAmount() {
+		return _clientDistributionAmount;
+	}
 }
