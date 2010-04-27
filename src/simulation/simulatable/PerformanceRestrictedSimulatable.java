@@ -266,6 +266,7 @@ public class PerformanceRestrictedSimulatable
 				
 				// handle event
 				handleEventDelegate( e );
+				
 				break;
 			case PARTIALLY_AWAKE:
 				// handle cost and state

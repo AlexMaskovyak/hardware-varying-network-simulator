@@ -3,29 +3,21 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import simulation.event.DefaultDiscreteScheduledEvent;
 import simulation.event.IDiscreteScheduledEvent;
 import simulation.event.IDiscreteScheduledEvent.IMessage;
-import simulation.simulatable.AbstractSimulatable;
 import simulation.simulatable.ISimulatable;
 import simulation.simulatable.PerformanceRestrictedSimulatable;
 import simulation.simulatable.listeners.ISimulatableEvent;
 import simulation.simulatable.listeners.ISimulatableListener;
-import simulation.simulator.DESimulator;
-import simulation.simulator.IDESimulator;
 import simulation.simulator.ISimulator;
-import simulation.simulator.listeners.ISimulatorEvent;
 
-import messages.AlgorithmResponseMessage;
-import messages.ConnectionAdaptorManagerMessage;
-import messages.ConnectionAdaptorManagerOutMessage;
-import messages.NodeInMessage;
-import messages.NodeOutMessage;
+import messages.ProtocolHandlerMessage;
 import network.communication.AbstractProtocolHandler;
 import network.communication.Address;
-import network.communication.ConnectionAdaptorManager;
+import network.communication.IProtocolHandler;
+import network.communication.NetworkProtocolHandler;
 import network.communication.IPacket;
-import network.communication.Packet;
+import network.communication.TransportProtocolHandler;
 import network.listeners.NodeSimulatableEvent;
 import network.listeners.NodeSimulatableListener;
 import network.routing.IAddress;
@@ -39,7 +31,7 @@ import network.routing.IAddress;
  *
  */
 public class Node 
-		extends AbstractProtocolHandler<IPacket> 
+		extends AbstractProtocolHandler<IPacket, IPacket> 
 		implements INode, ISimulatable, Comparable<INode>, IPublicCloneable {
 
 /// Fields	
@@ -51,11 +43,14 @@ public class Node
 	
 	/** address of this Node. */
 	protected IAddress _address;
+	/** manages transportation. */
+	protected TransportProtocolHandler _transport;
 	/** manages all of our connections. */
-	protected ConnectionAdaptorManager _manager;
+	protected NetworkProtocolHandler _networkHandler;
 	/** baseline Adapator to clone for new connections. */
 	protected IConnectionAdaptor _baseAdaptor;
 
+	
 /// Construction.
 	
 	/**
@@ -72,7 +67,6 @@ public class Node
 	public Node(IAddress address) {
 		super();
 		setAddress( address );
-		_manager.install( this, AbstractProtocolHandler.DEFAULT_PROTOCAL );
 	}
 	
 	/**
@@ -81,7 +75,10 @@ public class Node
 	protected void init() {
 		super.init();
 		_currentState = State.IDLE;
-		_manager = new ConnectionAdaptorManager();
+		_networkHandler = new NetworkProtocolHandler();
+		_transport = new TransportProtocolHandler();
+		_networkHandler.installHigherHandler( _transport ); //, AbstractProtocolHandler.DEFAULT_PROTOCAL );
+		_transport.installLowerHandler( _networkHandler );
 	}
 
 	
@@ -103,7 +100,8 @@ public class Node
 	@Override
 	public void setAddress( IAddress address ) {
 		_address = address;
-		_manager.setAddress(address);
+		_transport.setAddress( address );
+		_networkHandler.setAddress( address );
 	}
 	
 	/*
@@ -127,19 +125,17 @@ public class Node
 	public void send(Object data, IAddress address) {
 		// notify listeners that we sent data.
 		_currentState = State.SENT;
-		IPacket<Object> packet = new Packet<Object>(data, getAddress(), address, "algorithm", 5, 5);
+		
+		/*_transport.send( data, address );
 		// send it down the stack
-		
-		getSimulator().schedule(
-			new DefaultDiscreteScheduledEvent(
-				this,
-				_manager,
-				getSimulator().getTime(),
-				getSimulator(),
-				new ConnectionAdaptorManagerOutMessage(data, address)));
-		//_manager.receive(packet);
-		
-		notifyListeners(new NodeSimulatableEvent(this, -1, "Sent data.", packet));
+		sendEvent( 
+			(ISimulatable) getLowerHandler(), 
+			new ProtocolHandlerMessage( 
+				ProtocolHandlerMessage.TYPE.HANDLE_HIGHER, 
+				new Packet( data, getAddress(), address, "algorithm", -1, -1 ),
+				this ) );
+		 */
+		//notifyListeners(new NodeSimulatableEvent(this, -1, "Sent data.", packet));
 		_currentState = State.IDLE;
 	}
 
@@ -149,7 +145,7 @@ public class Node
 	 */
 	@Override
 	public void addAdaptor(IConnectionAdaptor adaptor) {
-		_manager.addConnectionAdaptor(adaptor);
+		_networkHandler.addConnectionAdaptor(adaptor);
 	}
 
 	/*
@@ -158,7 +154,7 @@ public class Node
 	 */
 	@Override
 	public void removeAdaptor(IConnectionAdaptor adaptor) {
-		_manager.removeConnectionAdaptor(adaptor);
+		_networkHandler.removeConnectionAdaptor(adaptor);
 	}
 	
 	/*
@@ -167,7 +163,7 @@ public class Node
 	 */
 	@Override
 	public Collection<IConnectionAdaptor> getAdaptors() {
-		return _manager.getConnectionAdaptors();
+		return _networkHandler.getConnectionAdaptors();
 	}
 	
 	/*
@@ -188,7 +184,8 @@ public class Node
 	 */
 	public void setSimulator(ISimulator simulator) {
 		super.setSimulator( simulator );
-		_manager.setSimulator( simulator );
+		_networkHandler.setSimulator( simulator );
+		_transport.setSimulator( simulator );
 	}
 	
 	/*
@@ -198,37 +195,14 @@ public class Node
 	@Override
 	public void handleEvent(IDiscreteScheduledEvent e) {
 		IMessage message = e.getMessage();
-		if( message instanceof NodeOutMessage ) {
-			NodeOutMessage nodeMessage = ((NodeOutMessage)message);
-			IAddress destination = nodeMessage.getAddress();
-			IMessage data = nodeMessage.getMessage();
-			String protocol = nodeMessage.getProtocol();
-			getSimulator().schedule( 
-				new DefaultDiscreteScheduledEvent<ConnectionAdaptorManagerMessage>(
-					this, 
-					_manager, 
-					e.getEventTime() + getTransitTime(), 
-					e.getSimulator(), 
-					new ConnectionAdaptorManagerMessage(
-						new Packet(
-							data, 
-							getAddress(),
-							destination,
-							protocol,
-							-1,
-							-1 ) ) ));
-		} else if( message instanceof NodeInMessage ) {
-			NodeInMessage nodeMessage = ((NodeInMessage)message);
-			String protocol = nodeMessage.getProtocol();
-			IMessage data = nodeMessage.getMessage();
-			AbstractProtocolHandler handler = getHandler( protocol );
-			getSimulator().schedule(
-				new DefaultDiscreteScheduledEvent(
-					this, 
-					handler, 
-					getSimulator().getTime() + .0001, 
-					getSimulator(),
-					data));
+		if( message instanceof ProtocolHandlerMessage ) {
+			ProtocolHandlerMessage phMessage = (ProtocolHandlerMessage)message;
+			switch( phMessage.getType() ) {
+				
+				case HANDLE_HIGHER: handleHigher( phMessage.getPacket(), phMessage.getCaller() ); break;
+				case HANDLE_LOWER: handleLower( phMessage.getPacket(), phMessage.getCaller() ); break;
+				default: throw new RuntimeException( "Unsupported message type." );
+			}
 		}
 	}
 
@@ -291,15 +265,6 @@ public class Node
 		return null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see network.AbstractProtocolHandler#handle(java.lang.Object)
-	 */
-	@Override
-	public void handle(IPacket packetLikeObject) {
-		receive( packetLikeObject );
-	}
-
 	
 // PublicCloneable 
 
@@ -310,5 +275,51 @@ public class Node
 	@Override
 	protected PerformanceRestrictedSimulatable createNew() {
 		return new Node();	
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see network.communication.AbstractProtocolHandler#handleHigher(java.lang.Object, network.communication.IProtocolHandler)
+	 */
+	@Override
+	public void handleHigher(IPacket payload, IProtocolHandler sender) {
+		/*NodeOutMessage nodeMessage = ((NodeOutMessage)message);
+		IAddress destination = nodeMessage.getAddress();
+		IMessage data = nodeMessage.getMessage();
+		String protocol = nodeMessage.getProtocol();
+		getSimulator().schedule( 
+			new DefaultDiscreteScheduledEvent<ConnectionAdaptorManagerInMessage>(
+				this, 
+				_manager, 
+				getSimulator().getTime() + getTransitTime(), 
+				getSimulator(), 
+				new ConnectionAdaptorManagerInMessage(
+					new Packet(
+						data, 
+						getAddress(),
+						destination,
+						protocol,
+						-1,
+						-1 ) ) ));*/
+
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see network.communication.AbstractProtocolHandler#handleLower(java.lang.Object, network.communication.IProtocolHandler)
+	 */
+	@Override
+	public void handleLower(IPacket message, IProtocolHandler sender) {
+		/*NodeInMessage nodeMessage = ((NodeInMessage)message);
+		String protocol = nodeMessage.getProtocol();
+		IMessage data = nodeMessage.getMessage();
+		AbstractProtocolHandler handler = getHandler( protocol );
+		getSimulator().schedule(
+			new DefaultDiscreteScheduledEvent(
+				this, 
+				handler, 
+				getSimulator().getTime() + .0001, 
+				getSimulator(),
+				data));*/
 	}
 }

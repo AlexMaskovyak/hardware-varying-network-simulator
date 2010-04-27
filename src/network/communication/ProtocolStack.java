@@ -94,8 +94,9 @@ public class ProtocolStack {
 	protected void mutualInstall( 
 			IProtocolHandler handler1, 
 			IProtocolHandler handler2 ) {
-		handler1.install( handler2 );
-		handler2.install( handler1 );
+		//handler1.installLowerHandler(handler)
+		//handler1.install( handler2 );
+		//handler2.install( handler1 );
 	}
 	
 	/**
@@ -107,7 +108,7 @@ public class ProtocolStack {
 	protected void mutualUninstall(
 			IProtocolHandler handler1, 
 			IProtocolHandler handler2 ) {
-		handler1.uninstall( handler2 );
-		handler2.uninstall( handler1 );
+		//handler1.uninstall( handler2 );
+		//handler2.uninstall( handler1 );
 	}
 }

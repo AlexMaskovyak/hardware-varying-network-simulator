@@ -20,4 +20,12 @@ public class ConnectionMediumMessage
 		super(packet);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see messages.ConnectionAdaptorMessage#toString()
+	 */
+	@Override
+	public String toString() {
+		return String.format("MediumMessage %s", getPacket());
+	}
 }

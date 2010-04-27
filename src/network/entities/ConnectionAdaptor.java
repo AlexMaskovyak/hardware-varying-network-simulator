@@ -1,12 +1,13 @@
 package network.entities;
 
 import network.communication.AbstractProtocolHandler;
-import network.communication.ConnectionAdaptorManager;
+import network.communication.NetworkProtocolHandler;
 import network.communication.IPacket;
 import network.communication.IProtocolHandler;
 import network.routing.IAddress;
 import messages.ConnectionAdaptorMessage;
 import messages.ConnectionMediumMessage;
+import messages.ProtocolHandlerMessage;
 
 import simulation.event.DefaultDiscreteScheduledEvent;
 import simulation.event.IDiscreteScheduledEvent;
@@ -20,15 +21,15 @@ import simulation.simulatable.PerformanceRestrictedSimulatable;
  *
  */
 public class ConnectionAdaptor 
-		extends AbstractProtocolHandler<IPacket<IPacket>>
-		implements IConnectionAdaptor<IPacket<IPacket>>, ISimulatable {
+		extends AbstractProtocolHandler<IPacket<IPacket>, IPacket<IPacket>>
+		implements IConnectionAdaptor<IPacket<IPacket>, IPacket<IPacket>>, ISimulatable {
 
 // Fields
 	
 	/** address of this connection. */
 	protected IAddress _address;
 	/** manager in charge of us. */
-	protected ConnectionAdaptorManager _manager;
+	protected NetworkProtocolHandler _manager;
 	/** node we're connected to. */
 	protected INode _node;
 	/** connection medium. */
@@ -52,6 +53,7 @@ public class ConnectionAdaptor
 		_manager = null;
 		_node = null;
 		_medium = null;
+		_protocol = ConnectionAdaptor.DEFAULT_PROTOCAL; 
 		setTransitTime( 1 );
 		setMaxAllowedOperations( 5 );
 		setRefreshInterval( 5 );
@@ -125,65 +127,74 @@ public class ConnectionAdaptor
 	 * @see network.IConnectionAdaptor#send(network.IPacket)
 	 */
 	@Override
-	public void send(IPacket<IPacket> packet) {
-		if( _medium != null ) { 
-			getSimulator().schedule(
-				new DefaultDiscreteScheduledEvent<ConnectionMediumMessage>(
-					(ISimulatable)this, 
-					(ISimulatable)_medium, 
-					getSimulator().getTime() + getTransitTime(), 
-					getSimulator(), 
-					new ConnectionMediumMessage( packet ) ) );
-		}
+	public void send(IPacket packet) {
+		handleHigher( packet, null );
 	}
 	
 	/* (non-Javadoc)
 	 * @see network.IConnectionAdaptor#receive(network.IPacket)
 	 */
 	@Override
-	public void receive(IPacket<IPacket> packet) {
+	public void receive(IPacket packet) {
 		// is this for us?
 		if( getAddress().equals( packet.getDestination() ) ) {
-			IProtocolHandler ph = _protocalMappings.get( packet.getProtocol() );
-			ph.handle(packet.getContent());
+			handleLower( packet, null );
 		} else if ( getAddress().equals( packet.getSource() ) ) {
 			// we're sending it
-			send( packet );
+			handleHigher( packet, null );
 		}
 		// there is no route discovery currently
 		// everyone has a universal view, otherwise we might update our table in
 		// this method
 	}
 	
-// IPacketHandler
-	
 	/*
 	 * (non-Javadoc)
-	 * @see network.AbstractPacketHandler#handle(network.IPacket)
+	 * @see network.communication.AbstractProtocolHandler#handleHigher(java.lang.Object, network.communication.IProtocolHandler)
 	 */
 	@Override
-	public void handle(IPacket<IPacket> packetLikeObject) {
-		receive(packetLikeObject);
+	public void handleHigher(IPacket<IPacket> packet, IProtocolHandler caller) {
+		if( _medium != null ) { 
+			sendEvent( 
+				(ISimulatable)getConnectedMedium(), new ConnectionMediumMessage( (IPacket)packet.clone() ) );
+		}
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see network.AbstractPacketHandler#getProtocal()
+	 * @see network.communication.AbstractProtocolHandler#handleLower(java.lang.Object, network.communication.IProtocolHandler)
 	 */
 	@Override
-	public String getProtocol() {
-		return ConnectionAdaptor.DEFAULT_PROTOCAL; 
+	public void handleLower(IPacket<IPacket> packet, IProtocolHandler caller) {
+		if ( getAddress().equals( packet.getDestination() ) ) {
+			sendEvent( 
+				(ISimulatable)getHigherHandler(), 
+				new ProtocolHandlerMessage(
+					ProtocolHandlerMessage.TYPE.HANDLE_LOWER, 
+					(IPacket)packet.clone(), 
+					(IProtocolHandler)this ) );
+		}
 	}
 
 	/*
-	 * 
+	 * (non-Javadoc)
+	 * @see simulation.simulatable.PerformanceRestrictedSimulatable#handleEventDelegate(simulation.event.IDiscreteScheduledEvent)
 	 */
 	@Override
 	public void handleEventDelegate(IDiscreteScheduledEvent e) {
-		IMessage message = e.getMessage();
-		if( message instanceof ConnectionAdaptorMessage ) {
-			ConnectionAdaptorMessage caMessage = ((ConnectionAdaptorMessage)message);
-			handle( caMessage.getPacket() );
+		IMessage original = e.getMessage();
+		
+		if( original instanceof ProtocolHandlerMessage ) {
+			ProtocolHandlerMessage message = (ProtocolHandlerMessage)original;
+			switch( message.getType() ) {
+			
+				case HANDLE_HIGHER: handleHigher( message.getPacket(), message.getCaller() ); break;
+				case HANDLE_LOWER: handleLower( message.getPacket(), message.getCaller() ); break;
+				default: throw new RuntimeException( "Unsupported message type." );
+			}
+		} else if( original instanceof ConnectionAdaptorMessage ) {
+			ConnectionAdaptorMessage message = (ConnectionAdaptorMessage)original;
+			handleLower( message.getPacket(), null );
 		}
 	}
 	

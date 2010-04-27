@@ -74,7 +74,9 @@ public class ComputerNode
 	public void install(IAlgorithm algorithm) {
 		_algorithm = (AbstractAlgorithm) algorithm;
 		IProtocolHandler handler = (IProtocolHandler)algorithm;
-		install(handler, handler.getProtocol());
+		handler.installLowerHandler( _transport );
+		_transport.installHigherHandler( handler );
+		//install(handler, handler.getProtocol());
 		_algorithm.setSimulator( getSimulator() );
 	}
 	

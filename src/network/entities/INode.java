@@ -53,7 +53,7 @@ public interface INode
 	public void receive(IPacket packet);
 	
 	/**
-	 * Sends data out to all connections.
+	 * Sends data out to the address.
 	 * @param data to send to connected items.
 	 * @param address to which to send data.
 	 */

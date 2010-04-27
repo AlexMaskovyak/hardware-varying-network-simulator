@@ -7,26 +7,15 @@ import java.util.Map;
 import java.util.Set;
 
 import network.entities.IConnectionAdaptor;
-import network.entities.Node;
 import network.routing.CentralRouter;
 import network.routing.IAddress;
 import network.routing.IRoutingTable;
 import network.routing.RoutingTable;
 
-import messages.ConnectionAdaptorManagerMessage;
-import messages.ConnectionAdaptorManagerOutMessage;
-import messages.ConnectionAdaptorMessage;
-import messages.NodeInMessage;
-import messages.NodeOutMessage;
+import messages.ProtocolHandlerMessage;
 
-import simulation.event.DefaultDiscreteScheduledEvent;
 import simulation.event.IDiscreteScheduledEvent;
-import simulation.event.IDiscreteScheduledEvent.IMessage;
 import simulation.simulatable.ISimulatable;
-import simulation.simulatable.listeners.ISimulatableEvent;
-import simulation.simulatable.listeners.ISimulatableListener;
-import simulation.simulator.DESimulator;
-import simulation.simulator.listeners.ISimulatorEvent;
 
 /**
  * Manages the ConnectionAdaptors for a node.  Installed as a 
@@ -34,9 +23,9 @@ import simulation.simulator.listeners.ISimulatorEvent;
  * @author Alex Maskovyak
  *
  */
-public class ConnectionAdaptorManager 
-		extends AbstractProtocolHandler<IPacket<IPacket>> 
-		implements IProtocolHandler<IPacket<IPacket>>, ISimulatable {
+public class NetworkProtocolHandler 
+		extends AbstractProtocolHandler<IPacket<IPacket>, IPacket<IPacket>> 
+		implements IProtocolHandler<IPacket<IPacket>, IPacket<IPacket>>, ISimulatable {
 
 /// Fields
 	
@@ -45,15 +34,17 @@ public class ConnectionAdaptorManager
 	/** all connection adaptors to be managed. */
 	protected Set<IConnectionAdaptor> _adaptors;
 	/** generic protocol used for typical addresses. */
-	protected static String PROTOCAL = "DEFAULT";
+	protected static String PROTOCAL = "NETWORK";
 	/** address of this adaptor. */
 	protected IAddress _address;
 	
+	/** default time tive for packets. */
+	protected int _ttl;
 	
 /// Construction.
 	
 	/** Default constructor. */
-	public ConnectionAdaptorManager() {
+	public NetworkProtocolHandler() {
 		this(null);
 	}
 	
@@ -62,7 +53,7 @@ public class ConnectionAdaptorManager
 	 * @param address to assign to this adaptor manager, generally should be
 	 * appropriate to this "level" of the network stack.
 	 */
-	public ConnectionAdaptorManager(IAddress address) {
+	public NetworkProtocolHandler(IAddress address) {
 		super();
 		setAddress(address);
 	}
@@ -72,6 +63,9 @@ public class ConnectionAdaptorManager
 		super.init();
 		_adaptors = new HashSet<IConnectionAdaptor>();
 		_table = new RoutingTable();
+		_protocol = NetworkProtocolHandler.PROTOCAL;
+		setTTL( 10 );
+		setTransitTime( .0000001 );
 	}
 
 /// Accessors / Mutators
@@ -98,6 +92,23 @@ public class ConnectionAdaptorManager
 		}
 	}
 	
+	/**
+	 * Gets the time to live to install on new outgoing packets.
+	 * @return ttl to install on new outgoing packets.
+	 */
+	public int getTTL() {
+		return _ttl;
+	}
+	
+	/**
+	 * Sets the time to live to install on new outgoing packets.
+	 * @param ttl to install on new outgoing packets.
+	 */
+	public void setTTL( int ttl ) {
+		_ttl = ttl;
+	}
+	
+	
 /// Methods
 	
 	/**
@@ -106,7 +117,7 @@ public class ConnectionAdaptorManager
 	 */
 	public void addConnectionAdaptor(IConnectionAdaptor adaptor) {
 		_adaptors.add(adaptor);
-		adaptor.install(this, ConnectionAdaptorManager.PROTOCAL);
+		adaptor.installHigherHandler( this );
 	}
 	
 	/**
@@ -115,6 +126,7 @@ public class ConnectionAdaptorManager
 	 */
 	public void removeConnectionAdaptor(IConnectionAdaptor adaptor) {
 		_adaptors.remove(adaptor);
+		adaptor.installHigherHandler( null );
 	}
 
 	/**
@@ -130,66 +142,6 @@ public class ConnectionAdaptorManager
 		return copy;
 	}
 
-	/**
-	 * General receiver.
-	 * @param packet to receive.
-	 */
-	public void receive(IPacket packet) {
-		if( getAddress().equals( packet.getDestination() ) ) {
-			// pass it up
-			receiveFromBelow(packet);
-		} else if ( getAddress().equals( packet.getSource() ) ) {
-			// pass it down
-			receiveFromAbove(packet);
-		} else {
-			// route
-			receiveFromAbove(packet);
-		}
-	}
-	
-	/**
-	 * Packet is outgoing.
-	 * @param packet to route away from above us on the stack.
-	 */
-	public void receiveFromAbove(IPacket packet) {
-		// get destination
-		IAddress destination = packet.getDestination();
-
-		// get next hop
-		IAddress nextHop = _table.getNextHop( destination );
-		
-		// create new packet
-		IPacket outgoing = new Packet<IPacket>(packet, getAddress(), nextHop, ConnectionAdaptorManager.PROTOCAL, 5, 0);
-		for( IConnectionAdaptor ca : _adaptors ) {
-			getSimulator().schedule(
-				new DefaultDiscreteScheduledEvent<ConnectionAdaptorMessage>(
-					(ISimulatable)this,
-					(ISimulatable)ca, 
-					getSimulator().getTime() + .00001,
-					getSimulator(),
-					new ConnectionAdaptorMessage(outgoing)));
-		}
-	}
-	
-	/**
-	 * Packet is incoming from somewhere else and must be delivered up the 
-	 * stack.
-	 * @param packet to deliver up the stack from below.
-	 */
-	public void receiveFromBelow(IPacket<IPacket> packet) {
-		AbstractProtocolHandler handler = super.getHandler( packet.getProtocol() );
-		if( handler instanceof Node ) {
-			getSimulator().schedule(
-				new DefaultDiscreteScheduledEvent<NodeInMessage>(
-					(ISimulatable)this, 
-					(ISimulatable)handler, 
-					getSimulator().getTime() + getTransitTime(), 
-					getSimulator(), 
-					new NodeInMessage(
-						(IMessage)packet.getContent(), packet.getProtocol())));
-		}
-	}
-
 	
 /// ISimulatable
 	
@@ -199,34 +151,93 @@ public class ConnectionAdaptorManager
 	 */
 	@Override
 	public void handleEvent(IDiscreteScheduledEvent e) {
-		IMessage message = e.getMessage();
-		if( message instanceof ConnectionAdaptorManagerMessage ) {
-			IPacket packet = ((ConnectionAdaptorManagerMessage)message).getPacket();
-			handle(((ConnectionAdaptorManagerMessage)message).getPacket());
-		} 
+		ProtocolHandlerMessage message = (ProtocolHandlerMessage)e.getMessage();
+		switch( message.getType() ) {
+			
+			case HANDLE_HIGHER: handleHigher( message.getPacket(), message.getCaller() ); break;
+			case HANDLE_LOWER: handleLower( message.getPacket(), message.getCaller() ); break;
+			default: throw new RuntimeException( "Unsupported message type." );
+		}
 	}
 	
 /// IPacketHandler
 	
 	/*
 	 * (non-Javadoc)
-	 * @see network.AbstractPacketHandler#handle(network.IPacket)
+	 * @see network.communication.AbstractProtocolHandler#handleHigher(java.lang.Object, network.communication.IProtocolHandler)
 	 */
 	@Override
-	public void handle(IPacket<IPacket> packetLikeObject) {
-		receive(packetLikeObject);
+	public void handleHigher(IPacket payload, IProtocolHandler sender) {
+		// get destination
+		IAddress destination = payload.getDestination();
+
+		// get next hop
+		IAddress nextHop = _table.getNextHop( destination );
+		
+		// create new packet
+		IPacket outgoing = new Packet<IPacket>(payload, getAddress(), nextHop, NetworkProtocolHandler.PROTOCAL, getTTL(), 0);
+		
+		sendOut( outgoing, null );
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see network.AbstractPacketHandler#getProtocal()
+	 * @see network.communication.AbstractProtocolHandler#handleLower(java.lang.Object, network.communication.IProtocolHandler)
 	 */
 	@Override
-	public String getProtocol() {
-		return ConnectionAdaptorManager.PROTOCAL;
+	public void handleLower(IPacket<IPacket> message, IProtocolHandler sender) {
+		if( getAddress().equals( message.getContent().getDestination() ) ) {
+			sendEvent(
+				(ISimulatable)getHigherHandler(),
+				new ProtocolHandlerMessage(
+					ProtocolHandlerMessage.TYPE.HANDLE_LOWER, 
+					message.getContent(), 
+					this ) );
+			return;
+		} 
+		
+		// let's make sure this can still live
+		int ttl = message.getTTL() - 1;
+		// if the ttl is less than 0, then it's ttd
+		if( ttl < 0 ) { return; }
+		
+		// get destination
+		IAddress destination = message.getContent().getDestination();
+
+		// get next hop
+		IAddress nextHop = _table.getNextHop( destination );
+		IPacket<IPacket> newMessage = 
+			new Packet(
+				message.getContent(), 
+				getAddress(), 
+				nextHop,
+				message.getProtocol(), 
+				ttl, 
+				-1 );
+		
+		sendOut( newMessage, sender );
 	}
 	
-
+	/**
+	 * Sends out the constructed packet to all adaptors, except if one of those
+	 * adaptors happened to originate this packet.
+	 * @param outgoing packet to send.
+	 * @param sender who is not to receive the packet.
+	 */
+	protected void sendOut( IPacket outgoing, IProtocolHandler sender ) {
+		for( IConnectionAdaptor ca : _adaptors ) {
+			// don't send across the same originator of this message
+			if( ca == sender ) { continue; }
+			sendEvent(
+				(ISimulatable)ca, 
+				new ProtocolHandlerMessage( 
+					ProtocolHandlerMessage.TYPE.HANDLE_HIGHER, 
+					outgoing, 
+					this ) );
+		}
+	}
+	
+	
 /// Display
 	
 	/*
@@ -235,7 +246,7 @@ public class ConnectionAdaptorManager
 	 */
 	@Override
 	public String toString() {
-		return String.format( "AdaptorManager[%s]", getAddress() );
+		return String.format( "NetworkPH[%s]", getAddress() );
 	}
 	
 /// Testing
@@ -256,10 +267,10 @@ public class ConnectionAdaptorManager
     	//DijkstraEngine<INode> engine = new DijkstraEngine<INode>(map);
     	CentralRouter router = CentralRouter.getInstance();
     	router.addBiDirectionalRoute(n0, n1, 1);
-    	//router.addBiDirectionalRoute(n1, n2, 1);
-    	//router.addBiDirectionalRoute(n0, n2, 1);
-    	//router.addBiDirectionalRoute(n2, n3, 1);
-    	//router.addBiDirectionalRoute(n3, n4, 1);
+    	router.addBiDirectionalRoute(n1, n2, 1);
+    	router.addBiDirectionalRoute(n0, n2, 1);
+    	router.addBiDirectionalRoute(n2, n3, 1);
+    	router.addBiDirectionalRoute(n3, n4, 1);
     	///map.addDirectRoute(start, end, cost)
     	//IAddress next = router.getNextHop(n0, n4);
     	
@@ -270,7 +281,7 @@ public class ConnectionAdaptorManager
     	System.out.println( test.containsKey(new Address(0)) );
     	System.out.println((new Address(0)).equals(new Address(0)));
     	
-    	IAddress next = router.getNextHop((IAddress)new Address(0), (IAddress)new Address(1));
+    	IAddress next = router.getNextHop((IAddress)new Address(0), (IAddress)new Address(4));
     	
     	System.out.println( ">>>> next: " + next );
     	
@@ -279,5 +290,15 @@ public class ConnectionAdaptorManager
     	
     	next = router.getNextHop(n1, n1);
     	System.out.println( ">>>> next: " + next );
+
+    	next = router.getNextHop(n1, n4);
+    	System.out.println( ">>>> next: " + next );
+    	
+    	next = router.getNextHop(n2, n4);
+    	System.out.println( ">>>> next: " + next );
+    
+    	next = router.getNextHop(n3, n4);
+    	System.out.println( ">>>> next: " + next );
+
 	}
 }

@@ -115,7 +115,8 @@ public class NetworkSimulator
 	
 /// Factory methods
 	
-	/** creates a Node and adds it to the simulator. */
+	/** creates a Node and adds it to the simulator. 
+	 *  @return a clone of the base node. */
 	public INode createNode() {
 		INode node = (INode)getBaseNode().clone();
 		node.setAddress( _addressCreator.createUnique() );
@@ -125,18 +126,19 @@ public class NetworkSimulator
 		return node;
 	}
 	
-	/** creates an adaptor and adds it to the simulator. */
+	/** creates an adaptor and adds it to the simulator. 
+	 *  @return a clone of the base adaptor. */
 	public IConnectionAdaptor createAdaptor() {
 		IConnectionAdaptor adaptor = (IConnectionAdaptor)getBaseAdaptor().clone();
 		registerSimulatable((ISimulatable)adaptor);
 		return adaptor;
 	}
 	
-	/** creates a connection medium and adds it to the simulator. */
+	/** creates a connection medium and adds it to the simulator. 
+	 *  @return a clone of the base medium. */
 	public IConnectionMedium createConnectionMedium() {
 		IConnectionMedium medium = (IConnectionMedium)getBaseMedium().clone();
 		registerSimulatable((ISimulatable)medium);
-		System.out.println("create medium");
 		return medium;
 	}
 	

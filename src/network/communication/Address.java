@@ -9,6 +9,13 @@ import network.routing.IAddress;
  */
 public class Address implements IAddress {
 
+/// Class Values
+	
+	/** broadcast address which all addressable should accept and/or check for. 
+	 * */
+	public static Address BROADCAST = new Address( Integer.MAX_VALUE );
+	
+	
 /// Fields
 	
 	/** underlying representation. */
@@ -68,7 +75,7 @@ public class Address implements IAddress {
 	 * @return true if the addresses are equal, false otherwise.
 	 */
 	public boolean equals(Address a) {
-		return _address == a._address;
+		return ( a == Address.BROADCAST ) || ( _address == a._address );
 	}
 	
 
@@ -92,7 +99,7 @@ public class Address implements IAddress {
 	 * greater then this one.
 	 */
 	public int compareTo(Address a) {
-		return _address - a._address;
+		return ( a == Address.BROADCAST ) ? 0 : _address - a._address;
 	}
 
 	
