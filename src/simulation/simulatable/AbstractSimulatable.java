@@ -3,6 +3,7 @@ package simulation.simulatable;
 import java.util.HashSet;
 import java.util.Set;
 
+import simulation.event.DefaultDiscreteScheduledEvent;
 import simulation.event.IDiscreteScheduledEvent;
 import simulation.simulatable.listeners.ISimulatableEvent;
 import simulation.simulatable.listeners.ISimulatableListener;
@@ -135,5 +136,22 @@ public abstract class AbstractSimulatable
 	@Override
 	public boolean canPerformOperation() {
 		return true;
+	}
+	
+	/**
+	 * Aids in event sending.
+	 * @param destination to receive the message.
+	 * @param message to send to the destination.
+	 */
+	protected void sendEvent( 
+			ISimulatable destination, IDiscreteScheduledEvent.IMessage message ) {
+		
+		getSimulator().schedule(
+				new DefaultDiscreteScheduledEvent (
+					this, 
+					destination, 
+					getSimulator().getTime() + getTransitTime(), 
+					getSimulator(), 
+					message));
 	}
 }

@@ -1,7 +1,5 @@
 package messages;
 
-import computation.IData;
-
 import simulation.event.IDiscreteScheduledEvent.IMessage;
 
 /**

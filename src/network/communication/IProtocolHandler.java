@@ -1,52 +1,54 @@
 package network.communication;
 
+import network.routing.IAddress;
+
 /**
  * Handles a packet.  Basically a protocal or part of the stack.
  * @author Alex Maskovyak
  *
  */
-public interface IProtocolHandler<T> {
+public interface IProtocolHandler<U, L> {
 
 	/** 
-	 * handle the packet supplied in a protocol specific way.
-	 * @param message
+	 * Handle the payload from the higher level protocol.
+	 * @param payload from the higher level protocol which is to be wrapped.
+	 * @param destination to which to send payload.
+	 * @param sender reference which is invoking us.
 	 */
-	public void handle(T message);
+	public void handleHigher(U payload, IProtocolHandler sender);
 	
 	/**
-	 * obtains the handler for a particular protocol. 
-	 * @param protocol associated with a handler.
-	 * @return handler associated with the specified protocol, the universal 
-	 * handler if none is specified.
+	 * Handle the message from the lower protocol.
+	 * @param message in the format we understand.
+	 * @param sender reference which is invoking us.
 	 */
-	public IProtocolHandler getHandler(String protocol);
+	public void handleLower(L message, IProtocolHandler sender);
 	
-	/** obtains the protocol with which this handler identifies itself. */
+	/**
+	 * Gets the higher level protocol handler.
+	 * @return higher level protocol handler.
+	 */
+	public IProtocolHandler getHigherHandler();
+	
+	/**
+	 * Gets the lower level protocol handler.
+	 * @return the lower level protocol handler.
+	 */
+	public IProtocolHandler getLowerHandler();
+	
+	/**
+	 * Installs a protocol handler to receive requests from this one.
+	 * @param handler to which to send processed information from below.
+	 */
+	public void installHigherHandler(IProtocolHandler handler);
+		
+	/**
+	 * Installs a protocol handler to which to send requests from this one.
+	 * @param handler to which to send processed informationn from above.
+	 */
+	public void installLowerHandler(IProtocolHandler handler);
+	
+	/** obtains the protocol with which this handler identifies itself. 
+	 * @return name of the protocol handled by this handler. */
 	public String getProtocol();
-	
-	/**
-	 * Installs a protocolhandler using that protocol handler's default protocol
-	 * name for mapping.
-	 * @param handler to install.
-	 */
-	public void install(IProtocolHandler handler);
-	
-	/** 
-	 * install a ProtocolHandler to handle for the specified protocol. 
-	 * @param handler to associate with the protocol.
-	 * @param protocol name to associate with the handler.
-	 */
-	public void install(IProtocolHandler handler, String protocol);
-	
-	/** 
-	 * uninstall the protocolhandler from all protocols established.
-	 * @param handler to uninstall completely.
-	 */
-	public void uninstall(IProtocolHandler handler);
-	
-	/**
-	 * uninstall the protocal and it associated handler. 
-	 * @param protocal and associated handler to remove.
-	 */
-	public void uninstall(String protocal);
 }

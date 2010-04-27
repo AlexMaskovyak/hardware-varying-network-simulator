@@ -7,8 +7,11 @@ import network.routing.IAddress;
  * @author Alex Maskovyak
  *
  */
-public class Packet<T> implements IPacket<T> {
+public class Packet<T> 
+		implements IPacket<T> {
 
+/// Fields
+	
 	/** content of this packet.  Could possibly be another packet. */
 	protected T _content;
 	/** source of this packet. */
@@ -20,8 +23,10 @@ public class Packet<T> implements IPacket<T> {
 	/** time to live */
 	protected int _ttl;
 	/** number of this packet */
-	protected int _sequence;
+	protected long _sequence;
 	
+
+/// Construction
 	
 	/**
 	 * Default constructor.
@@ -32,7 +37,7 @@ public class Packet<T> implements IPacket<T> {
 	 * @param ttl time to live, max hops before being trashed.
 	 * @param sequence number in a series of packets.
 	 */
-	public Packet(T content, IAddress source, IAddress destination, String protocol, int ttl, int sequence) {
+	public Packet(T content, IAddress source, IAddress destination, String protocol, int ttl, long sequence) {
 		_content = content;
 		_source = source;
 		_destination = destination;
@@ -40,13 +45,24 @@ public class Packet<T> implements IPacket<T> {
 		_ttl = ttl;
 		_sequence = sequence;
 	}
-	
+
+
+/// Accessors/Mutators
 	
 	/* (non-Javadoc)
 	 * @see network.IPacket#getContent()
 	 */
 	public T getContent() {
 		return _content;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see network.communication.IPacket#setContent(java.lang.Object)
+	 */
+	@Override
+	public void setContent(T content) {
+		_content = content;
 	}
 	
 	/* (non-Javadoc)
@@ -56,11 +72,30 @@ public class Packet<T> implements IPacket<T> {
 		return _source;
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * @see network.communication.IPacket#setSource(network.routing.IAddress)
+	 */
+	@Override
+	public void setSource(IAddress source) {
+		_source = source;
+	}
+	
 	/* (non-Javadoc)
 	 * @see network.IPacket#getDestination()
 	 */
 	public IAddress getDestination() {
 		return _destination;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see network.communication.IPacket#setDestination(network.routing.IAddress)
+	 */
+	@Override
+	public void setDestination(IAddress destination) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 	/* (non-Javadoc)
@@ -70,6 +105,15 @@ public class Packet<T> implements IPacket<T> {
 		return _protocol;
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * @see network.communication.IPacket#setProtocol(java.lang.String)
+	 */
+	@Override
+	public void setProtocol(String protocol) {
+		_protocol = protocol;
+	}
+	
 	/* (non-Javadoc)
 	 * @see network.IPacket#getTTL()
 	 */
@@ -77,13 +121,31 @@ public class Packet<T> implements IPacket<T> {
 		return _ttl;
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * @see network.communication.IPacket#setTTL(int)
+	 */
+	@Override
+	public void setTTL( int ttl ) {
+		_ttl = ttl;
+	}
+	
 	/* (non-Javadoc)
 	 * @see network.IPacket#getSequence()
 	 */
-	public int getSequence() {
+	public long getSequence() {
 		return _sequence;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see network.communication.IPacket#setSequence(int)
+	 */
+	@Override
+	public void setSequence(long sequence) {
+		_sequence = sequence;
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * @see java.lang.Object#toString()
@@ -96,5 +158,24 @@ public class Packet<T> implements IPacket<T> {
 				getTTL(),
 				getSequence(),
 				getContent());
+	}
+	
+	
+/// IPublicCloneable
+	
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#clone()
+	 */
+	@Override
+	public Object clone() {
+		return 
+			new Packet( 
+				this.getContent(), 
+				this.getSource(), 
+				this.getDestination(), 
+				this.getProtocol(), 
+				this.getTTL(), 
+				this.getSequence() );
 	}
 }

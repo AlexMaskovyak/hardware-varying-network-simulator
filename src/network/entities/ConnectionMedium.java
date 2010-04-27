@@ -139,7 +139,7 @@ public class ConnectionMedium
 		if( message instanceof ConnectionMediumMessage ) {
 			ConnectionMediumMessage cmMessage = (ConnectionMediumMessage)message;
 			IPacket packet = cmMessage.getPacket();
-			receive(packet);
+			receive((IConnectionAdaptor)e.getSource(), packet);
 		}
 	}
 
@@ -159,7 +159,8 @@ public class ConnectionMedium
 	@Override
 	public void send(IConnectionAdaptor sender, IPacket packet) {
 		for( IConnectionAdaptor ca : _adaptors ) {
-			if( !ca.getAddress().equals( packet.getSource() ) ) {
+			if( ca != sender ) {
+			//if( !ca.getAddress().equals( packet.getSource() ) ) {
 				getSimulator().schedule(
 					new DefaultDiscreteScheduledEvent<IMessage>(
 						(ISimulatable)this, 

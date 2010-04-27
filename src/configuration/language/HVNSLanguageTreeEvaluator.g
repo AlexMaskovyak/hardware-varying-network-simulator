@@ -232,26 +232,16 @@ assign returns [ Object result ]
 	:	^(ASSIGN NAME v=expression ) {
 			setVariable( $NAME.text, $v.result ); 
 			$result = v;
-		} 
+		}
 	;
 
 /** Connection requests for groupings of nodes. */
 connect returns [ Object result ]
-	:	^(SERIES_CONNECT_OP (names+=NAME)+) {
-			getSimulator().connectAsSeries( getNodes( $names ) ); 
-		}
-	| 	^(BUS_CONNECT_OP (names+=NAME)+) { 
-			getSimulator().connectAsBus( getNodes( $names ) );  
-		}
-	| 	^(MESH_CONNECT_OP (names+=NAME)+) { 
-			getSimulator().connectAsMesh( getNodes( $names ) );  
-		}
-	| 	^(RANDOM_CONNECT_OP (names+=NAME)+) { 
-			getSimulator().connectRandomly( getNodes( $names ) );  
-		}
-	| 	^(RING_CONNECT_OP (names+=NAME)+) { 
-			getSimulator().connectAsRing( getNodes( $names ) );   
-		}
+	:	^(SERIES_CONNECT_OP (names+=NAME)+) { getSimulator().connectAsSeries( getNodes( $names ) ); }
+	| 	^(BUS_CONNECT_OP (names+=NAME)+) { getSimulator().connectAsBus( getNodes( $names ) ); }
+	| 	^(MESH_CONNECT_OP (names+=NAME)+) { getSimulator().connectAsMesh( getNodes( $names ) ); }
+	| 	^(RANDOM_CONNECT_OP (names+=NAME)+) { getSimulator().connectRandomly( getNodes( $names ) ); }
+	| 	^(RING_CONNECT_OP (names+=NAME)+) { getSimulator().connectAsRing( getNodes( $names ) ); }
 	;
 
 /** All numeric and object related expressions occur here.  */

@@ -37,24 +37,10 @@ public abstract class AbstractAlgorithm
 		super();
 	}
 	
-	
-/// IProtocol
-	
-	/*
-	 * (non-Javadoc)
-	 * @see network.AbstractProtocolHandler#getProtocal()
-	 */
-	@Override
-	public String getProtocol() {
-		return "ALGORITHM";
+	protected void init() {
+		super.init();
+		_protocol = "ALGORITHM";
 	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see network.AbstractProtocolHandler#handle(java.lang.Object)
-	 */
-	@Override
-	public abstract void handle(Object packetLikeObject);
 	
 
 /// IAlgorithm

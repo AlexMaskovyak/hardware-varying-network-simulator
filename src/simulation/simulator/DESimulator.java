@@ -96,7 +96,7 @@ public class DESimulator
 					notifyListeners( new DESimulatorEvent( this, getTime(), event ) );
 					event.getDestination().handleEvent(event);		// get destination and deliver
 
-				} catch( Exception e ) { /* interrupt exceptions kick us here and then to condition check. */ }
+				} catch( Exception e ) { e.printStackTrace(); /* interrupt exceptions kick us here and then to condition check. */ }
 			}
 		} finally {
 			_lock.unlock();

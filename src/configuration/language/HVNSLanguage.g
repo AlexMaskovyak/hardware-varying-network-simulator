@@ -167,7 +167,7 @@ fragment UPPER: 'A'..'Z';
 
 // numerics
 INTEGER: NON_ZERO_DIGIT DIGIT*;
-FLOAT: INTEGER '.' DIGIT+;
+FLOAT: DIGIT* '.' DIGIT+;
 fragment DIGIT: '0'..'9';
 fragment NON_ZERO_DIGIT: '1'..'9';
 

@@ -17,6 +17,7 @@ import computation.hardware.Cache;
 import computation.hardware.Harddrive;
 import configuration.ConfigurationManager;
 
+import simulation.event.DefaultDiscreteScheduledEvent;
 import simulation.simulatable.ISimulatable;
 import simulation.simulatable.PerformanceRestrictedSimulatable;
 import simulation.simulator.ComputerNetworkSimulator;
@@ -51,6 +52,8 @@ public class DriverNetworkSimulator {
 		ConfigurationManager configManager = new ConfigurationManager( args[ 0 ], args[ 0 ] + File.separator + args[ 1 ], "run_" );
 		File outputPath = configManager.makeNewRunDirectory();
 		
+		
+		
 		System.out.println("starting");
 		
 		
@@ -66,14 +69,12 @@ public class DriverNetworkSimulator {
 		sim.start();
 		HardwareComputerNode c = (HardwareComputerNode)sim.getClient();
 		DummyAlgorithm alg = (DummyAlgorithm)c.getInstalledAlgorithm();
-		System.out.println(c.getAddress());
 		//alg.setDataAmount( 100 );
 		//alg.setInitialData( generateData( sim.getDataAmount() ) );
 		//alg.setInitialData(data)
 		alg.setAddressRange( new Address(1), new Address(5));
 		//n0.send(new IMessage() {}, new Address(7));
 		c.start();
-
 	}
 	
 	/**
