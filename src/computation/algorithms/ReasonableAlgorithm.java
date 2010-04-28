@@ -1,10 +1,6 @@
 package computation.algorithms;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Queue;
-
+import computation.HardwareComputerNode;
 import computation.IComputer;
 import computation.IData;
 import computation.IHardwareComputer;
@@ -17,8 +13,11 @@ import messages.AlgorithmStoreMessage;
 import messages.HarddriveRequestMessage;
 import messages.HarddriveStoreMessage;
 import messages.NodeOutMessage;
+import messages.ProtocolHandlerMessage;
 import network.communication.Address;
+import network.communication.IPacket;
 import network.communication.IProtocolHandler;
+import network.communication.Packet;
 import network.entities.INode;
 import network.routing.IAddress;
 
@@ -38,7 +37,7 @@ import simulation.simulatable.PerformanceRestrictedSimulatable;
 public class ReasonableAlgorithm 
 		extends AbstractAlgorithm
 		implements IAlgorithm, ISimulatable {
-
+	
 /// Custom values
 	
 	/**
@@ -76,18 +75,27 @@ public class ReasonableAlgorithm
 	/** role in the algorithm. */
 	protected Role _role;
 	
-	/** addresses of servers. */
-	protected Queue<IAddress> _serverAddresses;
-	/** current address to use...used during the read...we simply request things
-	 *  in order. */
-	protected Iterator<IAddress> _serverAddressIterator;
 	
+	/** first index of data to store and retrieve. */
+	protected int _startIndex;
+	/** last index of data to store and retrieve. */
+	protected int _endIndex;
+	/** current index. */
+	protected int _currentIndex;
 	
 	/** total responses from the HD. */
 	protected int _totalHDResponses;
 	/** total responses from clients. */
 	protected int _totalClientResponses;
 	
+	
+	/** first address in the range of addresses to store and retrieve from. */
+	protected IAddress _startAddress;
+	/** current address to use...used during the read...we simply request things
+	 *  in order. */
+	protected IAddress _currentAddress;
+	/** last address in the range of addresses */
+	protected IAddress _endAddress;
 	
 	/** address of the server */
 	protected IAddress _knownServerAddress;
@@ -108,6 +116,8 @@ public class ReasonableAlgorithm
 	public ReasonableAlgorithm( IHardwareComputer computer ) {
 		super();
 		_computer = computer;
+		//setMaxAllowedOperations( 20 );
+		//setRefreshInterval( 1 );
 		reset();
 	}
 	
@@ -118,9 +128,9 @@ public class ReasonableAlgorithm
 	@Override
 	protected void init() {
 		super.init();
-		_serverAddresses = new LinkedList<IAddress>();
 		_serverState = Client_State.IDLE;
 		_role = Role.SERVER;
+		setTransitTime( .0000001 );
 	}
 	
 	
@@ -131,21 +141,27 @@ public class ReasonableAlgorithm
 	 * @param startAddress of the address range.
 	 * @param endAddress of the address range.
 	 */
-	public void addServerAddress( IAddress serverAddress ) {
-		if( !_serverAddresses.contains( serverAddress ) ) {
-			_serverAddresses.add( serverAddress );	
-		}
+	public void setAddressRange( IAddress startAddress, IAddress endAddress ) {
+		_startAddress = startAddress;
+		_endAddress = endAddress;
 	}
 	
 	/**
-	 * Obtains the next server address to use for sending information.
+	 * Obtains the next address to use for information storage.
 	 * @return next address to store information.
 	 */
-	public IAddress getNextServerAddress() {
-		if( _serverAddressIterator == null || !_serverAddressIterator.hasNext() ) {
-			_serverAddressIterator = _serverAddresses.iterator();
-		}
-		return _serverAddressIterator.next();
+	public IAddress getNextStorageAddress() {
+		IAddress current = _currentAddress;
+		_currentAddress = new Address(((Address)_currentAddress).getRepresentation() + 1);
+		return current;
+	}
+	
+	/**
+	 * Obtains the next address to query for information during the read phase.
+	 * @return next address to ask for information.
+	 */
+	public IAddress getNextRetrievalAddress() {
+		return getNextStorageAddress();
 	}
 	
 	
@@ -187,12 +203,12 @@ public class ReasonableAlgorithm
 	 * @see hardware.IAlgorithm#distribute()
 	 */
 	public void distribute( int startIndex, int endIndex ) {
-		/*_startIndex = startIndex;
+		_startIndex = startIndex;
 		_endIndex = endIndex;
 		_currentIndex = startIndex;
 		
 		_currentAddress = _startAddress;
-		*/
+		
 		_totalClientResponses = 0;
 		_totalHDResponses = 0;
 		
@@ -213,7 +229,7 @@ public class ReasonableAlgorithm
 		//sendDoWork();								// kick-start us
 	}
 
-
+	
 /// Distribution Algorithm's methods
 	
 	/**
@@ -226,6 +242,19 @@ public class ReasonableAlgorithm
 		} else {
 			serverHandle( e );
 		}
+	}
+	
+
+	@Override
+	public void handleHigher(Object payload, IProtocolHandler sender) {
+		// does not exist
+		// we should never have something installed atop us.
+	}
+
+	@Override
+	public void handleLower(Object message, IProtocolHandler sender) {
+		IPacket packet = (IPacket)message;
+		packet.getContent();
 	}
 	
 	/**
@@ -269,18 +298,21 @@ public class ReasonableAlgorithm
 			notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "SERVER", 1, 0, 0, 1, 0, 0) );
 			System.out.println("server send!");
 			AlgorithmResponseMessage aMessage = (AlgorithmResponseMessage)message;
-			getSimulator().schedule(
-				new DefaultDiscreteScheduledEvent<IMessage>(
-					this, 
-					(ISimulatable)getComputer(), 
-					e.getEventTime() + getTransitTime(), 
-					getSimulator(), 
-					new NodeOutMessage(
-						new AlgorithmResponseMessage( aMessage.getData()),
-						_knownServerAddress, 
-						getProtocol())));
+			sendEvent(
+				(ISimulatable)getLowerHandler(),
+				new ProtocolHandlerMessage( 
+					ProtocolHandlerMessage.TYPE.HANDLE_HIGHER,
+					new Packet(
+						new AlgorithmResponseMessage( aMessage.getData() ),
+						((HardwareComputerNode)getComputer()).getAddress(),
+						_knownServerAddress,
+						getProtocol(),
+						-1,
+						-1),
+					this ) );				
 		}
 	}
+	
 	
 	/**
 	 * Handles operations when a server.
@@ -288,7 +320,7 @@ public class ReasonableAlgorithm
 	 */
 	protected void clientHandle( IDiscreteScheduledEvent e ) {
 		IMessage message = e.getMessage();
-		/*switch( _serverState ) {
+		switch( _serverState ) {
 			case DISTRIBUTE:
 				// grab more information
 				if( message instanceof AlgorithmDoWorkMessage ) {
@@ -339,7 +371,7 @@ public class ReasonableAlgorithm
 					}
 				}
 				break;
-		}*/
+		}
 	}
 	
 	/**
@@ -347,7 +379,7 @@ public class ReasonableAlgorithm
 	 * @return true if there is more to distribute, false otherwise.
 	 */
 	protected boolean haveMoreToDistribute() {
-		return true; //( _currentIndex <= _endIndex );
+		return ( _currentIndex <= _endIndex );
 	}
 
 	/**
@@ -355,7 +387,7 @@ public class ReasonableAlgorithm
 	 * @return true if there is more to read, false otherwise.
 	 */
 	protected boolean haveMoreToRead() {
-		return true;// ( _currentIndex <= _endIndex );
+		return ( _currentIndex <= _endIndex );
 	}
 	
 	/**
@@ -396,19 +428,27 @@ public class ReasonableAlgorithm
 	 * @param address of the client which is to store it.
 	 */
 	protected void sendDataToClient( IData data, IAddress address ) {
-		getSimulator().schedule(
-			new DefaultDiscreteScheduledEvent<IMessage>(
-				this, 
-				(ISimulatable)getComputer(), 
-				getSimulator().getTime() + getTransitTime(),
-				getSimulator(), 
-				new NodeOutMessage(
-					new AlgorithmStoreMessage( 
-						data.getID(), 
-						data,
-						((INode)getComputer()).getAddress()),
-					address,
-					getProtocol())));
+		Object payload = 
+			new AlgorithmStoreMessage( 
+				data.getID(), 
+				data,
+				((INode)getComputer()).getAddress());
+		
+		IPacket message = 
+			new Packet(
+				payload, 
+				((HardwareComputerNode)getComputer()).getAddress(),
+				address, 
+				"algorithm",
+				-1,
+				-1);
+		
+		sendEvent( 
+			(ISimulatable)getLowerHandler(), 
+			new ProtocolHandlerMessage( 
+				ProtocolHandlerMessage.TYPE.HANDLE_HIGHER, 
+				message, 
+				this ) );
 	}
 	
 	/**
@@ -418,16 +458,23 @@ public class ReasonableAlgorithm
 	 * @param address of the client which is to field the request.
 	 */
 	protected void sendClientRequest( int index, IAddress address ) {
-		getSimulator().schedule(
-			new DefaultDiscreteScheduledEvent<IMessage>(
-				this, 
-				(ISimulatable)getComputer(), 
-				getSimulator().getTime() + getTransitTime(), 
-				getSimulator(), 
-				new NodeOutMessage(
-					new AlgorithmRequestMessage( index ),
-					address,
-					getProtocol())));
+		Object payload = new AlgorithmRequestMessage( index );
+		
+		IPacket message = 
+			new Packet(
+				payload, 
+				((HardwareComputerNode)getComputer()).getAddress(),
+				address, 
+				"algorithm",
+				-1,
+				-1);
+		
+		sendEvent( 
+			(ISimulatable)getLowerHandler(), 
+			new ProtocolHandlerMessage( 
+				ProtocolHandlerMessage.TYPE.HANDLE_HIGHER, 
+				message, 
+				this ) );
 	}
 	
 	
@@ -444,17 +491,5 @@ public class ReasonableAlgorithm
 		result.setServerCount( this.getServerCount() );
 		result.setDataAmount( this.getDataAmount() );
 		return result;
-	}
-
-	@Override
-	public void handleHigher(Object payload, IProtocolHandler sender) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void handleLower(Object message, IProtocolHandler sender) {
-		// TODO Auto-generated method stub
-		
 	}
 }

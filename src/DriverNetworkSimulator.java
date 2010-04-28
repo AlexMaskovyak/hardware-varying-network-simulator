@@ -13,6 +13,7 @@ import computation.IData;
 import computation.algorithms.AbstractAlgorithm;
 import computation.algorithms.DummyAlgorithm;
 import computation.algorithms.IAlgorithm;
+import computation.algorithms.ReasonableAlgorithm;
 import computation.hardware.Cache;
 import computation.hardware.Harddrive;
 import configuration.ConfigurationManager;
@@ -68,7 +69,7 @@ public class DriverNetworkSimulator {
 		t.start();
 		sim.start();
 		HardwareComputerNode c = (HardwareComputerNode)sim.getClient();
-		DummyAlgorithm alg = (DummyAlgorithm)c.getInstalledAlgorithm();
+		ReasonableAlgorithm alg = (ReasonableAlgorithm)c.getInstalledAlgorithm();
 		//alg.setDataAmount( 100 );
 		//alg.setInitialData( generateData( sim.getDataAmount() ) );
 		//alg.setInitialData(data)

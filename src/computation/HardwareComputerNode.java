@@ -1,5 +1,6 @@
 package computation;
 
+import computation.algorithms.AbstractAlgorithm;
 import computation.algorithms.IAlgorithm;
 import computation.hardware.CPU;
 import computation.hardware.Cache;
@@ -168,10 +169,10 @@ public class HardwareComputerNode
 	@Override
 	public void setSimulator(ISimulator simulator) {
 		super.setSimulator( simulator );
-		if( getHarddrive() != null ) {
-			getHarddrive().setSimulator( simulator );
-			getCache().setSimulator( simulator );
-		}
+		if( getHarddrive() != null ) { getHarddrive().setSimulator( simulator );}
+		if( getCache() != null ) { getCache().setSimulator( simulator ); }
+		if( getInstalledAlgorithm() != null ) { 
+			((AbstractAlgorithm)getInstalledAlgorithm()).setSimulator( simulator );}
 	}
 
 	
@@ -186,6 +187,9 @@ public class HardwareComputerNode
 		HardwareComputerNode result = new HardwareComputerNode(); //super.clone();
 		result.setHarddrive( (Harddrive)this.getHarddrive().clone() );
 		result.setCache( (Cache)this.getCache().clone() );
+		IAlgorithm algorithm = (IAlgorithm)this.getInstalledAlgorithm().clone();
+		result.install( algorithm );
+		algorithm.install( result );
 		return result;
 	}
 	

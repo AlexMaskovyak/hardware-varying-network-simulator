@@ -13,6 +13,7 @@ import network.routing.IAddress;
 
 import simulation.simulatable.ISimulatable;
 import simulation.simulatable.PerformanceRestrictedSimulatable;
+import simulation.simulator.ISimulator;
 
 /**
  * Simulatable Computer Node which has modular hardware components.
@@ -64,6 +65,19 @@ public class ComputerNode
 		_algorithm = null;
 	}
 
+	
+/// ISimulatable
+
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.AbstractSimulatable#setSimulator(simulation.ISimulator)
+	 */
+	public void setSimulator(ISimulator simulator) {
+		super.setSimulator( simulator );
+		_algorithm.setSimulator( simulator );
+	}
+	
+	
 /// IComputer
 	
 	/*
@@ -73,10 +87,8 @@ public class ComputerNode
 	@Override
 	public void install(IAlgorithm algorithm) {
 		_algorithm = (AbstractAlgorithm) algorithm;
-		IProtocolHandler handler = (IProtocolHandler)algorithm;
-		handler.installLowerHandler( _transport );
-		_transport.installHigherHandler( handler );
-		//install(handler, handler.getProtocol());
+		_algorithm.installLowerHandler( _transport );
+		_transport.installHigherHandler( _algorithm );
 		_algorithm.setSimulator( getSimulator() );
 	}
 	
@@ -129,6 +141,11 @@ public class ComputerNode
 	 */
 	@Override
 	protected PerformanceRestrictedSimulatable createNew() {
-		return new ComputerNode();	
+		ComputerNode node = new ComputerNode();	
+		IAlgorithm algorithm = (IAlgorithm)this.getInstalledAlgorithm().clone();
+		node.install( algorithm );
+		algorithm.install( node );
+
+		return node;
 	}
 }

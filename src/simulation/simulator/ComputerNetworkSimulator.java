@@ -184,11 +184,18 @@ public class ComputerNetworkSimulator
 		HardwareComputerNode result = null;
 		try { 
 			result = (HardwareComputerNode) super.createNode();
-			IAlgorithm algorithm = (IAlgorithm)getBaseAlgorithm().clone();
-			algorithm.install( result );
-			result.install( (IAlgorithm)algorithm );
+			if( result.getInstalledAlgorithm() == null ) {
+				IAlgorithm algorithm = (IAlgorithm)getBaseAlgorithm().clone();
+				algorithm.install( result );
+				result.install( (IAlgorithm)algorithm );
+			}
 			addAlgorithmListener( result );
-			result.setHarddrive( createHarddrive() );
+			if( result.getHarddrive() == null ) {
+				result.setHarddrive( createHarddrive() );
+			}
+			if( result.getCache() == null ) {
+				result.setCache( createCache() );
+			}
 		} catch( Exception e ) { e.printStackTrace(); }
 		return result;
 	}
