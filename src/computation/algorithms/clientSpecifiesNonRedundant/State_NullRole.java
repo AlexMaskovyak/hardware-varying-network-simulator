@@ -37,13 +37,16 @@ public class State_NullRole
 					break;
 				case VOLUNTEER_REQUEST: 
 					AbstractAlgorithm algorithm = getStateHolder();
+					AlgorithmMessage response = new AlgorithmMessage( AlgorithmMessage.TYPE.VOLUNTEER_ACCEPTED );
+					response.setValue( AlgorithmMessage.VOLUNTEER_ADDRESS, algorithm.getComputer().getAddress() );
+					
+					// broadcast volunteer request to others
 					algorithm.sendEvent(
 						(ISimulatable)algorithm.getLowerHandler(), 
 						new ProtocolHandlerMessage( 
 							ProtocolHandlerMessage.TYPE.HANDLE_HIGHER, 
 							new Packet(
-								new AlgorithmMessage( 
-									AlgorithmMessage.TYPE.VOLUNTEER_REQUEST),
+								new AlgorithmMessage( AlgorithmMessage.TYPE.VOLUNTEER_REQUEST ),
 								algorithm.getComputer().getAddress(),
 								Address.BROADCAST, 
 								algorithm.getProtocol(),

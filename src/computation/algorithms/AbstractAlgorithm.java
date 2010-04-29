@@ -1,13 +1,20 @@
 package computation.algorithms;
 
 import simulation.event.IDEvent;
+import simulation.event.IDEvent.IMessage;
+import simulation.simulatable.ISimulatable;
 import computation.IComputer;
 import computation.IHardwareComputer;
 import computation.state.IState;
 import computation.state.IStateHolder;
 
+import messages.ProtocolHandlerMessage;
 import network.communication.AbstractProtocolHandler;
+import network.communication.IPacket;
+import network.communication.IProtocolHandler;
+import network.communication.Packet;
 import network.entities.IPublicCloneable;
+import network.routing.IAddress;
 
 /**
  * Abstract algorithm is a protocol handler which can be chained/installed on 
@@ -140,10 +147,40 @@ public abstract class AbstractAlgorithm
 	}
 	
 	/**
-	 * 
-	 * @param event
+	 * Sends messages down the stack without having to specify ttl or sequence.
+	 * @param message for the algorithm on another node.
+	 * @param destination address on which the other algorithm is running.
 	 */
-	//public void sendMessageDownStack( IMessage message ) {
-		
-	//}
+	public void sendMessageDownStack( IMessage message, IAddress destination ) {
+		sendMessageDownStack( message, destination, -1, -1);
+	}
+	
+	/**
+	 * Quick and easy way to send messages down the stack.  Encapsulates the 
+	 * message into a packet which will be sent in a scheduled ProtocolHandler
+	 * Message.
+	 * @param message for the algorithm on another node.
+	 * @param destination address on which the other algorithm is running.
+	 * @param ttl to determine how many hops this packet should live for.
+	 * @param sequence number of this packet.
+	 */
+	public void sendMessageDownStack( 
+			IMessage message, 
+			IAddress destination, 
+			int ttl, 
+			int sequence ) {
+		// wrap message in a packet
+		IPacket packet = 
+			new Packet(
+				message, 
+				this.getComputer().getAddress(),
+				destination, 
+				getProtocol(),
+				ttl,
+				sequence);
+		ProtocolHandlerMessage phMessage 
+			= new ProtocolHandlerMessage( 
+					ProtocolHandlerMessage.TYPE.HANDLE_HIGHER, packet, this );
+		sendEvent( (ISimulatable)getLowerHandler(), phMessage );
+	}
 }
