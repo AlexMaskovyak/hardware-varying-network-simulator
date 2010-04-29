@@ -14,13 +14,15 @@ import computation.state.IState;
  * @author Alex Maskovyak
  *
  */
-public class State_Client_FindServers
+public class State_Client_AwaitVolunteers
 		extends AbstractState 
 		implements IState<AbstractAlgorithm> {
 
 /// Fields	
 
+	/** servers we have found. */
 	protected List<IAddress> _servers;
+	/** server total we seek. */
 	protected int _volunteersSought;
 
 /// Construction
@@ -29,7 +31,7 @@ public class State_Client_FindServers
 	 * Servers to seek.
 	 * @param servers we need to obtain.
 	 */
-	public State_Client_FindServers( int servers ) {
+	public State_Client_AwaitVolunteers( int servers ) {
 		_volunteersSought = servers;
 	}
 	
@@ -46,12 +48,18 @@ public class State_Client_FindServers
 			AlgorithmMessage aMessage = (AlgorithmMessage)message;
 			switch( aMessage.getType() ) {
 			
-			case VOLUNTEER_ACCEPTED:
-				// if we need more, add it
-				if( _servers.size() < _volunteersSought ) {
+				case VOLUNTEER_ACCEPTED:
+					// add it
 					_servers.add( (IAddress)aMessage.getValue( AlgorithmMessage.VOLUNTEER_ADDRESS ) );
 					
-				}
+					// are we done looking?
+					if( _servers.size() == _volunteersSought ) {
+						updateStateHolder( new State_Client_Distribute( _servers ) );
+						sendEvent( getStateHolder(), new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK ) );
+					}
+					break;
+				// nothing else if worth our time
+				default: break;
 			}
 		}
 	}

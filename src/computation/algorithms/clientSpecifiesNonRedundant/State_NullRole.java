@@ -2,6 +2,7 @@ package computation.algorithms.clientSpecifiesNonRedundant;
 
 import network.communication.Address;
 import network.communication.Packet;
+import network.routing.IAddress;
 import messages.ProtocolHandlerMessage;
 import simulation.event.IDEvent;
 import simulation.event.IDEvent.IMessage;
@@ -32,28 +33,27 @@ public class State_NullRole
 			switch( aMessage.getType() ) {
 			
 				case SET_CLIENT: 
+					// send volunteer request
+					AlgorithmMessage volunteerRequest = new AlgorithmMessage( AlgorithmMessage.TYPE.VOLUNTEER_REQUEST );
+					volunteerRequest.setValue( AlgorithmMessage.CLIENT_ADDRESS, getStateHolder().getComputer().getAddress() );
+					sendMessageDownStack( volunteerRequest, Address.BROADCAST );
+					sendEvent( getStateHolder(), new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK ) );
+					
+					// record servers needed and set next state
 					int servers = (Integer)aMessage.getValue( AlgorithmMessage.SERVERS );
-					updateStateHolder( new State_Client_FindServers( servers ) ); 
+					updateStateHolder( new State_Client_AwaitVolunteers( servers ) ); 
 					break;
 				case VOLUNTEER_REQUEST: 
-					AbstractAlgorithm algorithm = getStateHolder();
+					// send response to client
+					IAddress clientAddress = (IAddress)aMessage.getValue( AlgorithmMessage.CLIENT_ADDRESS );
 					AlgorithmMessage response = new AlgorithmMessage( AlgorithmMessage.TYPE.VOLUNTEER_ACCEPTED );
-					response.setValue( AlgorithmMessage.VOLUNTEER_ADDRESS, algorithm.getComputer().getAddress() );
+					response.setValue( AlgorithmMessage.VOLUNTEER_ADDRESS, getStateHolder().getComputer().getAddress() );
+					sendMessageDownStack( response, clientAddress );
 					
-					// broadcast volunteer request to others
-					algorithm.sendEvent(
-						(ISimulatable)algorithm.getLowerHandler(), 
-						new ProtocolHandlerMessage( 
-							ProtocolHandlerMessage.TYPE.HANDLE_HIGHER, 
-							new Packet(
-								new AlgorithmMessage( AlgorithmMessage.TYPE.VOLUNTEER_REQUEST ),
-								algorithm.getComputer().getAddress(),
-								Address.BROADCAST, 
-								algorithm.getProtocol(),
-								-1,
-								-1
-								), 
-							algorithm ) );
+					// re-broadcast volunteer request to others
+					sendMessageDownStack( aMessage, Address.BROADCAST );
+					
+					// go to volunteered state
 					updateStateHolder( new State_Server_Volunteered() );
 					break;
 			}
