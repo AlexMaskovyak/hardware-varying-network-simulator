@@ -1,12 +1,11 @@
 package computation.algorithms;
 
+import simulation.event.IDEvent;
 import computation.IComputer;
-import computation.IData;
 import computation.IHardwareComputer;
-import computation.hardware.Harddrive;
+import computation.state.IState;
+import computation.state.IStateHolder;
 
-import simulation.event.IDiscreteScheduledEvent;
-import simulation.simulatable.PerformanceRestrictedSimulatable;
 import network.communication.AbstractProtocolHandler;
 import network.entities.IPublicCloneable;
 
@@ -18,7 +17,7 @@ import network.entities.IPublicCloneable;
  */
 public abstract class AbstractAlgorithm
 		extends AbstractProtocolHandler
-		implements IAlgorithm, IPublicCloneable {
+		implements IAlgorithm, IPublicCloneable, IStateHolder {
 
 /// Fields
 	
@@ -28,7 +27,8 @@ public abstract class AbstractAlgorithm
 	protected int _serverCount;
 	/** amount of data the client is to distribute. */
 	protected int _clientDistributionAmount;
-
+	/** current state of the algorithm. */
+	protected IState _iState;
 	
 /// Construction.
 	
@@ -117,4 +117,33 @@ public abstract class AbstractAlgorithm
 	public int getDataAmount() {
 		return _clientDistributionAmount;
 	}
+
+	
+/// IStateHolder
+
+	/*
+	 * (non-Javadoc)
+	 * @see computation.state.IStateHolder#setState(computation.state.IState)
+	 */
+	@Override
+	public void setIState( IState newState ) {
+		_iState = newState;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see computation.state.IStateHolder#getIState()
+	 */
+	@Override
+	public IState getIState() {
+		return _iState;
+	}
+	
+	/**
+	 * 
+	 * @param event
+	 */
+	//public void sendMessageDownStack( IMessage message ) {
+		
+	//}
 }

@@ -1,13 +1,13 @@
 package messages;
 
-import simulation.event.IDiscreteScheduledEvent.IMessage;
+import simulation.event.IDEvent.IMessage;
 
 /**
  *  Messages designed for Harddrive.  Requests information.
  * @author Alex Maskovyak
  *
  */
-public class HarddriveRequestMessage 
+public class StorageDeviceDataRequestMessage 
 		implements IMessage {
 
 	/** index requested. */
@@ -22,7 +22,7 @@ public class HarddriveRequestMessage
 	 * advanced ComputerNode is made which support multiple algorithms, that 
 	 * shouldn't be the case.
 	 */
-	public HarddriveRequestMessage( int index, int requestId ) {
+	public StorageDeviceDataRequestMessage( int index, int requestId ) {
 		_sequence = index;
 		_requestId = requestId;
 	}

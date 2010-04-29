@@ -2,9 +2,9 @@ package simulation.simulatable;
 
 import network.entities.IPublicCloneable;
 import messages.SimulatableRefreshMessage;
-import simulation.event.DefaultDiscreteScheduledEvent;
-import simulation.event.IDiscreteScheduledEvent;
-import simulation.event.IDiscreteScheduledEvent.IMessage;
+import simulation.event.DEvent;
+import simulation.event.IDEvent;
+import simulation.event.IDEvent.IMessage;
 
 /**
  * Simulatables which can perform a restricted number of operations.  This type
@@ -243,7 +243,7 @@ public class PerformanceRestrictedSimulatable
 	 * @see simulation.AbstractSimulatable#handleEvent(simulation.IDiscreteScheduledEvent)
 	 */
 	@Override
-	public synchronized void handleEvent(IDiscreteScheduledEvent e) {
+	public synchronized void handleEvent(IDEvent e) {
 		IMessage message = e.getMessage();
 	
 		// do this for all states.
@@ -294,7 +294,7 @@ public class PerformanceRestrictedSimulatable
 	 * maintain the performance restricted functionality of this class.
 	 * @param e the event to handle.
 	 */
-	protected void handleEventDelegate( IDiscreteScheduledEvent e ) {}
+	protected void handleEventDelegate( IDEvent e ) {}
 	
 	/*
 	 * (non-Javadoc)
@@ -315,13 +315,13 @@ public class PerformanceRestrictedSimulatable
 	protected void sendRefreshMessage( double currentEventTime ) {
 		if( getMaxAllowedOperations() != INFINITY ) {
 			getSimulator().schedule(
-				new DefaultDiscreteScheduledEvent<SimulatableRefreshMessage>(
+				new DEvent<SimulatableRefreshMessage>(
 					this, 
 					this, 
 					currentEventTime + getRefreshInterval(), 
 					getSimulator(), 
 					new SimulatableRefreshMessage(),
-					DefaultDiscreteScheduledEvent.INTERNAL));
+					DEvent.INTERNAL));
 		}
 	}
 	
@@ -330,15 +330,15 @@ public class PerformanceRestrictedSimulatable
 	 * receive and deal with it and other requests again.
 	 * @param e event to reschedule for ourselves into the future.
 	 */
-	protected void rescheduleEvent( IDiscreteScheduledEvent e ) {
-		IDiscreteScheduledEvent rescheduledEvent = 
-			new DefaultDiscreteScheduledEvent<IMessage>(
+	protected void rescheduleEvent( IDEvent e ) {
+		IDEvent rescheduledEvent = 
+			new DEvent<IMessage>(
 				e.getSource(), 
 				e.getDestination(), 
 				getLastRefreshTime() + getRefreshInterval(), 
 				e.getSimulator(), 
 				e.getMessage(),
-				DefaultDiscreteScheduledEvent.EXTERNAL);
+				DEvent.EXTERNAL);
 		getSimulator().schedule( rescheduledEvent );
 	}
 	

@@ -3,8 +3,8 @@ package simulation.simulatable;
 import java.util.HashSet;
 import java.util.Set;
 
-import simulation.event.DefaultDiscreteScheduledEvent;
-import simulation.event.IDiscreteScheduledEvent;
+import simulation.event.DEvent;
+import simulation.event.IDEvent;
 import simulation.simulatable.listeners.ISimulatableEvent;
 import simulation.simulatable.listeners.ISimulatableListener;
 import simulation.simulator.IDESimulator;
@@ -126,7 +126,7 @@ public abstract class AbstractSimulatable
 // Event handling
 	
 	@Override
-	public abstract void handleEvent(IDiscreteScheduledEvent e);
+	public abstract void handleEvent(IDEvent e);
 	
 	/*
 	 * By default we can perform operations.
@@ -143,14 +143,32 @@ public abstract class AbstractSimulatable
 	 * @param destination to receive the message.
 	 * @param message to send to the destination.
 	 */
-	protected void sendEvent( 
-			ISimulatable destination, IDiscreteScheduledEvent.IMessage message ) {
+	public void sendEvent( 
+			ISimulatable destination, 
+			IDEvent.IMessage message ) {
+		
+		sendEvent( 
+			destination, 
+			message, 
+			getTransitTime() );
+	}
+	
+	/**
+	 * Sends an event at an explicitly defined time.
+	 * @param destination to receive the message.
+	 * @param message to send to the destination.
+	 * @param time delta in the future to schedule the event.
+	 */
+	public void sendEvent(
+			ISimulatable destination,
+			IDEvent.IMessage message,
+			double time) {
 		
 		getSimulator().schedule(
-				new DefaultDiscreteScheduledEvent (
+				new DEvent (
 					this, 
 					destination, 
-					getSimulator().getTime() + getTransitTime(), 
+					getSimulator().getTime() + time, 
 					getSimulator(), 
 					message));
 	}

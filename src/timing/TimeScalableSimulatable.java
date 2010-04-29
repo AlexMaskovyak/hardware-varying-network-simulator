@@ -1,6 +1,6 @@
 package timing;
 
-import simulation.event.IDiscreteScheduledEvent;
+import simulation.event.IDEvent;
 import simulation.simulatable.AbstractSimulatable;
 import simulation.simulatable.ISimulatable;
 import simulation.simulatable.PerformanceRestrictedSimulatable;
@@ -98,7 +98,7 @@ public class TimeScalableSimulatable extends PerformanceRestrictedSimulatable im
 	}
 
 	@Override
-	public void handleEvent(IDiscreteScheduledEvent e) {
+	public void handleEvent(IDEvent e) {
 		// TODO Auto-generated method stub
 		
 	}

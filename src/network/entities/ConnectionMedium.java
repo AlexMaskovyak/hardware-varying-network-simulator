@@ -8,9 +8,9 @@ import network.communication.IPacket;
 import messages.ConnectionAdaptorMessage;
 import messages.ConnectionMediumMessage;
 
-import simulation.event.DefaultDiscreteScheduledEvent;
-import simulation.event.IDiscreteScheduledEvent;
-import simulation.event.IDiscreteScheduledEvent.IMessage;
+import simulation.event.DEvent;
+import simulation.event.IDEvent;
+import simulation.event.IDEvent.IMessage;
 import simulation.simulatable.AbstractSimulatable;
 import simulation.simulatable.ISimulatable;
 import simulation.simulatable.PerformanceRestrictedSimulatable;
@@ -134,7 +134,7 @@ public class ConnectionMedium
 	 * @see simulation.AbstractSimulatable#handleEvent(simulation.IDiscreteScheduledEvent)
 	 */
 	@Override
-	public void handleEvent(IDiscreteScheduledEvent e) {
+	public void handleEvent(IDEvent e) {
 		IMessage message = e.getMessage();
 		if( message instanceof ConnectionMediumMessage ) {
 			ConnectionMediumMessage cmMessage = (ConnectionMediumMessage)message;
@@ -162,7 +162,7 @@ public class ConnectionMedium
 			if( ca != sender ) {
 			//if( !ca.getAddress().equals( packet.getSource() ) ) {
 				getSimulator().schedule(
-					new DefaultDiscreteScheduledEvent<IMessage>(
+					new DEvent<IMessage>(
 						(ISimulatable)this, 
 						(ISimulatable)ca, 
 						getSimulator().getTime() + getTransitTime(), 

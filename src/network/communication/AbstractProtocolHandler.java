@@ -3,11 +3,6 @@ package network.communication;
 import java.util.HashMap;
 import java.util.Map;
 
-import messages.ProtocolHandlerMessage;
-
-import simulation.event.DefaultDiscreteScheduledEvent;
-import simulation.event.IDiscreteScheduledEvent;
-import simulation.simulatable.ISimulatable;
 import simulation.simulatable.PerformanceRestrictedSimulatable;
 
 /**

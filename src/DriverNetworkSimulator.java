@@ -13,20 +13,16 @@ import computation.IData;
 import computation.algorithms.AbstractAlgorithm;
 import computation.algorithms.DummyAlgorithm;
 import computation.algorithms.IAlgorithm;
-import computation.algorithms.ReasonableAlgorithm;
+import computation.algorithms.ClientSpecifiesNonRedundantAlgorithm;
 import computation.hardware.Cache;
 import computation.hardware.Harddrive;
 import configuration.ConfigurationManager;
 
-import simulation.event.DefaultDiscreteScheduledEvent;
-import simulation.simulatable.ISimulatable;
-import simulation.simulatable.PerformanceRestrictedSimulatable;
 import simulation.simulator.ComputerNetworkSimulator;
 import simulation.simulator.listeners.ReportingSimulatorListener;
 import network.communication.Address;
 import network.entities.ConnectionAdaptor;
 import network.entities.ConnectionMedium;
-import network.entities.IConnectionAdaptor;
 import network.entities.INode;
 
 
@@ -69,7 +65,7 @@ public class DriverNetworkSimulator {
 		t.start();
 		sim.start();
 		HardwareComputerNode c = (HardwareComputerNode)sim.getClient();
-		ReasonableAlgorithm alg = (ReasonableAlgorithm)c.getInstalledAlgorithm();
+		ClientSpecifiesNonRedundantAlgorithm alg = (ClientSpecifiesNonRedundantAlgorithm)c.getInstalledAlgorithm();
 		//alg.setDataAmount( 100 );
 		//alg.setInitialData( generateData( sim.getDataAmount() ) );
 		//alg.setInitialData(data)

@@ -10,8 +10,8 @@ import messages.AlgorithmDoWorkMessage;
 import messages.AlgorithmRequestMessage;
 import messages.AlgorithmResponseMessage;
 import messages.AlgorithmStoreMessage;
-import messages.HarddriveRequestMessage;
-import messages.HarddriveStoreMessage;
+import messages.StorageDeviceDataRequestMessage;
+import messages.StorageDeviceDataStoreMessage;
 import messages.NodeOutMessage;
 import messages.ProtocolHandlerMessage;
 import network.communication.Address;
@@ -21,9 +21,9 @@ import network.communication.Packet;
 import network.entities.INode;
 import network.routing.IAddress;
 
-import simulation.event.DefaultDiscreteScheduledEvent;
-import simulation.event.IDiscreteScheduledEvent;
-import simulation.event.IDiscreteScheduledEvent.IMessage;
+import simulation.event.DEvent;
+import simulation.event.IDEvent;
+import simulation.event.IDEvent.IMessage;
 import simulation.simulatable.ISimulatable;
 import simulation.simulatable.PerformanceRestrictedSimulatable;
 
@@ -234,9 +234,9 @@ public class DummyAlgorithm
 	
 	/**
 	 * This override implements functionality for client and server.
-	 * @see simulation.simulatable.PerformanceRestrictedSimulatable#handleEventDelegate(simulation.event.IDiscreteScheduledEvent)
+	 * @see simulation.simulatable.PerformanceRestrictedSimulatable#handleEventDelegate(simulation.event.IDEvent)
 	 */
-	protected void handleEventDelegate( IDiscreteScheduledEvent e) {
+	protected void handleEventDelegate( IDEvent e) {
 		if( _role == Role.CLIENT ) {
 			clientHandle( e );
 		} else {
@@ -261,7 +261,7 @@ public class DummyAlgorithm
 	 * Handles operation when a client.
 	 * @param e event to handle.
 	 */
-	protected void serverHandle( IDiscreteScheduledEvent e ) {
+	protected void serverHandle( IDEvent e ) {
 		IMessage message = e.getMessage();
 		// store information into memory
 		if( message instanceof AlgorithmStoreMessage ) {
@@ -270,12 +270,12 @@ public class DummyAlgorithm
 			_knownServerAddress = aMessage.getServer();
 			notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "SERVER", 0, 1, 1, 0, 0, 0) );
 			getSimulator().schedule(
-				new DefaultDiscreteScheduledEvent<HarddriveStoreMessage>(
+				new DEvent<StorageDeviceDataStoreMessage>(
 					this, 
 					getComputer().getHarddrive(), 
 					e.getEventTime() + getTransitTime(), 
 					getSimulator(), 
-					new HarddriveStoreMessage(
+					new StorageDeviceDataStoreMessage(
 						aMessage.getIndex(), 
 						aMessage.getData())));
 		} 
@@ -284,12 +284,12 @@ public class DummyAlgorithm
 			AlgorithmRequestMessage aMessage = (AlgorithmRequestMessage)message;
 			notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "SERVER", 0, 0, 0, 0, 1, 1) );
 			getSimulator().schedule(
-				new DefaultDiscreteScheduledEvent<HarddriveRequestMessage>(
+				new DEvent<StorageDeviceDataRequestMessage>(
 					this, 
 					getComputer().getHarddrive(), 
 					e.getEventTime() + getTransitTime(), 
 					getSimulator(), 
-					new HarddriveRequestMessage(
+					new StorageDeviceDataRequestMessage(
 						aMessage.getIndex(),
 						-1)));
 		} 
@@ -318,7 +318,7 @@ public class DummyAlgorithm
 	 * Handles operations when a server.
 	 * @param e event to handle.
 	 */
-	protected void clientHandle( IDiscreteScheduledEvent e ) {
+	protected void clientHandle( IDEvent e ) {
 		IMessage message = e.getMessage();
 		switch( _serverState ) {
 			case DISTRIBUTE:
@@ -398,7 +398,7 @@ public class DummyAlgorithm
 	 */
 	protected void sendDoWork() {
 		getSimulator().schedule(
-			new DefaultDiscreteScheduledEvent<IMessage>(
+			new DEvent<IMessage>(
 				this, 
 				this, 
 				getSimulator().getTime(), 
@@ -412,12 +412,12 @@ public class DummyAlgorithm
 	 */
 	protected void sendHarddriveRequest( int index ) {
 		getSimulator().schedule(
-			new DefaultDiscreteScheduledEvent<IMessage>(
+			new DEvent<IMessage>(
 				this, 
 				getComputer().getHarddrive(), 
 				getSimulator().getTime() + getTransitTime(), 
 				getSimulator(), 
-				new HarddriveRequestMessage( 
+				new StorageDeviceDataRequestMessage( 
 					index, 
 					-1 )));
 	}

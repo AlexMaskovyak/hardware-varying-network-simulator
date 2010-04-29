@@ -3,7 +3,7 @@ package computation.hardware;
 import network.entities.Node;
 import computation.IData;
 
-import simulation.event.IDiscreteScheduledEvent;
+import simulation.event.IDEvent;
 import simulation.simulatable.AbstractSimulatable;
 import simulation.simulatable.ISimulatable;
 import simulation.simulatable.PerformanceRestrictedSimulatable;
@@ -46,7 +46,7 @@ public class Cache
 	}
 
 	@Override
-	public void handleEventDelegate(IDiscreteScheduledEvent e) {
+	public void handleEventDelegate(IDEvent e) {
 		// TODO Auto-generated method stub
 		
 	}

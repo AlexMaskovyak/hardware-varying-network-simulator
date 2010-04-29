@@ -8,8 +8,8 @@ import simulation.simulator.ISimulator;
  * @author Alex Maskovyak
  *
  */
-public class DefaultDiscreteScheduledEvent<T extends IDiscreteScheduledEvent.IMessage>
-		implements IDiscreteScheduledEvent<T> {
+public class DEvent<T extends IDEvent.IMessage>
+		implements IDEvent<T> {
 
 /// Constants
 	
@@ -46,7 +46,7 @@ public class DefaultDiscreteScheduledEvent<T extends IDiscreteScheduledEvent.IMe
 	 * @param simulator responsible for queueing and assigning this event.
 	 * @param message to deliver.
 	 */
-	public DefaultDiscreteScheduledEvent( 
+	public DEvent( 
 			ISimulatable source, 
 			ISimulatable destination, 
 			double eventTime, 
@@ -64,7 +64,7 @@ public class DefaultDiscreteScheduledEvent<T extends IDiscreteScheduledEvent.IMe
 	 * @param message to deliver.
 	 * @param priority how valuable is this event, normally this is set to 
 	 */
-	public DefaultDiscreteScheduledEvent(
+	public DEvent(
 			ISimulatable source, 
 			ISimulatable destination, 
 			double eventTime, 

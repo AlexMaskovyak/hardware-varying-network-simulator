@@ -2,7 +2,7 @@ package messages;
 
 import network.communication.IPacket;
 import network.communication.IProtocolHandler;
-import simulation.event.IDiscreteScheduledEvent.IMessage;
+import simulation.event.IDEvent.IMessage;
 
 /**
  * Contains messages to be passed to ProtocolHandlers.

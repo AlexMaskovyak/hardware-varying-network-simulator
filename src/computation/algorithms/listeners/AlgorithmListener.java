@@ -9,7 +9,7 @@ import network.entities.INode;
 
 import computation.algorithms.IAlgorithm;
 
-import simulation.event.IDiscreteScheduledEvent;
+import simulation.event.IDEvent;
 import simulation.simulatable.AbstractSimulatable;
 import simulation.simulatable.listeners.ISimulatableEvent;
 import simulation.simulatable.listeners.ISimulatableListener;

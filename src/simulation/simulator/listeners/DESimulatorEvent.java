@@ -1,6 +1,6 @@
 package simulation.simulator.listeners;
 
-import simulation.event.IDiscreteScheduledEvent;
+import simulation.event.IDEvent;
 import simulation.simulator.ISimulator;
 
 /**
@@ -15,7 +15,7 @@ public class DESimulatorEvent
 /// Fields
 	
 	/** discrete event. */
-	protected IDiscreteScheduledEvent _dEvent;
+	protected IDEvent _dEvent;
 	
 
 /// Construction
@@ -29,7 +29,7 @@ public class DESimulatorEvent
 	public DESimulatorEvent(
 			ISimulator source, 
 			double time, 
-			IDiscreteScheduledEvent dEvent ) {
+			IDEvent dEvent ) {
 		super( source, time );
 		_dEvent = dEvent;
 	}
@@ -39,7 +39,7 @@ public class DESimulatorEvent
 	 * @see simulation.simulator.listeners.IDESimulatorEvent#getScheduledEvent()
 	 */
 	@Override
-	public IDiscreteScheduledEvent getScheduledEvent() {
+	public IDEvent getScheduledEvent() {
 		return _dEvent;
 	}
 }
