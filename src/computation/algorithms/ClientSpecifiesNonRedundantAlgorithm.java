@@ -269,47 +269,25 @@ public class ClientSpecifiesNonRedundantAlgorithm
 			// store the server's address
 			_knownServerAddress = aMessage.getServer();
 			notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "SERVER", 0, 1, 1, 0, 0, 0) );
-			getSimulator().schedule(
-				new DEvent<StorageDeviceDataStoreMessage>(
-					this, 
-					getComputer().getHarddrive(), 
-					e.getEventTime() + getTransitTime(), 
-					getSimulator(), 
-					new StorageDeviceDataStoreMessage(
-						aMessage.getIndex(), 
-						aMessage.getData())));
+			sendEvent( 
+				getComputer().getHarddrive(),
+				new StorageDeviceDataStoreMessage(
+					aMessage.getIndex(), 
+					aMessage.getData()) );
 		} 
 		// previously stored information is requested
 		else if( message instanceof AlgorithmRequestMessage ) {
 			AlgorithmRequestMessage aMessage = (AlgorithmRequestMessage)message;
 			notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "SERVER", 0, 0, 0, 0, 1, 1) );
-			getSimulator().schedule(
-				new DEvent<StorageDeviceDataRequestMessage>(
-					this, 
-					getComputer().getHarddrive(), 
-					e.getEventTime() + getTransitTime(), 
-					getSimulator(), 
-					new StorageDeviceDataRequestMessage(
-						aMessage.getIndex(),
-						-1)));
+			sendEvent( 
+				getComputer().getHarddrive(), 
+				new StorageDeviceDataRequestMessage( aMessage.getIndex(), -1 ) );
 		} 
 		// information requested from memory has arrived
 		else if( message instanceof AlgorithmResponseMessage ) {
 			notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "SERVER", 1, 0, 0, 1, 0, 0) );
 			System.out.println("server send!");
-			AlgorithmResponseMessage aMessage = (AlgorithmResponseMessage)message;
-			sendEvent(
-				(ISimulatable)getLowerHandler(),
-				new ProtocolHandlerMessage( 
-					ProtocolHandlerMessage.TYPE.HANDLE_HIGHER,
-					new Packet(
-						new AlgorithmResponseMessage( aMessage.getData() ),
-						((HardwareComputerNode)getComputer()).getAddress(),
-						_knownServerAddress,
-						getProtocol(),
-						-1,
-						-1),
-					this ) );				
+			sendMessageDownStack( (AlgorithmResponseMessage)message, _knownServerAddress, -1, -1);
 		}
 	}
 	
@@ -397,13 +375,7 @@ public class ClientSpecifiesNonRedundantAlgorithm
 	 * do.
 	 */
 	protected void sendDoWork() {
-		getSimulator().schedule(
-			new DEvent<IMessage>(
-				this, 
-				this, 
-				getSimulator().getTime(), 
-				getSimulator(), 
-				new AlgorithmDoWorkMessage()));
+		sendEvent( this, new AlgorithmDoWorkMessage() );
 	}
 	
 	/**
@@ -411,15 +383,7 @@ public class ClientSpecifiesNonRedundantAlgorithm
 	 * @param index to retrieve from the harddrive.
 	 */
 	protected void sendHarddriveRequest( int index ) {
-		getSimulator().schedule(
-			new DEvent<IMessage>(
-				this, 
-				getComputer().getHarddrive(), 
-				getSimulator().getTime() + getTransitTime(), 
-				getSimulator(), 
-				new StorageDeviceDataRequestMessage( 
-					index, 
-					-1 )));
+		sendEvent( getComputer().getHarddrive(), new StorageDeviceDataRequestMessage(index, -1) );
 	}
 	
 	/**
@@ -428,27 +392,12 @@ public class ClientSpecifiesNonRedundantAlgorithm
 	 * @param address of the client which is to store it.
 	 */
 	protected void sendDataToClient( IData data, IAddress address ) {
-		Object payload = 
+		IMessage payload = 
 			new AlgorithmStoreMessage( 
 				data.getID(), 
 				data,
 				((INode)getComputer()).getAddress());
-		
-		IPacket message = 
-			new Packet(
-				payload, 
-				((HardwareComputerNode)getComputer()).getAddress(),
-				address, 
-				"algorithm",
-				-1,
-				-1);
-		
-		sendEvent( 
-			(ISimulatable)getLowerHandler(), 
-			new ProtocolHandlerMessage( 
-				ProtocolHandlerMessage.TYPE.HANDLE_HIGHER, 
-				message, 
-				this ) );
+		sendMessageDownStack( payload, address, -1, -1);
 	}
 	
 	/**
@@ -458,23 +407,8 @@ public class ClientSpecifiesNonRedundantAlgorithm
 	 * @param address of the client which is to field the request.
 	 */
 	protected void sendClientRequest( int index, IAddress address ) {
-		Object payload = new AlgorithmRequestMessage( index );
-		
-		IPacket message = 
-			new Packet(
-				payload, 
-				((HardwareComputerNode)getComputer()).getAddress(),
-				address, 
-				"algorithm",
-				-1,
-				-1);
-		
-		sendEvent( 
-			(ISimulatable)getLowerHandler(), 
-			new ProtocolHandlerMessage( 
-				ProtocolHandlerMessage.TYPE.HANDLE_HIGHER, 
-				message, 
-				this ) );
+		IMessage payload = new AlgorithmRequestMessage( index );
+		sendMessageDownStack( payload, address, -1, -1);
 	}
 	
 	
