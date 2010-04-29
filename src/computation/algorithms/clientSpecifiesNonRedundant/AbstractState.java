@@ -6,7 +6,6 @@ import simulation.event.IDEvent.IMessage;
 import simulation.simulatable.ISimulatable;
 import computation.algorithms.AbstractAlgorithm;
 import computation.state.IState;
-import computation.state.IStateHolder;
 
 /**
  * Basis behind states.
@@ -16,8 +15,11 @@ import computation.state.IStateHolder;
 public abstract class AbstractState
 		implements IState<AbstractAlgorithm> {
 
+/// Fields
+	
 	/** stateholder that possesses us. */
 	protected AbstractAlgorithm _holder;
+	
 	
 /// IState
 	

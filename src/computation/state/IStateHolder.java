@@ -6,7 +6,7 @@ package computation.state;
  * @author Alex Maskovyak
  *
  */
-public interface IStateHolder {
+public interface IStateHolder<T extends IStateHolder<T>> {
 
 	
 	/**
@@ -14,11 +14,11 @@ public interface IStateHolder {
 	 * holder to modify the holder.
 	 * @param newState to assign to this state holder.
 	 */
-	public void setIState( IState newState );
+	public void setIState( IState<T> newState );
 	
 	/**
 	 * Obtains the current state of the stateholder.
 	 * @return the StateHolder's current state.
 	 */
-	public IState getIState();
+	public IState<T> getIState();
 }

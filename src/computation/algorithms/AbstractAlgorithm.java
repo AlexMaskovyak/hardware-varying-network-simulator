@@ -22,9 +22,9 @@ import network.routing.IAddress;
  * @author Alex Maskovyak
  *
  */
-public abstract class AbstractAlgorithm
+public abstract class AbstractAlgorithm<T extends AbstractAlgorithm<T>>
 		extends AbstractProtocolHandler
-		implements IAlgorithm, IPublicCloneable, IStateHolder {
+		implements IAlgorithm, IPublicCloneable, IStateHolder<T> {
 
 /// Fields
 	
@@ -35,7 +35,7 @@ public abstract class AbstractAlgorithm
 	/** amount of data the client is to distribute. */
 	protected int _clientDistributionAmount;
 	/** current state of the algorithm. */
-	protected IState _iState;
+	protected IState<T> _iState;
 	
 /// Construction.
 	
@@ -58,8 +58,7 @@ public abstract class AbstractAlgorithm
 	 */
 	@Override
 	public void distribute() {
-		System.out.println("DISTRIBUTE!");
-		
+		System.out.println("DISTRIBUTE!");	
 	}
 
 	/*
@@ -133,8 +132,9 @@ public abstract class AbstractAlgorithm
 	 * @see computation.state.IStateHolder#setState(computation.state.IState)
 	 */
 	@Override
-	public void setIState( IState newState ) {
+	public void setIState( IState<T> newState ) {
 		_iState = newState;
+		_iState.setStateHolder( this );
 	}
 	
 	/*
@@ -142,7 +142,7 @@ public abstract class AbstractAlgorithm
 	 * @see computation.state.IStateHolder#getIState()
 	 */
 	@Override
-	public IState getIState() {
+	public IState<T> getIState() {
 		return _iState;
 	}
 	

@@ -56,7 +56,11 @@ public class State_Client_Distribute
 					break;
 				// this is our call to distribute information
 				case DO_WORK:
+					
+					
 					//getStateHolder().g
+					
+					sendEvent( getStateHolder(), new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK ) );
 					break;
 			}
 		}
