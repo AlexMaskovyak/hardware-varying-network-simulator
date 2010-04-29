@@ -1,6 +1,6 @@
 package messages;
 
-import simulation.event.IDiscreteScheduledEvent.IMessage;
+import simulation.event.IDEvent.IMessage;
 
 /**
  * Messages for Simulatables to renew themselves.

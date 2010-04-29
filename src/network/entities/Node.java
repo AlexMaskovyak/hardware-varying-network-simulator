@@ -3,8 +3,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import simulation.event.IDiscreteScheduledEvent;
-import simulation.event.IDiscreteScheduledEvent.IMessage;
+import simulation.event.IDEvent;
+import simulation.event.IDEvent.IMessage;
 import simulation.simulatable.ISimulatable;
 import simulation.simulatable.PerformanceRestrictedSimulatable;
 import simulation.simulatable.listeners.ISimulatableEvent;
@@ -193,7 +193,7 @@ public class Node
 	 * @see simulation.AbstractSimulatable#handleEvent(simulation.IDiscreteScheduledEvent)
 	 */
 	@Override
-	public void handleEvent(IDiscreteScheduledEvent e) {
+	public void handleEvent(IDEvent e) {
 		IMessage message = e.getMessage();
 		if( message instanceof ProtocolHandlerMessage ) {
 			ProtocolHandlerMessage phMessage = (ProtocolHandlerMessage)message;

@@ -1,5 +1,6 @@
 package computation;
 
+import network.routing.IAddress;
 import computation.hardware.CPU;
 import computation.hardware.Cache;
 import computation.hardware.Harddrive;
@@ -60,4 +61,10 @@ public interface IHardwareComputer
 	 * @param memory to install.
 	 */
 	public void setMemory(Memory memory);
+	
+	/**
+	 * Get the address of the node.
+	 * @return address of the node.
+	 */
+	public IAddress getAddress();
 }

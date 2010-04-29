@@ -8,9 +8,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 
-import simulation.event.IDiscreteScheduledEvent;
-import simulation.simulatable.listeners.ISimulatableEvent;
-import simulation.simulatable.listeners.ISimulatableListener;
 
 /**
  * A nice little class to display what is happening to a node.

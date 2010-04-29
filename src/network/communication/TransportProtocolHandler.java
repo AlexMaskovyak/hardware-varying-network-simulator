@@ -4,11 +4,8 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Random;
 
-import javax.naming.OperationNotSupportedException;
-
-import simulation.event.DefaultDiscreteScheduledEvent;
-import simulation.event.IDiscreteScheduledEvent;
-import simulation.event.IDiscreteScheduledEvent.IMessage;
+import simulation.event.IDEvent;
+import simulation.event.IDEvent.IMessage;
 import simulation.simulatable.ISimulatable;
 import messages.ProtocolHandlerMessage;
 import network.routing.IAddress;
@@ -101,7 +98,7 @@ public class TransportProtocolHandler
 	 * @see simulation.simulatable.PerformanceRestrictedSimulatable#handleEventDelegate(simulation.event.IDiscreteScheduledEvent)
 	 */
 	@Override
-	protected void handleEventDelegate( IDiscreteScheduledEvent e ) {
+	protected void handleEventDelegate( IDEvent e ) {
 		ProtocolHandlerMessage message = (ProtocolHandlerMessage)e.getMessage();
 		switch( message.getType() ) {
 		

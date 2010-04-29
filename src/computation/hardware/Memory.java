@@ -1,18 +1,9 @@
 package computation.hardware;
 
-import java.util.Map;
 
 import computation.IData;
 
-import messages.AlgorithmResponseMessage;
-import messages.HarddriveRequestMessage;
-import messages.HarddriveStoreMessage;
-import messages.MemoryRequestMessage;
-import messages.MemoryStoreMessage;
-import simulation.event.DefaultDiscreteScheduledEvent;
-import simulation.event.IDiscreteScheduledEvent;
-import simulation.event.IDiscreteScheduledEvent.IMessage;
-import simulation.simulatable.AbstractSimulatable;
+import simulation.event.IDEvent;
 import simulation.simulatable.ISimulatable;
 
 public class Memory 
@@ -53,8 +44,8 @@ public class Memory
 	}
 
 	@Override
-	public void handleEvent(IDiscreteScheduledEvent e) {
-		IMessage message = e.getMessage();
+	public void handleEvent(IDEvent e) {
+		/*IMessage message = e.getMessage();
 		if( message instanceof MemoryRequestMessage ) {
 			MemoryRequestMessage mMessage = (MemoryRequestMessage)message;
 			int index = mMessage.getSequence();
@@ -72,7 +63,7 @@ public class Memory
 			IData data = mMessage.getData();
 			setIndex( index, data );
 			System.out.println("harddrive store");
-		}
+		}*/
 	}
 
 	@Override

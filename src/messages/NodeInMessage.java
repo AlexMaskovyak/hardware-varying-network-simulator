@@ -3,8 +3,8 @@ package messages;
 import computation.IData;
 
 import network.routing.IAddress;
-import simulation.event.IDiscreteScheduledEvent;
-import simulation.event.IDiscreteScheduledEvent.IMessage;
+import simulation.event.IDEvent;
+import simulation.event.IDEvent.IMessage;
 
 /**
  * Messages designed for Node.

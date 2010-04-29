@@ -2,7 +2,7 @@ package messages;
 
 import computation.IData;
 
-import simulation.event.IDiscreteScheduledEvent.IMessage;
+import simulation.event.IDEvent.IMessage;
 
 /**
  * Messages for Algorithms.

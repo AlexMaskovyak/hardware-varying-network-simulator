@@ -13,11 +13,11 @@ import computation.Data;
 import computation.IData;
 
 import messages.AlgorithmResponseMessage;
-import messages.HarddriveRequestMessage;
-import messages.HarddriveStoreMessage;
-import simulation.event.DefaultDiscreteScheduledEvent;
-import simulation.event.IDiscreteScheduledEvent;
-import simulation.event.IDiscreteScheduledEvent.IMessage;
+import messages.StorageDeviceDataRequestMessage;
+import messages.StorageDeviceDataStoreMessage;
+import simulation.event.DEvent;
+import simulation.event.IDEvent;
+import simulation.event.IDEvent.IMessage;
 import simulation.simulatable.AbstractSimulatable;
 import simulation.simulatable.ISimulatable;
 import simulation.simulatable.PerformanceRestrictedSimulatable;
@@ -152,20 +152,20 @@ public class Harddrive<T extends IData>
 	 * @see simulation.simulatable.PerformanceRestrictedSimulatable#handleEventDelegate(simulation.event.IDiscreteScheduledEvent)
 	 */
 	@Override
-	protected void handleEventDelegate( IDiscreteScheduledEvent e ) {
+	protected void handleEventDelegate( IDEvent e ) {
 		IMessage message = e.getMessage();
-		if( message instanceof HarddriveRequestMessage ) {
-			HarddriveRequestMessage hdMessage = (HarddriveRequestMessage)message;
+		if( message instanceof StorageDeviceDataRequestMessage ) {
+			StorageDeviceDataRequestMessage hdMessage = (StorageDeviceDataRequestMessage)message;
 			int index = hdMessage.getSequence();
 			getSimulator().schedule(
-				new DefaultDiscreteScheduledEvent<IMessage>(
+				new DEvent<IMessage>(
 					this, 
 					e.getSource(), 
 					getSimulator().getTime() + getTransitTime(), 
 					getSimulator(), 
 					new AlgorithmResponseMessage(getIndex(index))));
-		} else if( message instanceof HarddriveStoreMessage ) {
-			HarddriveStoreMessage hdMessage = (HarddriveStoreMessage)message;
+		} else if( message instanceof StorageDeviceDataStoreMessage ) {
+			StorageDeviceDataStoreMessage hdMessage = (StorageDeviceDataStoreMessage)message;
 			int index = hdMessage.getIndex();
 			IData data = hdMessage.getData();
 			setIndex( index, data );			

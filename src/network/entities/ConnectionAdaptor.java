@@ -9,9 +9,9 @@ import messages.ConnectionAdaptorMessage;
 import messages.ConnectionMediumMessage;
 import messages.ProtocolHandlerMessage;
 
-import simulation.event.DefaultDiscreteScheduledEvent;
-import simulation.event.IDiscreteScheduledEvent;
-import simulation.event.IDiscreteScheduledEvent.IMessage;
+import simulation.event.DEvent;
+import simulation.event.IDEvent;
+import simulation.event.IDEvent.IMessage;
 import simulation.simulatable.ISimulatable;
 import simulation.simulatable.PerformanceRestrictedSimulatable;
 
@@ -36,6 +36,7 @@ public class ConnectionAdaptor
 	protected IConnectionMedium _medium;
 	/** the protocal we should be installed to another handler as... */
 	protected static String DEFAULT_PROTOCAL = "DEFAULT";
+	
 	
 // Construction. 
 	
@@ -172,7 +173,8 @@ public class ConnectionAdaptor
 				new ProtocolHandlerMessage(
 					ProtocolHandlerMessage.TYPE.HANDLE_LOWER, 
 					(IPacket)packet.clone(), 
-					(IProtocolHandler)this ) );
+					(IProtocolHandler)this ), 
+				.000001 );
 		}
 	}
 
@@ -181,7 +183,7 @@ public class ConnectionAdaptor
 	 * @see simulation.simulatable.PerformanceRestrictedSimulatable#handleEventDelegate(simulation.event.IDiscreteScheduledEvent)
 	 */
 	@Override
-	public void handleEventDelegate(IDiscreteScheduledEvent e) {
+	public void handleEventDelegate(IDEvent e) {
 		IMessage original = e.getMessage();
 		
 		if( original instanceof ProtocolHandlerMessage ) {

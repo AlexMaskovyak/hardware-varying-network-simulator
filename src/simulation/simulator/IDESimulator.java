@@ -1,6 +1,6 @@
 package simulation.simulator;
 
-import simulation.event.IDiscreteScheduledEvent;
+import simulation.event.IDEvent;
 
 /**
  * Interface for a Discrete Event Simulator.  It has all of the functionality of
@@ -15,7 +15,7 @@ public interface IDESimulator extends ISimulator, Runnable {
 	 * Adds a IDiscreteScheduledEvent to the priority queue.
 	 * @param event to be scheduled.
 	 */
-	public abstract void schedule(IDiscreteScheduledEvent event);
+	public abstract void schedule(IDEvent event);
 
 	/**
 	 * Runs the main scheduling and dispatch thread.

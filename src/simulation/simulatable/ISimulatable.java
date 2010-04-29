@@ -1,7 +1,7 @@
 package simulation.simulatable;
 import java.util.EventListener;
 
-import simulation.event.IDiscreteScheduledEvent;
+import simulation.event.IDEvent;
 import simulation.simulatable.listeners.ISimulatableEvent;
 import simulation.simulatable.listeners.ISimulatableListener;
 import simulation.simulator.ISimulator;
@@ -37,7 +37,7 @@ public interface ISimulatable extends EventListener {
 	 * Signals an event which may/may not trigger a response.
 	 * @param e ISimulatableEvent which has occurred.
 	 */
-	public void handleEvent(IDiscreteScheduledEvent e);
+	public void handleEvent(IDEvent e);
 	
 	/**
 	 * Obtains the simulator to which we are registered.

@@ -1,7 +1,5 @@
 package simulation.event;
 
-import java.util.Comparator;
-
 import simulation.simulatable.ISimulatable;
 import simulation.simulatable.listeners.ISimulatableEvent;
 import simulation.simulator.listeners.ISimulatorEvent;
@@ -11,7 +9,7 @@ import simulation.simulator.listeners.ISimulatorEvent;
  * @author Alex Maskovyak
  *
  */
-public interface IDiscreteScheduledEvent<T extends IDiscreteScheduledEvent.IMessage> 
+public interface IDEvent<T extends IDEvent.IMessage> 
 		extends ISimulatableEvent, ISimulatorEvent {
 
 	/** destination to receive the event. */

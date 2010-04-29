@@ -2,14 +2,14 @@ package messages;
 
 import computation.IData;
 
-import simulation.event.IDiscreteScheduledEvent.IMessage;
+import simulation.event.IDEvent.IMessage;
 
 /**
  * Message telling Harddrive to store information.
  * @author Alex Maskovyak
  *
  */
-public class HarddriveStoreMessage 
+public class StorageDeviceDataStoreMessage 
 		implements IMessage {
 
 	/** index at which to store the data. */
@@ -22,7 +22,7 @@ public class HarddriveStoreMessage
 	 * @param index at which to store the information.
 	 * @param data to store.
 	 */
-	public HarddriveStoreMessage( int index, IData data ) {
+	public StorageDeviceDataStoreMessage( int index, IData data ) {
 		_index = index;
 		_data = data;
 	}

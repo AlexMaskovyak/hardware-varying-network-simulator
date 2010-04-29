@@ -14,7 +14,7 @@ import network.routing.RoutingTable;
 
 import messages.ProtocolHandlerMessage;
 
-import simulation.event.IDiscreteScheduledEvent;
+import simulation.event.IDEvent;
 import simulation.simulatable.ISimulatable;
 
 /**
@@ -150,7 +150,7 @@ public class NetworkProtocolHandler
 	 * @see simulation.PerformanceRestrictedSimulatable#handleEvent(simulation.IDiscreteScheduledEvent)
 	 */
 	@Override
-	public void handleEvent(IDiscreteScheduledEvent e) {
+	public void handleEvent(IDEvent e) {
 		ProtocolHandlerMessage message = (ProtocolHandlerMessage)e.getMessage();
 		switch( message.getType() ) {
 			

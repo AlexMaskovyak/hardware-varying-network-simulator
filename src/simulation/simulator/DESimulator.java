@@ -4,8 +4,8 @@ import java.util.Iterator;
 import java.util.PriorityQueue;
 import java.util.concurrent.locks.Condition;
 
-import simulation.event.DiscreteScheduleEventComparator;
-import simulation.event.IDiscreteScheduledEvent;
+import simulation.event.DEComparator;
+import simulation.event.IDEvent;
 import simulation.simulatable.ISimulatable;
 import simulation.simulator.listeners.DESimulatorEvent;
 import simulation.simulator.listeners.IDESimulatorListener;
@@ -29,7 +29,7 @@ public class DESimulator
 /// Fields
 	
 	/** queue of events. */
-	protected PriorityQueue<IDiscreteScheduledEvent> _queue;
+	protected PriorityQueue<IDEvent> _queue;
 	/** lock protecting the addition, subtraction, retrieval of events. */
 	protected final Condition _eventsAddedCondition = _lock.newCondition();
 	
@@ -44,9 +44,9 @@ public class DESimulator
 	protected void init() {
 		super.init();
 		_queue = 
-			new PriorityQueue<IDiscreteScheduledEvent>(
+			new PriorityQueue<IDEvent>(
 					10, 
-					new DiscreteScheduleEventComparator<IDiscreteScheduledEvent>());
+					new DEComparator<IDEvent>());
 	}
 
 /// IDESimulator
@@ -54,7 +54,7 @@ public class DESimulator
 	/* (non-Javadoc)
 	 * @see IDESimulator#schedule(simulation.IDiscreteScheduledEvent)
 	 */
-	public void schedule(IDiscreteScheduledEvent event) {
+	public void schedule(IDEvent event) {
 		_lock.lock();
 		try {
 			// ensure that this isn't from the past
@@ -91,7 +91,7 @@ public class DESimulator
 					while( _queue.isEmpty() ) { _eventsAddedCondition.await(); }
 					while( _state == State.PAUSED ) { _startedCondition.await(); }
 					
-					IDiscreteScheduledEvent event = _queue.poll();	// get event
+					IDEvent event = _queue.poll();	// get event
 					setTime( event.getEventTime() );				// update time
 					notifyListeners( new DESimulatorEvent( this, getTime(), event ) );
 					event.getDestination().handleEvent(event);		// get destination and deliver
