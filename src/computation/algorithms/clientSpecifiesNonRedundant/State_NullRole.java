@@ -8,6 +8,7 @@ import simulation.event.IDEvent;
 import simulation.event.IDEvent.IMessage;
 import simulation.simulatable.ISimulatable;
 import computation.algorithms.AbstractAlgorithm;
+import computation.algorithms.listeners.AlgorithmEvent;
 import computation.state.IState;
 
 /**
@@ -33,20 +34,26 @@ public class State_NullRole
 			switch( aMessage.getType() ) {
 			
 				case SET_CLIENT: 
+					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SETUP", 0, 0, 1, 0, 0, 0) );
+					
 					// send volunteer request
-					AlgorithmMessage volunteerRequest = new AlgorithmMessage( AlgorithmMessage.TYPE.VOLUNTEER_REQUEST );
+					AlgorithmMessage volunteerRequest = new AlgorithmMessage( AlgorithmMessage.TYPE.CLIENT_REQUESTS_VOLUNTEERS );
 					volunteerRequest.setValue( AlgorithmMessage.CLIENT_ADDRESS, getStateHolder().getComputer().getAddress() );
+					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "NULL", 0, 0, 1, 0, 0, 0) );
 					sendMessageDownStack( volunteerRequest, Address.BROADCAST );
-					sendEvent( getStateHolder(), new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK ) );
 					
 					// record servers needed and set next state
-					int servers = (Integer)aMessage.getValue( AlgorithmMessage.SERVERS );
+					int servers =  getStateHolder().getServerCount(); //(Integer)aMessage.getValue( AlgorithmMessage.SERVERS );
 					updateStateHolder( new State_Client_AwaitVolunteers( servers ) ); 
+					sendEvent( getStateHolder(), new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK ) );
+					
 					break;
-				case VOLUNTEER_REQUEST: 
+				case CLIENT_REQUESTS_VOLUNTEERS: 
+					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "NULL", 0, 0, 1, 1, 0, 0) );
+					
 					// send response to client
 					IAddress clientAddress = (IAddress)aMessage.getValue( AlgorithmMessage.CLIENT_ADDRESS );
-					AlgorithmMessage response = new AlgorithmMessage( AlgorithmMessage.TYPE.VOLUNTEER_ACCEPTED );
+					AlgorithmMessage response = new AlgorithmMessage( AlgorithmMessage.TYPE.SERVER_VOLUNTEERS );
 					response.setValue( AlgorithmMessage.VOLUNTEER_ADDRESS, getStateHolder().getComputer().getAddress() );
 					sendMessageDownStack( response, clientAddress );
 					
@@ -58,5 +65,13 @@ public class State_NullRole
 					break;
 			}
 		}
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	public String toString() {
+		return String.format( "State_NullRole" );
 	}
 }

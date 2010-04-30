@@ -222,4 +222,12 @@ public class ConnectionMedium
 	protected PerformanceRestrictedSimulatable createNew() {
 		return new ConnectionMedium();	
 	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	public String toString() {
+		return String.format( "ConnectionMedium" );
+	}
 }

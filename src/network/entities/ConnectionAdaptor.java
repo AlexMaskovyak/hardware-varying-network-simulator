@@ -174,7 +174,8 @@ public class ConnectionAdaptor
 					ProtocolHandlerMessage.TYPE.HANDLE_LOWER, 
 					(IPacket)packet.clone(), 
 					(IProtocolHandler)this ), 
-				.000001 );
+				.000001,
+				DEvent.EXTERNAL );
 		}
 	}
 

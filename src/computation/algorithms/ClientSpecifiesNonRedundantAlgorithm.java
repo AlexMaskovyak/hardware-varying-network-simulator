@@ -10,10 +10,9 @@ import messages.AlgorithmDoWorkMessage;
 import messages.AlgorithmRequestMessage;
 import messages.AlgorithmResponseMessage;
 import messages.AlgorithmStoreMessage;
-import messages.StorageDeviceDataRequestMessage;
-import messages.StorageDeviceDataStoreMessage;
 import messages.NodeOutMessage;
 import messages.ProtocolHandlerMessage;
+import messages.StorageDeviceMessage;
 import network.communication.Address;
 import network.communication.IPacket;
 import network.communication.IProtocolHandler;
@@ -214,6 +213,9 @@ public class ClientSpecifiesNonRedundantAlgorithm
 		
 		_role = Role.CLIENT;						// distributors are servers	
 		_serverState = Client_State.DISTRIBUTE;		// inside distribution
+		
+		getComputer().getHarddrive().generateAndLoadData( getDataAmount() );
+		
 		sendDoWork();								// kick-start us.
 	}
 	
@@ -268,26 +270,29 @@ public class ClientSpecifiesNonRedundantAlgorithm
 			AlgorithmStoreMessage aMessage = (AlgorithmStoreMessage)message;
 			// store the server's address
 			_knownServerAddress = aMessage.getServer();
-			notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "SERVER", 0, 1, 1, 0, 0, 0) );
+			notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "SERVER", 0, 1, 0, 0, 1, 0) );
 			sendEvent( 
 				getComputer().getHarddrive(),
-				new StorageDeviceDataStoreMessage(
+				new StorageDeviceMessage(
+					StorageDeviceMessage.TYPE.STORE,
+					StorageDeviceMessage.DEVICE_TYPE.HARDDRIVE,
 					aMessage.getIndex(), 
+					-1, 
 					aMessage.getData()) );
 		} 
 		// previously stored information is requested
 		else if( message instanceof AlgorithmRequestMessage ) {
 			AlgorithmRequestMessage aMessage = (AlgorithmRequestMessage)message;
-			notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "SERVER", 0, 0, 0, 0, 1, 1) );
+			notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "SERVER", 0, 0, 1, 1, 0, 0) );
 			sendEvent( 
 				getComputer().getHarddrive(), 
-				new StorageDeviceDataRequestMessage( aMessage.getIndex(), -1 ) );
+				new StorageDeviceMessage( StorageDeviceMessage.TYPE.RETRIEVE, StorageDeviceMessage.DEVICE_TYPE.HARDDRIVE, aMessage.getIndex(), -1, null ) );
 		} 
 		// information requested from memory has arrived
-		else if( message instanceof AlgorithmResponseMessage ) {
-			notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "SERVER", 1, 0, 0, 1, 0, 0) );
+		else if( message instanceof StorageDeviceMessage ) {
+			notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "SERVER", 1, 0, 0, 0, 0, 1) );
 			System.out.println("server send!");
-			sendMessageDownStack( (AlgorithmResponseMessage)message, _knownServerAddress, -1, -1);
+			sendMessageDownStack( (StorageDeviceMessage)message, _knownServerAddress, -1, -1);
 		}
 	}
 	
@@ -306,17 +311,17 @@ public class ClientSpecifiesNonRedundantAlgorithm
 					if( haveMoreToDistribute() ) {
 						// read index from harddrive
 						sendHarddriveRequest( _currentIndex++ );
-						notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "DISTR", 0, 0, 0, 0, 1, 0 ) );
+						notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "LOCAL", 0, 0, 1, 0, 0, 0 ) );
 						sendDoWork();
 					} 
 					
-				} else if( message instanceof AlgorithmResponseMessage ) {
-					IData data = ((AlgorithmResponseMessage)message).getData();
+				} else if( message instanceof StorageDeviceMessage ) {
+					IData data = ((StorageDeviceMessage)message).getData();
 					sendDataToClient( data, getNextStorageAddress() );
 					
 					_totalHDResponses++;
 					
-					notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "DISTR", 1, 0, 0, 1, 0, 0));
+					notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "LOCAL", 1, 0, 0, 0, 0, 1));
 					
 					// check if we've received and distributed everything
 					if( _totalHDResponses == ( _endIndex - _startIndex + 1 ) ) {
@@ -333,16 +338,18 @@ public class ClientSpecifiesNonRedundantAlgorithm
 						sendDoWork();
 						IAddress address = getNextRetrievalAddress();
 						sendClientRequest( _currentIndex++, address );
-						notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "READ", 0, 0, 0, 0, 1, 0));
+						notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "REMOTE", 0, 0, 1, 0, 0, 0));
 						System.out.println("send remote read");
 					} 
-				} else if( message instanceof AlgorithmResponseMessage ) {
+				} else if( message instanceof StorageDeviceMessage ) {
 					_totalClientResponses++;
 					
-					notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "READ", 0, 1, 0, 0, 0, 0));
+					notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "REMOTE", 0, 1, 0, 0, 0, 0));
 					
 					if( _totalClientResponses == ( _endIndex - _startIndex + 1 ) ) {
 						System.out.println("hurray.");
+						getSimulator().stop();
+						Thread.currentThread().interrupt();
 					}
 					if( _totalClientResponses > ( _endIndex - _startIndex + 1 ) ) {
 						System.out.println("additional invalid response.");
@@ -383,7 +390,7 @@ public class ClientSpecifiesNonRedundantAlgorithm
 	 * @param index to retrieve from the harddrive.
 	 */
 	protected void sendHarddriveRequest( int index ) {
-		sendEvent( getComputer().getHarddrive(), new StorageDeviceDataRequestMessage(index, -1) );
+		sendEvent( getComputer().getHarddrive(), new StorageDeviceMessage( StorageDeviceMessage.TYPE.RETRIEVE, StorageDeviceMessage.DEVICE_TYPE.HARDDRIVE, index, -1, null) );
 	}
 	
 	/**

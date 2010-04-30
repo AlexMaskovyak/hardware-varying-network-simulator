@@ -37,7 +37,7 @@ public class DriverNetworkSimulator {
 	
 	
 	/**
-	 * Read in the configuration file.
+	 * Read in the configuration file.J
 	 * @param args
 	 */
 	public static void main(String... args) throws Exception {
@@ -65,11 +65,11 @@ public class DriverNetworkSimulator {
 		t.start();
 		sim.start();
 		HardwareComputerNode c = (HardwareComputerNode)sim.getClient();
-		ClientSpecifiesNonRedundantAlgorithm alg = (ClientSpecifiesNonRedundantAlgorithm)c.getInstalledAlgorithm();
+		//ClientSpecifiesNonRedundantAlgorithm alg = (ClientSpecifiesNonRedundantAlgorithm)c.getInstalledAlgorithm();
 		//alg.setDataAmount( 100 );
 		//alg.setInitialData( generateData( sim.getDataAmount() ) );
 		//alg.setInitialData(data)
-		alg.setAddressRange( new Address(1), new Address(5));
+		//alg.setAddressRange( new Address(1), new Address(5));
 		//n0.send(new IMessage() {}, new Address(7));
 		c.start();
 	}

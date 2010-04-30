@@ -134,7 +134,7 @@ public abstract class AbstractAlgorithm<T extends AbstractAlgorithm<T>>
 	@Override
 	public void setIState( IState<T> newState ) {
 		_iState = newState;
-		_iState.setStateHolder( this );
+		_iState.setStateHolder( (T)this );
 	}
 	
 	/*

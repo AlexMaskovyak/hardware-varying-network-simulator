@@ -1,32 +1,19 @@
 package computation.algorithms;
 
-import computation.HardwareComputerNode;
-import computation.IComputer;
+import javax.swing.GroupLayout.Alignment;
+
 import computation.IData;
 import computation.IHardwareComputer;
+import computation.algorithms.clientSpecifiesNonRedundant.AlgorithmMessage;
 import computation.algorithms.clientSpecifiesNonRedundant.State_NullRole;
-import computation.algorithms.listeners.AlgorithmEvent;
-import computation.state.IState;
 import computation.state.IStateHolder;
 
 import messages.AlgorithmDoWorkMessage;
-import messages.AlgorithmRequestMessage;
-import messages.AlgorithmResponseMessage;
-import messages.AlgorithmStoreMessage;
-import messages.StorageDeviceDataRequestMessage;
-import messages.StorageDeviceDataStoreMessage;
-import messages.NodeOutMessage;
-import messages.ProtocolHandlerMessage;
-import network.communication.Address;
 import network.communication.IPacket;
 import network.communication.IProtocolHandler;
-import network.communication.Packet;
-import network.entities.INode;
 import network.routing.IAddress;
 
-import simulation.event.DEvent;
 import simulation.event.IDEvent;
-import simulation.event.IDEvent.IMessage;
 import simulation.simulatable.ISimulatable;
 import simulation.simulatable.PerformanceRestrictedSimulatable;
 
@@ -85,9 +72,9 @@ public class ClientSpecifiesNonRedundantAlgorithm2
 	 * @return next address to store information.
 	 */
 	public IAddress getNextStorageAddress() {
-		IAddress current = _currentAddress;
-		_currentAddress = new Address(((Address)_currentAddress).getRepresentation() + 1);
-		return current;
+		//IAddress current = _currentAddress;
+		//_currentAddress = new Address(((Address)_currentAddress).getRepresentation() + 1);
+		return null; //current;
 	}
 	
 	/**
@@ -127,9 +114,7 @@ public class ClientSpecifiesNonRedundantAlgorithm2
 	 * @see computation.algorithms.IAlgorithm#setInitialData(computation.IData[])
 	 */
 	@Override
-	public void setInitialData(IData... data) {
-		
-	}
+	public void setInitialData(IData... data) { /* not used, we just generate it */	}
 	
 	/**
 	 * Distribute here queues up a distribute event to kick-start disribution 
@@ -137,7 +122,10 @@ public class ClientSpecifiesNonRedundantAlgorithm2
 	 * @see hardware.IAlgorithm#distribute()
 	 */
 	public void distribute( int startIndex, int endIndex ) {
-		sendDoWork();								// kick-start us.
+		// load data to harddrive
+		getComputer().getHarddrive().generateAndLoadData( getDataAmount() );
+		sendEvent( this, new AlgorithmMessage( AlgorithmMessage.TYPE.SET_CLIENT ) );
+		//sendDoWork();								// kick-start us.
 	}
 	
 	/**
@@ -160,11 +148,7 @@ public class ClientSpecifiesNonRedundantAlgorithm2
 	 * @see simulation.simulatable.PerformanceRestrictedSimulatable#handleEventDelegate(simulation.event.IDEvent)
 	 */
 	protected void handleEventDelegate( IDEvent e) {
-		if( _role == Role.CLIENT ) {
-			clientHandle( e );
-		} else {
-			serverHandle( e );
-		}
+		getIState().handleEventDelegate( e );
 	}
 	
 
@@ -179,102 +163,6 @@ public class ClientSpecifiesNonRedundantAlgorithm2
 		IPacket packet = (IPacket)message;
 		packet.getContent();
 	}
-	
-	/**
-	 * Handles operation when a client.
-	 * @param e event to handle.
-	 */
-	protected void serverHandle( IDEvent e ) {
-		IMessage message = e.getMessage();
-		// store information into memory
-		if( message instanceof AlgorithmStoreMessage ) {
-			AlgorithmStoreMessage aMessage = (AlgorithmStoreMessage)message;
-			// store the server's address
-			_knownServerAddress = aMessage.getServer();
-			notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "SERVER", 0, 1, 1, 0, 0, 0) );
-			sendEvent( 
-				getComputer().getHarddrive(),
-				new StorageDeviceDataStoreMessage(
-					aMessage.getIndex(), 
-					aMessage.getData()) );
-		} 
-		// previously stored information is requested
-		else if( message instanceof AlgorithmRequestMessage ) {
-			AlgorithmRequestMessage aMessage = (AlgorithmRequestMessage)message;
-			notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "SERVER", 0, 0, 0, 0, 1, 1) );
-			sendEvent( 
-				getComputer().getHarddrive(), 
-				new StorageDeviceDataRequestMessage( aMessage.getIndex(), -1 ) );
-		} 
-		// information requested from memory has arrived
-		else if( message instanceof AlgorithmResponseMessage ) {
-			notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "SERVER", 1, 0, 0, 1, 0, 0) );
-			System.out.println("server send!");
-			sendMessageDownStack( (AlgorithmResponseMessage)message, _knownServerAddress, -1, -1);
-		}
-	}
-	
-	
-	/**
-	 * Handles operations when a server.
-	 * @param e event to handle.
-	 */
-	protected void clientHandle( IDEvent e ) {
-		IMessage message = e.getMessage();
-		switch( _serverState ) {
-			case DISTRIBUTE:
-				// grab more information
-				if( message instanceof AlgorithmDoWorkMessage ) {
-					// do we have more?
-					if( haveMoreToDistribute() ) {
-						// read index from harddrive
-						sendHarddriveRequest( _currentIndex++ );
-						notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "DISTR", 0, 0, 0, 0, 1, 0 ) );
-						sendDoWork();
-					} 
-					
-				} else if( message instanceof AlgorithmResponseMessage ) {
-					IData data = ((AlgorithmResponseMessage)message).getData();
-					sendDataToClient( data, getNextStorageAddress() );
-					
-					_totalHDResponses++;
-					
-					notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "DISTR", 1, 0, 0, 1, 0, 0));
-					
-					// check if we've received and distributed everything
-					if( _totalHDResponses == ( _endIndex - _startIndex + 1 ) ) {
-						_serverState = Client_State.READ;	// read round
-						_currentIndex = _startIndex;
-						_currentAddress = _startAddress;
-						sendDoWork();
-					}
-				}
-				break;
-			case READ:
-				if( message instanceof AlgorithmDoWorkMessage ) {
-					if( haveMoreToRead() ) {
-						sendDoWork();
-						IAddress address = getNextRetrievalAddress();
-						sendClientRequest( _currentIndex++, address );
-						notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "READ", 0, 0, 0, 0, 1, 0));
-						System.out.println("send remote read");
-					} 
-				} else if( message instanceof AlgorithmResponseMessage ) {
-					_totalClientResponses++;
-					
-					notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "READ", 0, 1, 0, 0, 0, 0));
-					
-					if( _totalClientResponses == ( _endIndex - _startIndex + 1 ) ) {
-						System.out.println("hurray.");
-					}
-					if( _totalClientResponses > ( _endIndex - _startIndex + 1 ) ) {
-						System.out.println("additional invalid response.");
-					}
-				}
-				break;
-		}
-	}
-
 	
 	/**
 	 * Send ourselves a new message to distribute.  We send this to ourselves at
@@ -299,5 +187,14 @@ public class ClientSpecifiesNonRedundantAlgorithm2
 		result.setServerCount( this.getServerCount() );
 		result.setDataAmount( this.getDataAmount() );
 		return result;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return String.format( "Node[%s] State[ %s ]", getComputer().getAddress(), getIState() );
 	}
 }

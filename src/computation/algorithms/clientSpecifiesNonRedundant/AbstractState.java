@@ -65,11 +65,21 @@ public abstract class AbstractState
 	}
 	
 	/**
+	 * Convenience to the algorithms send event.
+	 * @param destination to which to send the event.
+	 * @param message to send.
+	 * @param priority of the message.
+	 */
+	public void sendEvent( ISimulatable destination, IMessage message, int priority ) {
+		getStateHolder().sendEvent( destination, message, priority );
+	}
+	
+	/**
 	 * Convenience to the algorithm's send message down stack.
 	 * @param message to send.
 	 * @param destination address to which to send it.
 	 */
 	public void sendMessageDownStack( IMessage message, IAddress destination ) {
-		getStateHolder().sendMessageDownStack(message, destination);
+		getStateHolder().sendMessageDownStack( message, destination );
 	}
 }

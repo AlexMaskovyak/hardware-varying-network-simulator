@@ -1,27 +1,20 @@
 package computation.hardware;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import network.entities.IPublicCloneable;
-import network.entities.Node;
 
 import computation.Data;
 import computation.IData;
 
 import messages.AlgorithmResponseMessage;
-import messages.StorageDeviceDataRequestMessage;
-import messages.StorageDeviceDataStoreMessage;
-import simulation.event.DEvent;
+import messages.StorageDeviceMessage;
 import simulation.event.IDEvent;
-import simulation.event.IDEvent.IMessage;
-import simulation.simulatable.AbstractSimulatable;
 import simulation.simulatable.ISimulatable;
 import simulation.simulatable.PerformanceRestrictedSimulatable;
-import simulation.simulator.DESimulator;
+
 
 /**
  * Large storage device.  Typically it come pre-installed with some amount of 
@@ -56,12 +49,6 @@ public class Harddrive<T extends IData>
 	protected void init() {
 		super.init();
 		_data = new HashMap<Integer, IData>();
-		_data.put(0, new Data( 0, new byte[] { 0, 0, 0 } ) );
-		_data.put(1, new Data( 1, new byte[] { 0, 0, 1 } ) );
-		_data.put(2, new Data( 2, new byte[] { 0, 1, 0 } ) );
-		_data.put(3, new Data( 3, new byte[] { 0, 1, 1 } ) );
-		_data.put(4, new Data( 4, new byte[] { 1, 0, 0 } ) );
-		_data.put(5, new Data( 5, new byte[] { 1, 0, 1 } ) );
 		super.setTransitTime( 5 );
 		super.setMaxAllowedOperations( 3 );
 		super.setRefreshInterval( 1 );
@@ -83,7 +70,15 @@ public class Harddrive<T extends IData>
 	 */
 	public void setCapacity(int capacity) { _capacity = capacity; }
 
+	/**
+	 * Gets the current size of all items on disk.
+	 * @return number of indices on disk.
+	 */
+	public int getSize() {
+		return _data.size();
+	}
 
+	
 /// IHardware
 	
 	/*
@@ -145,6 +140,15 @@ public class Harddrive<T extends IData>
 		_data.put( index, data );
 	}
 	
+	/**
+	 * Deletes the index and data there specified.
+	 * @param index and the corresponding data to delete.
+	 */
+	public void deleteIndex(Integer index) {
+		_data.remove( index );
+	}
+	
+	
 /// ISimulatable
 	
 	/*
@@ -153,22 +157,17 @@ public class Harddrive<T extends IData>
 	 */
 	@Override
 	protected void handleEventDelegate( IDEvent e ) {
-		IMessage message = e.getMessage();
-		if( message instanceof StorageDeviceDataRequestMessage ) {
-			StorageDeviceDataRequestMessage hdMessage = (StorageDeviceDataRequestMessage)message;
-			int index = hdMessage.getSequence();
-			getSimulator().schedule(
-				new DEvent<IMessage>(
-					this, 
+		
+		StorageDeviceMessage message = (StorageDeviceMessage)e.getMessage();
+		switch( message.getType() ) {
+			case RETRIEVE:
+				sendEvent( 
 					e.getSource(), 
-					getSimulator().getTime() + getTransitTime(), 
-					getSimulator(), 
-					new AlgorithmResponseMessage(getIndex(index))));
-		} else if( message instanceof StorageDeviceDataStoreMessage ) {
-			StorageDeviceDataStoreMessage hdMessage = (StorageDeviceDataStoreMessage)message;
-			int index = hdMessage.getIndex();
-			IData data = hdMessage.getData();
-			setIndex( index, data );			
+					new StorageDeviceMessage( StorageDeviceMessage.TYPE.RESPONSE, StorageDeviceMessage.DEVICE_TYPE.HARDDRIVE, message.getIndex(), message.getRequestId(), getIndex( message.getIndex() ) ) );
+				break;
+			case STORE:
+				setIndex( message.getIndex(), message.getData() );
+				break;
 		}
 	}
 
@@ -188,6 +187,16 @@ public class Harddrive<T extends IData>
 		return super.clone();
 	}
 	
+	/**
+	 * Generates the quantity of data specified.
+	 * @param amount
+	 * @return
+	 */
+	public void generateAndLoadData( int amount ) {
+		for( int i = 0; i < amount; ++i ) {
+			setIndex( i, new Data( i, new byte[] { Byte.parseByte( String.format( "%d", i % 128 ) ) } ) );
+		}
+	}
 	
 // PublicCloneable 
 

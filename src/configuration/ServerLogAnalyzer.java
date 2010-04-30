@@ -84,10 +84,7 @@ public class ServerLogAnalyzer {
 	/**
 	 * Scan for time values.
 	 * @param scanner to use for information acquisition.
-	 */
-	/**
-	 * @param scanner
-	 * @return
+	 * @return true if scanning succeeded, false otherwise.
 	 */
 	public boolean scan( Scanner scanner ) {
 		try {
