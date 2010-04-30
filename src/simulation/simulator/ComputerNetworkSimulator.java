@@ -5,7 +5,7 @@ import computation.HardwareComputerNode;
 import computation.IComputer;
 import computation.algorithms.AbstractAlgorithm;
 import computation.algorithms.IAlgorithm;
-import computation.algorithms.DummyAlgorithm;
+import computation.algorithms.dummy.DummyAlgorithm;
 import computation.algorithms.listeners.AlgorithmListener;
 import computation.hardware.Cache;
 import computation.hardware.Harddrive;

@@ -1,14 +1,14 @@
-package computation.algorithms;
+package computation.algorithms.clientSpecifiesNonRedundant;
 
 import javax.swing.GroupLayout.Alignment;
 
 import computation.IData;
 import computation.IHardwareComputer;
-import computation.algorithms.clientSpecifiesNonRedundant.AlgorithmMessage;
-import computation.algorithms.clientSpecifiesNonRedundant.State_NullRole;
+import computation.algorithms.AbstractAlgorithm;
+import computation.algorithms.IAlgorithm;
+import computation.algorithms.dummy.AlgorithmDoWorkMessage;
 import computation.state.IStateHolder;
 
-import messages.AlgorithmDoWorkMessage;
 import network.communication.IPacket;
 import network.communication.IProtocolHandler;
 import network.routing.IAddress;
@@ -24,7 +24,7 @@ import simulation.simulatable.PerformanceRestrictedSimulatable;
  * @author Alex Maskovyak
  *
  */
-public class ClientSpecifiesNonRedundantAlgorithm2 
+public class ClientSpecifiesNonRedundantAlgorithm 
 		extends AbstractAlgorithm
 		implements IAlgorithm, IProtocolHandler, ISimulatable, IStateHolder {
 
@@ -40,14 +40,14 @@ public class ClientSpecifiesNonRedundantAlgorithm2
 /// Construction
 	
 	/** Default constructor. */
-	public ClientSpecifiesNonRedundantAlgorithm2() {
+	public ClientSpecifiesNonRedundantAlgorithm() {
 		this( null );
 	}
 	
 	/** Constructor.
 	 * @param computer which we are installed  upon.
 	 */
-	public ClientSpecifiesNonRedundantAlgorithm2( IHardwareComputer computer ) {
+	public ClientSpecifiesNonRedundantAlgorithm( IHardwareComputer computer ) {
 		super();
 		_computer = computer;
 		reset();
@@ -183,7 +183,7 @@ public class ClientSpecifiesNonRedundantAlgorithm2
 	 */
 	@Override
 	protected PerformanceRestrictedSimulatable createNew() {
-		ClientSpecifiesNonRedundantAlgorithm2 result = new ClientSpecifiesNonRedundantAlgorithm2();
+		ClientSpecifiesNonRedundantAlgorithm result = new ClientSpecifiesNonRedundantAlgorithm();
 		result.setServerCount( this.getServerCount() );
 		result.setDataAmount( this.getDataAmount() );
 		return result;
