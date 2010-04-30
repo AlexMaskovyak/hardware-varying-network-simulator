@@ -14,7 +14,7 @@ public class StorageDeviceMessage
 
 /// Class variables
 	
-	public static enum TYPE { STORE, RETRIEVE, RESPONSE };
+	public static enum TYPE { STORE, RETRIEVE, RESPONSE, FREE_SPACE, DELETE };
 	public static enum DEVICE_TYPE { CACHE, HARDDRIVE };
 	
 /// Fields
@@ -29,7 +29,8 @@ public class StorageDeviceMessage
 	protected int _requestId;
 	/** data. */
 	protected IData _data;
-	
+	/** amount of freespace. */
+	protected int _freeSpace;
 
 /// Construction
 	
@@ -89,6 +90,22 @@ public class StorageDeviceMessage
 	 */
 	public IData getData() {
 		return _data;
+	}
+	
+	/**
+	 * Total free space of the storage device, if requested.
+	 * @return total free space.
+	 */
+	public int getFreeSpace() {
+		return _freeSpace;
+	}
+	
+	/**
+	 * Sets the total free space of the storage device.
+	 * @param freeSpace available on the device.
+	 */
+	public void setFreeSpace( int freeSpace ) {
+		_freeSpace = freeSpace;
 	}
 	
 	/*

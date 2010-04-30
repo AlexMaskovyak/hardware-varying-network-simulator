@@ -58,6 +58,9 @@ public class AlgorithmMessage
 	// SERVER_INDICATES_READ_READY
 	public static final String SERVER_ADDRESS = "serverAddress";
 	
+	// DO WORK DURING SERVICE
+	public static final String AMOUNT = "amount";
+	
 	
 /// Fields
 	

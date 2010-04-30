@@ -3,6 +3,8 @@ package computation.hardware;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 
 import network.entities.IPublicCloneable;
 
@@ -132,6 +134,15 @@ public class Harddrive<T extends IData>
 	}
 
 	/**
+	 * Checks to see if there is information stored at the index.
+	 * @param index at which to store information.
+	 * @return true if the index is empty, false otherwise.
+	 */
+	public boolean indexAvailable(int index) {
+		return (getIndex(index) == null);
+	}
+	
+	/**
 	 * Gets the indexed value.
 	 * @return the value at the index.
 	 */
@@ -156,6 +167,50 @@ public class Harddrive<T extends IData>
 		_data.remove( index );
 	}
 	
+	/**
+	 * Gets the amount of freespace available for storage.
+	 * @return free space available.
+	 */
+	public int freeSpace() {
+		return getCapacity() - getSize();
+	}
+	
+	/**
+	 * Determines if there is free space available to store information.
+	 * @return free-space available.
+	 */
+	public boolean spaceAvailable() {
+		return freeSpace() > 0;
+	}
+	
+	/**
+	 * Attempts to store the data at the specified index.
+	 * @param index at which to store the data.
+	 * @param data to store at the index.
+	 * @return true if the storage request was successful, false if we don't
+	 * have enough room to store the data.
+	 */
+	public boolean storeData( Integer index, IData data ) {
+		// see if this replaces currently available data
+		// we can always replace since the data couldn't have gotten there 
+		// unless there was enough space
+		if( !indexAvailable( index ) || spaceAvailable() ) { 
+			setIndex( index, data ); 
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * Obtains an index that is not available.
+	 * @return filled index.
+	 */
+	public Integer getFilledIndex() {
+		Set<Integer> indices = _data.keySet();
+		Iterator<Integer> it = indices.iterator();
+		return (it.hasNext()) ? it.next() : null;
+	}
+	
 	
 /// ISimulatable
 	
@@ -173,9 +228,25 @@ public class Harddrive<T extends IData>
 					e.getSource(), 
 					new StorageDeviceMessage( StorageDeviceMessage.TYPE.RESPONSE, StorageDeviceMessage.DEVICE_TYPE.HARDDRIVE, message.getIndex(), message.getRequestId(), getIndex( message.getIndex() ) ) );
 				break;
+			// this case allows for cache and harddrives to communicate directly
+			// with one another
+			case RESPONSE:
+				storeData( message.getIndex(), message.getData() );
+				break;				
 			case STORE:
-				setIndex( message.getIndex(), message.getData() );
+				storeData( message.getIndex(), message.getData() );
 				break;
+			case FREE_SPACE:
+				StorageDeviceMessage response = 
+					new StorageDeviceMessage( StorageDeviceMessage.TYPE.FREE_SPACE, StorageDeviceMessage.DEVICE_TYPE.HARDDRIVE, -1, -1, null );
+				response.setFreeSpace( getCapacity() - getSize() );
+				sendEvent( e.getSource(), response );
+	
+				break;
+			case DELETE:
+				deleteIndex( message.getIndex() );
+				break;
+			default: break;
 		}
 	}
 

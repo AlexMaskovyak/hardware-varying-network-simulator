@@ -2,6 +2,7 @@ package computation.algorithms.clientSpecifiesNonRedundant;
 
 import network.routing.IAddress;
 import messages.StorageDeviceMessage;
+import simulation.event.DEvent;
 import simulation.event.IDEvent;
 import simulation.event.IDEvent.IMessage;
 import computation.IData;
@@ -54,6 +55,10 @@ public class State_Server_AwaitStorage
 					sendMessageDownStack( 
 						sendReady, 
 						(IAddress)aMessage.getValue( AlgorithmMessage.CLIENT_ADDRESS ));
+					
+					AlgorithmMessage doWork = new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK );
+					doWork.setValue( AlgorithmMessage.AMOUNT, getStateHolder().getComputer().getCache().freeSpace() );
+					sendEvent( getStateHolder(), doWork, DEvent.INTERNAL );
 					break;
 				default: break;
 			}

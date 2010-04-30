@@ -66,7 +66,7 @@ public class State_Client_ConfirmServerReady
 			switch( aMessage.getType() ) {
 				// tell all servers that we're through sending them info
 				case DO_WORK:
-					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "DISTR", 0, 0, 1, 1, 0, 0));
+					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "CONFIRMREADY", 0, 0, 1, 1, 0, 0));
 					
 					// indices of the servers to tell
 					int currentIndex = (Integer)aMessage.getValue( AlgorithmMessage.START_INDEX );
