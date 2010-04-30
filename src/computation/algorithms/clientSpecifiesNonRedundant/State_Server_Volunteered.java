@@ -3,6 +3,7 @@ package computation.algorithms.clientSpecifiesNonRedundant;
 import simulation.event.IDEvent;
 import simulation.event.IDEvent.IMessage;
 import computation.algorithms.AbstractAlgorithm;
+import computation.algorithms.listeners.AlgorithmEvent;
 import computation.state.IState;
 
 /**
@@ -27,10 +28,14 @@ public class State_Server_Volunteered
 			AlgorithmMessage aMessage = (AlgorithmMessage)message;
 			switch( aMessage.getType() ) {
 			
-				case VOLUNTEER_ACCEPTED: 
+				case CLIENT_ACCEPTS_VOLUNTEER: 
+					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_VOLUNTEER", 0, 0, 0, 1, 0, 0) );
+					
 					updateStateHolder( new State_Server_AwaitStorage() ); 
 					break;
-				case VOLUNTEER_REJECTED: 
+				case CLIENT_REJECTS_VOLUNTEER: 
+					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_VOLUNTEER", 0, 0, 0, 1, 0, 0) );
+					
 					updateStateHolder( new State_NullRole() );
 					break;
 				default: break;
@@ -38,4 +43,11 @@ public class State_Server_Volunteered
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	public String toString() {
+		return String.format( "State_Client_Volunteered" );
+	}
 }

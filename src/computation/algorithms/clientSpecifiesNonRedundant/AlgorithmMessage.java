@@ -27,15 +27,15 @@ public class AlgorithmMessage
 	public static enum TYPE { 
 		SET_CLIENT,
 		DO_WORK, 
-		VOLUNTEER_REQUEST, 
-		VOLUNTEER_ACCEPTED, 
-		VOLUNTEER_REJECTED,
-		SERVER_SELECT,
-		SERVER_READ_READY,
-		SERVER_DATA_STORE,
-		SERVER_DATA_STORE_COMPLETE,
-		SERVER_DATA_REQUEST,
-		SERVER_DATA_RESPONSE 
+		CLIENT_REQUESTS_VOLUNTEERS, 
+		CLIENT_ACCEPTS_VOLUNTEER, 
+		CLIENT_REJECTS_VOLUNTEER,
+		CLIENT_REQUESTS_DATA_STORE,
+		CLIENT_INDICATES_DATA_STORE_COMPLETE,
+		CLIENT_REQUESTS_DATA,
+		SERVER_VOLUNTEERS,
+		SERVER_INDICATES_READ_READY,
+		SERVER_RESPONDS_WITH_DATA 
 	};
 	
 	/// SET CLIENT
@@ -45,13 +45,18 @@ public class AlgorithmMessage
 	public static final String VOLUNTEER_ADDRESS = "volunteer_address";
 	public static final String CLIENT_ADDRESS = "client_address";
 	
+	/// SERVER RESPONDS WITH DATA
 	/// DATA STORE 
 	public static final String INDEX = "index";
 	public static final String DATA = "data";
 	
+	// DO WORK
 	// DATA REQUEST
 	public static final String START_INDEX = "startIndex";
 	public static final String END_INDEX = "endIndex";
+	
+	// SERVER_INDICATES_READ_READY
+	public static final String SERVER_ADDRESS = "serverAddress";
 	
 	
 /// Fields
@@ -69,6 +74,7 @@ public class AlgorithmMessage
 	 */
 	public AlgorithmMessage( TYPE type ) {
 		_type = type;
+		init();
 	}
 	
 	/** Externalize instantiation. */

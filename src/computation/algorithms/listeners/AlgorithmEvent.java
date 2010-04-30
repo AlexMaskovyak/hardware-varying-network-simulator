@@ -35,10 +35,10 @@ public class AlgorithmEvent
 	 * @param epoch time epoch area of simulation that it occurred within.
 	 * @param dataSent amount.
 	 * @param dataReceived amount.
-	 * @param dataStored amount.
-	 * @param dataRetrieved amount.
 	 * @param controlSent amount.
 	 * @param controlReceived amount.
+	 * @param dataStored amount.
+	 * @param dataRetrieved amount.
 	 */
 	public AlgorithmEvent(
 			ISimulatable source, 
@@ -46,18 +46,18 @@ public class AlgorithmEvent
 			String epoch,
 			int dataSent,
 			int dataReceived,
-			int dataStored,
-			int dataRetrieved,
 			int controlSent,
-			int controlReceived ) {
+			int controlReceived,
+			int dataStored,
+			int dataRetrieved ) {
 		super(source, time);
 		_epoch = epoch;
 		_dataSent = dataSent;
 		_dataReceived = dataReceived;
-		_dataStored = dataStored;
-		_dataRetrieved = dataRetrieved;
 		_controlSent = controlSent;
 		_controlReceived = controlReceived;
+		_dataStored = dataStored;
+		_dataRetrieved = dataRetrieved;
 	}
 	
 	/**

@@ -342,7 +342,7 @@ public class PerformanceRestrictedSimulatable
 		getSimulator().schedule( rescheduledEvent );
 	}
 	
-
+	
 /// IPublicCloneable
 
 	/*

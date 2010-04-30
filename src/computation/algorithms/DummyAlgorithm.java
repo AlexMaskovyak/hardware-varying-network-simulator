@@ -10,10 +10,10 @@ import messages.AlgorithmDoWorkMessage;
 import messages.AlgorithmRequestMessage;
 import messages.AlgorithmResponseMessage;
 import messages.AlgorithmStoreMessage;
-import messages.StorageDeviceDataRequestMessage;
-import messages.StorageDeviceDataStoreMessage;
 import messages.NodeOutMessage;
 import messages.ProtocolHandlerMessage;
+import messages.StorageDeviceMessage;
+import messages.StorageDeviceMessage.TYPE;
 import network.communication.Address;
 import network.communication.IPacket;
 import network.communication.IProtocolHandler;
@@ -214,6 +214,10 @@ public class DummyAlgorithm
 		
 		_role = Role.CLIENT;						// distributors are servers	
 		_serverState = Client_State.DISTRIBUTE;		// inside distribution
+		
+		// generate data for harddrive
+		getComputer().getHarddrive().generateAndLoadData( getDataAmount() );
+		
 		sendDoWork();								// kick-start us.
 	}
 	
@@ -268,42 +272,48 @@ public class DummyAlgorithm
 			AlgorithmStoreMessage aMessage = (AlgorithmStoreMessage)message;
 			// store the server's address
 			_knownServerAddress = aMessage.getServer();
-			notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "SERVER", 0, 1, 1, 0, 0, 0) );
+			notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "SERVER", 0, 1, 0, 0, 1, 0) );
 			getSimulator().schedule(
-				new DEvent<StorageDeviceDataStoreMessage>(
+				new DEvent<StorageDeviceMessage>(
 					this, 
 					getComputer().getHarddrive(), 
 					e.getEventTime() + getTransitTime(), 
 					getSimulator(), 
-					new StorageDeviceDataStoreMessage(
+					new StorageDeviceMessage(
+						StorageDeviceMessage.TYPE.STORE,
+						StorageDeviceMessage.DEVICE_TYPE.HARDDRIVE,
 						aMessage.getIndex(), 
+						-1,
 						aMessage.getData())));
 		} 
 		// previously stored information is requested
 		else if( message instanceof AlgorithmRequestMessage ) {
 			AlgorithmRequestMessage aMessage = (AlgorithmRequestMessage)message;
-			notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "SERVER", 0, 0, 0, 0, 1, 1) );
+			notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "SERVER", 0, 0, 1, 1, 0, 0) );
 			getSimulator().schedule(
-				new DEvent<StorageDeviceDataRequestMessage>(
+				new DEvent<StorageDeviceMessage>(
 					this, 
 					getComputer().getHarddrive(), 
 					e.getEventTime() + getTransitTime(), 
 					getSimulator(), 
-					new StorageDeviceDataRequestMessage(
+					new StorageDeviceMessage(
+						StorageDeviceMessage.TYPE.RETRIEVE,
+						StorageDeviceMessage.DEVICE_TYPE.HARDDRIVE,
 						aMessage.getIndex(),
-						-1)));
+						-1,
+						null)));
 		} 
 		// information requested from memory has arrived
-		else if( message instanceof AlgorithmResponseMessage ) {
-			notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "SERVER", 1, 0, 0, 1, 0, 0) );
+		else if( message instanceof StorageDeviceMessage ) {
+			notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "SERVER", 1, 0, 0, 0, 0, 1) );
 			System.out.println("server send!");
-			AlgorithmResponseMessage aMessage = (AlgorithmResponseMessage)message;
+			StorageDeviceMessage aMessage = (StorageDeviceMessage)message;
 			sendEvent(
 				(ISimulatable)getLowerHandler(),
 				new ProtocolHandlerMessage( 
 					ProtocolHandlerMessage.TYPE.HANDLE_HIGHER,
 					new Packet(
-						new AlgorithmResponseMessage( aMessage.getData() ),
+						aMessage,
 						((HardwareComputerNode)getComputer()).getAddress(),
 						_knownServerAddress,
 						getProtocol(),
@@ -328,17 +338,17 @@ public class DummyAlgorithm
 					if( haveMoreToDistribute() ) {
 						// read index from harddrive
 						sendHarddriveRequest( _currentIndex++ );
-						notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "DISTR", 0, 0, 0, 0, 1, 0 ) );
+						notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "LOCAL", 0, 0, 1, 0, 0, 0 ) );
 						sendDoWork();
 					} 
 					
-				} else if( message instanceof AlgorithmResponseMessage ) {
-					IData data = ((AlgorithmResponseMessage)message).getData();
+				} else if( message instanceof StorageDeviceMessage ) {
+					IData data = ((StorageDeviceMessage)message).getData();
 					sendDataToClient( data, getNextStorageAddress() );
 					
 					_totalHDResponses++;
 					
-					notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "DISTR", 1, 0, 0, 1, 0, 0));
+					notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "LOCAL", 1, 0, 0, 0, 0, 1));
 					
 					// check if we've received and distributed everything
 					if( _totalHDResponses == ( _endIndex - _startIndex + 1 ) ) {
@@ -355,13 +365,13 @@ public class DummyAlgorithm
 						sendDoWork();
 						IAddress address = getNextRetrievalAddress();
 						sendClientRequest( _currentIndex++, address );
-						notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "READ", 0, 0, 0, 0, 1, 0));
+						notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "REMOTE", 0, 0, 1, 0, 0, 0));
 						System.out.println("send remote read");
 					} 
 				} else if( message instanceof AlgorithmResponseMessage ) {
 					_totalClientResponses++;
 					
-					notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "READ", 0, 1, 0, 0, 0, 0));
+					notifyListeners( new AlgorithmEvent(this, e.getEventTime(), "REMOTE", 0, 1, 0, 0, 0, 0));
 					
 					if( _totalClientResponses == ( _endIndex - _startIndex + 1 ) ) {
 						System.out.println("hurray.");
@@ -417,9 +427,12 @@ public class DummyAlgorithm
 				getComputer().getHarddrive(), 
 				getSimulator().getTime() + getTransitTime(), 
 				getSimulator(), 
-				new StorageDeviceDataRequestMessage( 
+				new StorageDeviceMessage( 
+					StorageDeviceMessage.TYPE.RETRIEVE,
+					StorageDeviceMessage.DEVICE_TYPE.HARDDRIVE,
 					index, 
-					-1 )));
+					-1,
+					null)));
 	}
 	
 	/**

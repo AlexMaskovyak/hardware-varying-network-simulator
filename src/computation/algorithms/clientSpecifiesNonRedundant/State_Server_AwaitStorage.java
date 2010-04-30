@@ -1,10 +1,12 @@
 package computation.algorithms.clientSpecifiesNonRedundant;
 
-import messages.StorageDeviceDataStoreMessage;
+import network.routing.IAddress;
+import messages.StorageDeviceMessage;
 import simulation.event.IDEvent;
 import simulation.event.IDEvent.IMessage;
 import computation.IData;
 import computation.algorithms.AbstractAlgorithm;
+import computation.algorithms.listeners.AlgorithmEvent;
 import computation.state.IState;
 
 /**
@@ -29,19 +31,40 @@ public class State_Server_AwaitStorage
 			AlgorithmMessage aMessage = (AlgorithmMessage)message;
 			switch( aMessage.getType() ) {
 			
-				case SERVER_DATA_STORE: 
+				// store data for the client
+				case CLIENT_REQUESTS_DATA_STORE: 
 					AbstractAlgorithm algorithm = getStateHolder();
-					algorithm.sendEvent( 
+					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER", 0, 1, 0, 0, 1, 0) );
+					sendEvent( 
 						algorithm.getComputer().getHarddrive(), 
-						new StorageDeviceDataStoreMessage( 
-							(Integer)aMessage.getValue(AlgorithmMessage.INDEX), 
+						new StorageDeviceMessage( 
+							StorageDeviceMessage.TYPE.STORE,
+							StorageDeviceMessage.DEVICE_TYPE.HARDDRIVE,
+							(Integer)aMessage.getValue(AlgorithmMessage.INDEX),
+							-1,
 							(IData)aMessage.getValue(AlgorithmMessage.DATA) ) );
 					break;
-				case SERVER_DATA_STORE_COMPLETE:
+				// acknowledge done storing data, move to service state
+				case CLIENT_INDICATES_DATA_STORE_COMPLETE:
+					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER", 0, 0, 1, 1, 0, 0) );
+					
 					updateStateHolder( new State_Server_Service() );
+					AlgorithmMessage sendReady = new AlgorithmMessage( AlgorithmMessage.TYPE.SERVER_INDICATES_READ_READY );
+					sendReady.setValue( AlgorithmMessage.SERVER_ADDRESS, getStateHolder().getComputer().getAddress() );
+					sendMessageDownStack( 
+						sendReady, 
+						(IAddress)aMessage.getValue( AlgorithmMessage.CLIENT_ADDRESS ));
 					break;
 				default: break;
 			}
 		}
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	public String toString() {
+		return String.format( "State_Server_AwaitStorage" );
 	}
 }

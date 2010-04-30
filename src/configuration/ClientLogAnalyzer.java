@@ -114,12 +114,12 @@ public class ClientLogAnalyzer {
 				String epoch = scanner.next();
 				Double time = scanner.nextDouble();
 				// grab start time
-				if( epoch.equals("DISTR") ) {
+				if( epoch.equals("LOCAL") ) {
 					if( _localTimeStart == null ) { _localTimeStart = time; }
 					// possible end time
 					else { _localTimeEnd = time; }
 				// grab start time
-				} else if( epoch.equals( "READ" ) ) {
+				} else if( epoch.equals( "REMOTE" ) ) {
 					if( _remoteTimeStart == null ) { _remoteTimeStart = time; }
 					// possible end time
 					else { _remoteTimeEnd = time; }				

@@ -136,8 +136,8 @@ public abstract class AbstractSimulatable
 	@Override
 	public boolean canPerformOperation() {
 		return true;
-	}
-	
+	}	
+
 	/**
 	 * Aids in event sending.
 	 * @param destination to receive the message.
@@ -150,8 +150,28 @@ public abstract class AbstractSimulatable
 		sendEvent( 
 			destination, 
 			message, 
-			getTransitTime() );
+			getTransitTime(),
+			DEvent.EXTERNAL );
 	}
+	
+	/**
+	 * Aids in event sending.
+	 * @param destination to receive the message.
+	 * @param message to send to the destination.
+	 */
+	public void sendEvent( 
+			ISimulatable destination, 
+			IDEvent.IMessage message,
+			int priority ) {
+		
+		sendEvent( 
+			destination, 
+			message, 
+			getTransitTime(),
+			priority );
+	}
+	
+	
 	
 	/**
 	 * Sends an event at an explicitly defined time.
@@ -162,7 +182,8 @@ public abstract class AbstractSimulatable
 	public void sendEvent(
 			ISimulatable destination,
 			IDEvent.IMessage message,
-			double time) {
+			double time,
+			int priority ) {
 		
 		getSimulator().schedule(
 				new DEvent (
@@ -170,6 +191,7 @@ public abstract class AbstractSimulatable
 					destination, 
 					getSimulator().getTime() + time, 
 					getSimulator(), 
-					message));
+					message, 
+					priority));
 	}
 }

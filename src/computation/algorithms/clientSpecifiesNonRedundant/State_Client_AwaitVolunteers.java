@@ -1,5 +1,6 @@
 package computation.algorithms.clientSpecifiesNonRedundant;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import network.routing.IAddress;
@@ -7,6 +8,7 @@ import network.routing.IAddress;
 import simulation.event.IDEvent;
 import simulation.event.IDEvent.IMessage;
 import computation.algorithms.AbstractAlgorithm;
+import computation.algorithms.listeners.AlgorithmEvent;
 import computation.state.IState;
 
 /**
@@ -33,7 +35,14 @@ public class State_Client_AwaitVolunteers
 	 */
 	public State_Client_AwaitVolunteers( int servers ) {
 		_volunteersSought = servers;
+		init();
 	}
+	
+	/** externalize instantiation. */
+	protected void init() {
+		_servers = new ArrayList<IAddress>();
+	}
+	
 	
 /// IState
 	
@@ -48,21 +57,39 @@ public class State_Client_AwaitVolunteers
 			AlgorithmMessage aMessage = (AlgorithmMessage)message;
 			switch( aMessage.getType() ) {
 			
-				case VOLUNTEER_ACCEPTED:
+				case SERVER_VOLUNTEERS:
 					// add it
-					_servers.add( (IAddress)aMessage.getValue( AlgorithmMessage.VOLUNTEER_ADDRESS ) );
+					IAddress volunteerAddress = (IAddress)aMessage.getValue( AlgorithmMessage.VOLUNTEER_ADDRESS );
+					_servers.add( volunteerAddress );
+					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "AWAIT_VOLUNTEERS", 0, 0, 0, 1, 0, 0) );
+					
+					System.out.printf("got volunteer %s\n", volunteerAddress );
+					
+					// inform them
+					sendMessageDownStack( new AlgorithmMessage( AlgorithmMessage.TYPE.CLIENT_ACCEPTS_VOLUNTEER ), volunteerAddress );
 					
 					// are we done looking?
 					if( _servers.size() == _volunteersSought ) {
 						updateStateHolder( new State_Client_Distribute( _servers ) );
-						sendEvent( getStateHolder(), new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK ) );
+						getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SETUP", 0, 0, 1, 0, 0, 0) );
+						
+						AlgorithmMessage doWork = new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK );
+						doWork.setValue( AlgorithmMessage.START_INDEX, 0 );
+						doWork.setValue( AlgorithmMessage.END_INDEX, getStateHolder().getDataAmount() - 1 );
+						sendEvent( getStateHolder(), doWork );
 					}
 					break;
-				// nothing else if worth our time
+				// nothing else is worth our time
 				default: break;
 			}
 		}
 	}
 
-	
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	public String toString() {
+		return String.format( "State_Client_AwaitVolunteers" );
+	}
 }
