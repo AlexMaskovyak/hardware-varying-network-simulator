@@ -65,13 +65,9 @@ public class DriverNetworkSimulator {
 		t.start();
 		sim.start();
 		HardwareComputerNode c = (HardwareComputerNode)sim.getClient();
-		//ClientSpecifiesNonRedundantAlgorithm alg = (ClientSpecifiesNonRedundantAlgorithm)c.getInstalledAlgorithm();
-		//alg.setDataAmount( 100 );
-		//alg.setInitialData( generateData( sim.getDataAmount() ) );
-		//alg.setInitialData(data)
-		//alg.setAddressRange( new Address(1), new Address(5));
-		//n0.send(new IMessage() {}, new Address(7));
 		c.start();
+		
+		//configManager.
 	}
 	
 	/**

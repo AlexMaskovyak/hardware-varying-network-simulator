@@ -1,12 +1,17 @@
 package computation.algorithms.clientSpecifiesNonRedundant;
 
+import java.util.Random;
+
 import network.routing.IAddress;
 import messages.StorageDeviceMessage;
+import messages.StorageDeviceMessage.TYPE;
 import simulation.event.IDEvent;
 import simulation.event.IDEvent.IMessage;
 import computation.IData;
 import computation.algorithms.AbstractAlgorithm;
 import computation.algorithms.listeners.AlgorithmEvent;
+import computation.hardware.Cache;
+import computation.hardware.Harddrive;
 import computation.state.IState;
 import computation.state.IStateHolder;
 
@@ -19,8 +24,33 @@ public class State_Server_Service
 		extends AbstractState
 		implements IState<AbstractAlgorithm> {
 	
-	protected IAddress _clientAddress;
+/// Fields
 	
+	/** address of the client node. */
+	protected IAddress _clientAddress;
+	/** random number generation. */
+	protected Random _rng;
+	
+	
+/// Construction
+	
+	/** Constructor. */
+	public State_Server_Service() {
+		init();
+	}
+	
+	/** externalize instantiaton. */
+	protected void init() {
+		_rng = new Random();
+	}
+
+	
+/// IState
+	
+	/*
+	 * (non-Javadoc)
+	 * @see computation.algorithms.clientSpecifiesNonRedundant.AbstractState#handleEventDelegate(simulation.event.IDEvent)
+	 */
 	@Override
 	public void handleEventDelegate(IDEvent event) {
 		IMessage message = event.getMessage();
@@ -44,7 +74,28 @@ public class State_Server_Service
 					break;
 				// general work case where we make sure that the cache is updated
 				case DO_WORK:
-					// ask cache how many resources it has
+					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVICE_FILL_CACHE", 0, 0, 1, 1, 0, 0) );
+					
+					int freespace = (Integer)aMessage.getValue( AlgorithmMessage.AMOUNT );
+					
+					Harddrive hd = getStateHolder().getComputer().getHarddrive();
+					Cache cache = getStateHolder().getComputer().getCache();
+					
+					// ask hd to store something into cache
+					getStateHolder().sendEventAsProxy(
+							cache,
+							hd,
+							new StorageDeviceMessage( 
+								StorageDeviceMessage.TYPE.RETRIEVE, 
+								StorageDeviceMessage.DEVICE_TYPE.HARDDRIVE, 
+								hd.getFilledIndex(),
+								-1,
+								null ) );
+					
+					if( freespace > 0 ) {
+						aMessage.setValue( AlgorithmMessage.AMOUNT, freespace - 1 );
+						sendEvent( getStateHolder(), aMessage );
+					}
 					
 					break;
 			}
@@ -87,8 +138,11 @@ public class State_Server_Service
 							AlgorithmMessage responseFromCache = new AlgorithmMessage( AlgorithmMessage.TYPE.SERVER_RESPONDS_WITH_DATA );
 							responseFromCache.setValue( AlgorithmMessage.INDEX, sdMessage.getIndex() );
 							responseFromCache.setValue( AlgorithmMessage.DATA, sdMessage.getData() );
-							
 							sendMessageDownStack( responseFromCache, _clientAddress );
+							
+							AlgorithmMessage doWork = new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK );
+							doWork.setValue( AlgorithmMessage.AMOUNT, 1 );
+							sendEvent( getStateHolder(), doWork );
 							
 							break;
 					

@@ -194,4 +194,30 @@ public abstract class AbstractSimulatable
 					message, 
 					priority));
 	}
+	
+	/**
+	 * Sends an event as occurring from someone else.  This is valuable since it
+	 * allows us direct a simulatable to direct responses to another simulatable
+	 * without having to explicitely create a message with some sort of 
+	 * destination reference.  As an example, an algorithm can use this to 
+	 * approximate DMA between the harddrive and cache.
+	 * @param source to appear to send this event as.
+	 * @param destination to receive this event.
+	 * @param message to send to the destination.
+	 */
+	public void sendEventAsProxy(
+			ISimulatable source,
+			ISimulatable destination,
+			IDEvent.IMessage message ) {
+		
+		getSimulator().schedule(
+			new DEvent (
+				source, 
+				destination, 
+				getSimulator().getTime() + getTransitTime(), 
+				getSimulator(), 
+				message, 
+				DEvent.EXTERNAL));
+	}
+	
 }

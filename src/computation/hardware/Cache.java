@@ -24,8 +24,19 @@ public class Cache
 					new StorageDeviceMessage( StorageDeviceMessage.TYPE.RESPONSE, StorageDeviceMessage.DEVICE_TYPE.CACHE, message.getIndex(), message.getRequestId(), getIndex( message.getIndex() ) ) );
 				break;
 			case STORE:
-				setIndex( message.getIndex(), message.getData() );
+				storeData( message.getIndex(), message.getData() );
 				break;
+			case FREE_SPACE:
+				StorageDeviceMessage response = 
+					new StorageDeviceMessage( StorageDeviceMessage.TYPE.FREE_SPACE, StorageDeviceMessage.DEVICE_TYPE.CACHE, -1, -1, null );
+				response.setFreeSpace( getCapacity() - getSize() );
+				sendEvent( e.getSource(), response );
+	
+				break;
+			case DELETE:
+				deleteIndex( message.getIndex() );
+				break;
+			default: break;
 		}
 	}
 	
