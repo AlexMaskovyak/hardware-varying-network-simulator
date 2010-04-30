@@ -64,4 +64,13 @@ public class Data implements IData {
 	public boolean equals(IData data) {
 		return this.getID() == data.getID() && this.getContent() == data.getContent();
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return String.format( "Data [%d]", getID() );
+	}
 }

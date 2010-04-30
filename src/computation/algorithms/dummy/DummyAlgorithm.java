@@ -1,15 +1,13 @@
-package computation.algorithms;
+package computation.algorithms.dummy;
 
 import computation.HardwareComputerNode;
 import computation.IComputer;
 import computation.IData;
 import computation.IHardwareComputer;
+import computation.algorithms.AbstractAlgorithm;
+import computation.algorithms.IAlgorithm;
 import computation.algorithms.listeners.AlgorithmEvent;
 
-import messages.AlgorithmDoWorkMessage;
-import messages.AlgorithmRequestMessage;
-import messages.AlgorithmResponseMessage;
-import messages.AlgorithmStoreMessage;
 import messages.NodeOutMessage;
 import messages.ProtocolHandlerMessage;
 import messages.StorageDeviceMessage;

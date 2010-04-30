@@ -1,7 +1,11 @@
 package computation.algorithms.clientSpecifiesNonRedundant;
 
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Queue;
 
 import javax.swing.GroupLayout.Alignment;
 
@@ -32,6 +36,10 @@ public class State_Client_Distribute
 	protected Iterator<IAddress> _iterator;
 	/** ending index for data. */
 	protected int _endIndex;
+	/** storage map. */
+	protected Map<IAddress, Queue<Integer>> _storageMap; 
+	/** total data sent out. */
+	protected int _dataSent;
 	
 /// Construction
 	
@@ -43,6 +51,16 @@ public class State_Client_Distribute
 		_servers = servers;
 		_iterator = servers.iterator();
 		_endIndex = -1;
+		init();
+	}
+	
+	/** externalize instantiation. */
+	protected void init() {
+		_storageMap = new HashMap<IAddress, Queue<Integer>>();
+		for( IAddress server : _servers ) {
+			_storageMap.put( server, new LinkedList<Integer>());
+		}
+		_dataSent = 0;
 	}
 	
 /// IState
@@ -74,11 +92,14 @@ public class State_Client_Distribute
 					int endIndex = (Integer)aMessage.getValue( AlgorithmMessage.END_INDEX );
 					_endIndex = endIndex;
 					
+					System.out.println( "request local " + currentIndex );
+					
 					// request data
 					sendEvent( getStateHolder().getComputer().getHarddrive(), 
 						new StorageDeviceMessage( StorageDeviceMessage.TYPE.RETRIEVE, StorageDeviceMessage.DEVICE_TYPE.HARDDRIVE, currentIndex++, -1, null ) );
 					
-					// more data to send, schedule it
+					
+					// more data to request, schedule it
 					if( currentIndex <= endIndex ) {
 						getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "LOCAL", 0, 0, 1, 0, 0, 0) );
 						AlgorithmMessage doWork = new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK );
@@ -97,6 +118,8 @@ public class State_Client_Distribute
 			
 				// got data requested, send it to a server
 				case RESPONSE:
+					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "LOCAL", 1, 0, 1, 1, 0, 1 ) );
+					
 					AlgorithmMessage dataStore = new AlgorithmMessage( AlgorithmMessage.TYPE.CLIENT_REQUESTS_DATA_STORE);
 					dataStore.setValue( AlgorithmMessage.INDEX, stMessage.getIndex() );
 					dataStore.setValue( AlgorithmMessage.DATA, stMessage.getData() );
@@ -106,15 +129,21 @@ public class State_Client_Distribute
 						_iterator = _servers.iterator();
 					}
 					
+					IAddress address = _iterator.next();
+					
 					// send it
-					sendMessageDownStack( dataStore, _iterator.next() );
+					sendMessageDownStack( dataStore, address );
 
+					_storageMap.get( address ).add( stMessage.getIndex() );
+					
 					System.out.println( "distribute data" + stMessage.getIndex() );
 					
+					_dataSent++;
+					
 					// we just sent the last thing
-					if( stMessage.getIndex() == _endIndex ) {
+					if( _dataSent == _endIndex + 1 ) {
 						System.out.println("done distributing");
-						updateStateHolder( new State_Client_ConfirmServerReady( _servers ) );
+						updateStateHolder( new State_Client_ConfirmServerReady( _servers, _storageMap ) );
 						AlgorithmMessage doWork = new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK );
 						doWork.setValue( AlgorithmMessage.START_INDEX, 0 );
 						doWork.setValue( AlgorithmMessage.END_INDEX, _servers.size() - 1 );

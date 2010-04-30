@@ -8,8 +8,8 @@ import network.entities.IPublicCloneable;
 
 import computation.Data;
 import computation.IData;
+import computation.algorithms.dummy.AlgorithmResponseMessage;
 
-import messages.AlgorithmResponseMessage;
 import messages.StorageDeviceMessage;
 import simulation.event.IDEvent;
 import simulation.simulatable.ISimulatable;
@@ -78,6 +78,14 @@ public class Harddrive<T extends IData>
 		return _data.size();
 	}
 
+	/**
+	 * Determines if the harddrive has information store inside of it.
+	 * @return true if the harddrive is empty, false otherwise.
+	 */
+	public boolean isEmpty() {
+		return _data.isEmpty();
+	}
+	
 	
 /// IHardware
 	

@@ -4,12 +4,12 @@ import computation.HardwareComputerNode;
 import computation.IComputer;
 import computation.IData;
 import computation.IHardwareComputer;
+import computation.algorithms.dummy.AlgorithmDoWorkMessage;
+import computation.algorithms.dummy.AlgorithmRequestMessage;
+import computation.algorithms.dummy.AlgorithmResponseMessage;
+import computation.algorithms.dummy.AlgorithmStoreMessage;
 import computation.algorithms.listeners.AlgorithmEvent;
 
-import messages.AlgorithmDoWorkMessage;
-import messages.AlgorithmRequestMessage;
-import messages.AlgorithmResponseMessage;
-import messages.AlgorithmStoreMessage;
 import messages.NodeOutMessage;
 import messages.ProtocolHandlerMessage;
 import messages.StorageDeviceMessage;

@@ -11,9 +11,9 @@ import computation.Data;
 import computation.HardwareComputerNode;
 import computation.IData;
 import computation.algorithms.AbstractAlgorithm;
-import computation.algorithms.DummyAlgorithm;
 import computation.algorithms.IAlgorithm;
 import computation.algorithms.ClientSpecifiesNonRedundantAlgorithm;
+import computation.algorithms.dummy.DummyAlgorithm;
 import computation.hardware.Cache;
 import computation.hardware.Harddrive;
 import configuration.ConfigurationManager;
@@ -55,7 +55,7 @@ public class DriverNetworkSimulator {
 		
 		
 		ComputerNetworkSimulator sim = configManager.configureSimulator();
-		sim.addListener(new ReportingSimulatorListener(new File("C:\\Users\\user\\workspaces\\gradproject\\hardware-varying-network-simulator-5\\output\\sim.txt")));
+		//sim.addListener(new ReportingSimulatorListener(new File("C:\\Users\\user\\workspaces\\gradproject\\hardware-varying-network-simulator-5\\output\\sim.txt")));
 		sim.setOutputPath( outputPath.getAbsolutePath() );
 		sim.addAlgorithmListeners();
 		
@@ -160,7 +160,7 @@ public class DriverNetworkSimulator {
 		client.start();
 		
 		
-		Thread.currentThread().sleep( 4000 );
+		//Thread.currentThread().sleep( 4000 );
 		//configManager.makeAveragesDirectory();
 		
 		//sim.resume();

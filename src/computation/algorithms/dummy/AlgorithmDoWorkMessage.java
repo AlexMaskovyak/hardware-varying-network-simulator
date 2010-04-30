@@ -1,4 +1,4 @@
-package messages;
+package computation.algorithms.dummy;
 
 import simulation.event.IDEvent.IMessage;
 

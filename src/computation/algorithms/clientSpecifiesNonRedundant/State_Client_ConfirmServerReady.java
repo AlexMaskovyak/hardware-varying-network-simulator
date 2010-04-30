@@ -2,6 +2,8 @@ package computation.algorithms.clientSpecifiesNonRedundant;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Queue;
 
 import javax.swing.GroupLayout.Alignment;
 
@@ -29,6 +31,8 @@ public class State_Client_ConfirmServerReady
 	protected List<IAddress> _servers;
 	/** servers that are ready. */
 	protected List<IAddress> _readyServers;
+	/** storage map between an address and a queue. */
+	protected Map<IAddress, Queue<Integer>> _storageMap;
 	
 	
 /// Construction
@@ -37,8 +41,11 @@ public class State_Client_ConfirmServerReady
 	 * Default constructor.
 	 * @param servers from which to get ready confirmations.
 	 */
-	public State_Client_ConfirmServerReady( List<IAddress> servers ) {
+	public State_Client_ConfirmServerReady( 
+			List<IAddress> servers, 
+			Map<IAddress, Queue<Integer>> storageMap ) {
 		_servers = servers;
+		_storageMap = storageMap;
 		init();
 	}
 	
@@ -90,10 +97,10 @@ public class State_Client_ConfirmServerReady
 					// if the sizes are equal everyone is ready
 					if( _readyServers.size() == _servers.size() ) {
 						AlgorithmMessage doWork = new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK );
-						doWork.setValue( AlgorithmMessage.START_INDEX, 0 );
-						doWork.setValue( AlgorithmMessage.END_INDEX, getStateHolder().getDataAmount() - 1  );
+						//doWork.setValue( AlgorithmMessage.START_INDEX, 0 );
+						//doWork.setValue( AlgorithmMessage.END_INDEX, getStateHolder().getDataAmount() - 1  );
 						
-						updateStateHolder( new State_Client_Read( _servers ) );
+						updateStateHolder( new State_Client_Read( _servers, _storageMap ) );
 						sendEvent( getStateHolder(), doWork, DEvent.INTERNAL );
 					}
 					break;

@@ -1,10 +1,33 @@
 package computation.hardware;
 
+import messages.StorageDeviceMessage;
+import simulation.event.IDEvent;
 import simulation.simulatable.PerformanceRestrictedSimulatable;
 
 public class Cache 
 		extends Harddrive 
 		implements IHardware {
+	
+	
+	/*
+	 * (non-Javadoc)
+	 * @see simulation.simulatable.PerformanceRestrictedSimulatable#handleEventDelegate(simulation.event.IDiscreteScheduledEvent)
+	 */
+	@Override
+	protected void handleEventDelegate( IDEvent e ) {
+		
+		StorageDeviceMessage message = (StorageDeviceMessage)e.getMessage();
+		switch( message.getType() ) {
+			case RETRIEVE:
+				sendEvent( 
+					e.getSource(), 
+					new StorageDeviceMessage( StorageDeviceMessage.TYPE.RESPONSE, StorageDeviceMessage.DEVICE_TYPE.CACHE, message.getIndex(), message.getRequestId(), getIndex( message.getIndex() ) ) );
+				break;
+			case STORE:
+				setIndex( message.getIndex(), message.getData() );
+				break;
+		}
+	}
 	
 // PublicCloneable 
 
