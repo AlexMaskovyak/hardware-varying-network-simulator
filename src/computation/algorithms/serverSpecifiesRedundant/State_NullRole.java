@@ -1,4 +1,4 @@
-package computation.algorithms.clientSpecifiesNonRedundant;
+package computation.algorithms.serverSpecifiesRedundant;
 
 import network.communication.Address;
 import network.communication.Packet;
@@ -39,7 +39,6 @@ public class State_NullRole
 					// send volunteer request
 					AlgorithmMessage volunteerRequest = new AlgorithmMessage( AlgorithmMessage.TYPE.CLIENT_REQUESTS_VOLUNTEERS );
 					volunteerRequest.setValue( AlgorithmMessage.CLIENT_ADDRESS, getStateHolder().getComputer().getAddress() );
-					volunteerRequest.setValue( AlgorithmMessage.AMOUNT, getStateHolder().getDataAmount() / getStateHolder().getServerCount() );
 					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "NULL", 0, 0, 1, 0, 0, 0) );
 					sendMessageDownStack( volunteerRequest, Address.BROADCAST );
 					
@@ -51,12 +50,6 @@ public class State_NullRole
 					break;
 				case CLIENT_REQUESTS_VOLUNTEERS: 
 					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "NULL", 0, 0, 1, 1, 0, 0) );
-					
-					// check to make sure we have enought space
-					if( (Integer)aMessage.getValue( AlgorithmMessage.AMOUNT ) 
-							>= getStateHolder().getComputer().getHarddrive().freeSpace() ) {
-						return;
-					}
 					
 					// send response to client
 					IAddress clientAddress = (IAddress)aMessage.getValue( AlgorithmMessage.CLIENT_ADDRESS );

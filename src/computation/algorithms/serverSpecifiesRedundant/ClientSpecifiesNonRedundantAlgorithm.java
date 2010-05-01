@@ -1,4 +1,4 @@
-package computation.algorithms.clientSpecifiesNonRedundant;
+package computation.algorithms.serverSpecifiesRedundant;
 
 import javax.swing.GroupLayout.Alignment;
 

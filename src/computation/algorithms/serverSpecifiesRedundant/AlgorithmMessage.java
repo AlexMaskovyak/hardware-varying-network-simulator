@@ -1,4 +1,4 @@
-package computation.algorithms.clientSpecifiesNonRedundant;
+package computation.algorithms.serverSpecifiesRedundant;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,7 +40,7 @@ public class AlgorithmMessage
 	
 	/// SET CLIENT
 	public static final String SERVERS = "servers";
-		
+	
 	/// VOLUNTEER ACCEPTED
 	public static final String VOLUNTEER_ADDRESS = "volunteer_address";
 	public static final String CLIENT_ADDRESS = "client_address";
@@ -58,7 +58,6 @@ public class AlgorithmMessage
 	// SERVER_INDICATES_READ_READY
 	public static final String SERVER_ADDRESS = "serverAddress";
 	
-	/// VOLUNTEER REQUEST
 	// DO WORK DURING SERVICE
 	public static final String AMOUNT = "amount";
 	
