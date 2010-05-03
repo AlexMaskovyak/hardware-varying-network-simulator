@@ -1,13 +1,9 @@
 package computation.algorithms.serverSpecifiesRedundant;
 
 import network.communication.Address;
-import network.communication.Packet;
 import network.routing.IAddress;
-import messages.ProtocolHandlerMessage;
 import simulation.event.IDEvent;
 import simulation.event.IDEvent.IMessage;
-import simulation.simulatable.ISimulatable;
-import computation.algorithms.AbstractAlgorithm;
 import computation.algorithms.listeners.AlgorithmEvent;
 import computation.state.IState;
 
@@ -17,9 +13,10 @@ import computation.state.IState;
  *
  */
 public class State_NullRole
-		extends AbstractState 
-		implements IState<AbstractAlgorithm> {
+		extends AbstractState<ServerSpecifiesRedundantAlgorithm>
+		implements IState<ServerSpecifiesRedundantAlgorithm> {
 
+	
 /// IState
 	
 	/*
@@ -32,24 +29,32 @@ public class State_NullRole
 		if( message instanceof AlgorithmMessage ) {
 			AlgorithmMessage aMessage = (AlgorithmMessage)message;
 			switch( aMessage.getType() ) {
-			
+				// this algorithm is a client
 				case SET_CLIENT: 
 					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SETUP", 0, 0, 1, 0, 0, 0) );
 					
 					// send volunteer request
 					AlgorithmMessage volunteerRequest = new AlgorithmMessage( AlgorithmMessage.TYPE.CLIENT_REQUESTS_VOLUNTEERS );
+					System.out.println( "client's address: " + getStateHolder().getComputer().getAddress() );
 					volunteerRequest.setValue( AlgorithmMessage.CLIENT_ADDRESS, getStateHolder().getComputer().getAddress() );
+					volunteerRequest.setValue( AlgorithmMessage.AMOUNT, getStateHolder().getDataAmount() / getStateHolder().getServerCount() );
+					
 					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "NULL", 0, 0, 1, 0, 0, 0) );
 					sendMessageDownStack( volunteerRequest, Address.BROADCAST );
 					
 					// record servers needed and set next state
-					int servers =  getStateHolder().getServerCount(); //(Integer)aMessage.getValue( AlgorithmMessage.SERVERS );
-					updateStateHolder( new State_Client_AwaitVolunteers( servers ) ); 
-					sendEvent( getStateHolder(), new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK ) );
+					updateStateHolder( new State_Client_AwaitFirstVolunteer( getStateHolder().getServerCount(), getStateHolder().getRedundancy() ) ); 
 					
 					break;
+				// this algorithm fields a request from the client for volunteers
 				case CLIENT_REQUESTS_VOLUNTEERS: 
 					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "NULL", 0, 0, 1, 1, 0, 0) );
+					int dataAmount = (Integer)aMessage.getValue( AlgorithmMessage.AMOUNT );
+					// check to make sure we have enough space
+					if( dataAmount
+							>= getStateHolder().getComputer().getHarddrive().freeSpace() ) {
+						return;
+					}
 					
 					// send response to client
 					IAddress clientAddress = (IAddress)aMessage.getValue( AlgorithmMessage.CLIENT_ADDRESS );
@@ -61,7 +66,7 @@ public class State_NullRole
 					sendMessageDownStack( aMessage, Address.BROADCAST );
 					
 					// go to volunteered state
-					updateStateHolder( new State_Server_Volunteered() );
+					updateStateHolder( new State_Server_Volunteered( dataAmount ) );
 					break;
 			}
 		}

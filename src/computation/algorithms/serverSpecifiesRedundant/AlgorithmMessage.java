@@ -26,14 +26,19 @@ public class AlgorithmMessage
 	 */
 	public static enum TYPE { 
 		SET_CLIENT,
-		DO_WORK, 
+		DO_WORK,
 		CLIENT_REQUESTS_VOLUNTEERS, 
-		CLIENT_ACCEPTS_VOLUNTEER, 
+		CLIENT_ACCEPTS_VOLUNTEER_AS_PRIMARY, 
 		CLIENT_REJECTS_VOLUNTEER,
 		CLIENT_REQUESTS_DATA_STORE,
+		CLIENT_DO_DISTRIBUTE,
 		CLIENT_INDICATES_DATA_STORE_COMPLETE,
+		CLIENT_DO_READ,
 		CLIENT_REQUESTS_DATA,
 		SERVER_VOLUNTEERS,
+		SERVER_REJECTS_VOLUNTEER_REQUEST,
+		SERVER_ACCEPTS_VOLUNTEER_AS_SECONDARY,
+		SERVER_INDICATES_STORE_READY,
 		SERVER_INDICATES_READ_READY,
 		SERVER_RESPONDS_WITH_DATA 
 	};
@@ -44,23 +49,22 @@ public class AlgorithmMessage
 	/// VOLUNTEER ACCEPTED
 	public static final String VOLUNTEER_ADDRESS = "volunteer_address";
 	public static final String CLIENT_ADDRESS = "client_address";
+	public static final String START_INDEX = "start_index";
+	public static final String END_INDEX = "end_index";
+	
+	
+	/// AWAIT FIRST VOLUNTEER, tell volunteer they are primary
+	public static final String SERVERS_REQUESTED = "servers_requested";
+	public static final String REDUNDANCY_REQUESTED = "redundancy_requested";
+	public static final String DATA_AMOUNT = "data_amount";
 	
 	/// SERVER RESPONDS WITH DATA
 	/// DATA STORE 
 	public static final String INDEX = "index";
 	public static final String DATA = "data";
 	
-	// DO WORK
-	// DATA REQUEST
-	public static final String START_INDEX = "startIndex";
-	public static final String END_INDEX = "endIndex";
-	
-	// SERVER_INDICATES_READ_READY
-	public static final String SERVER_ADDRESS = "serverAddress";
-	
-	// DO WORK DURING SERVICE
+	public static final String SERVER_ADDRESS = "server_address";
 	public static final String AMOUNT = "amount";
-	
 	
 /// Fields
 	

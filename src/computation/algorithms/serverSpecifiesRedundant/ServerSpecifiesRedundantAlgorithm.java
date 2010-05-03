@@ -6,7 +6,6 @@ import computation.IData;
 import computation.IHardwareComputer;
 import computation.algorithms.AbstractAlgorithm;
 import computation.algorithms.IAlgorithm;
-import computation.algorithms.dummy.AlgorithmDoWorkMessage;
 import computation.state.IStateHolder;
 
 import network.communication.IPacket;
@@ -24,7 +23,7 @@ import simulation.simulatable.PerformanceRestrictedSimulatable;
  * @author Alex Maskovyak
  *
  */
-public class ClientSpecifiesNonRedundantAlgorithm 
+public class ServerSpecifiesRedundantAlgorithm 
 		extends AbstractAlgorithm
 		implements IAlgorithm, IProtocolHandler, ISimulatable, IStateHolder {
 
@@ -33,19 +32,21 @@ public class ClientSpecifiesNonRedundantAlgorithm
 	
 	/** reference to the computer we are running upon. */
 	protected IHardwareComputer _computer;
-
+	/** to use for data. */ 
+	protected int _redundancy;
+	
 	
 /// Construction
 	
 	/** Default constructor. */
-	public ClientSpecifiesNonRedundantAlgorithm() {
+	public ServerSpecifiesRedundantAlgorithm() {
 		this( null );
 	}
 	
 	/** Constructor.
 	 * @param computer which we are installed  upon.
 	 */
-	public ClientSpecifiesNonRedundantAlgorithm( IHardwareComputer computer ) {
+	public ServerSpecifiesRedundantAlgorithm( IHardwareComputer computer ) {
 		super();
 		_computer = computer;
 		reset();
@@ -60,6 +61,24 @@ public class ClientSpecifiesNonRedundantAlgorithm
 		super.init();
 		setTransitTime( .0000001 );
 		setIState( new State_NullRole() );
+	}
+	
+	/**
+	 * Gets the amount of data redundancy to use when storing/distributing the
+	 * data.
+	 * @return redundancy multiplier.
+	 */
+	public int getRedundancy() {
+		return _redundancy;
+	}
+	
+	/**
+	 * Sets the amount of data redundancy to use when storing/distributing the
+	 * data
+	 * @param redundancyMultiplier to use against the base server count.
+	 */
+	public void setRedundancy( int redundancyMultiplier ) {
+		_redundancy = redundancyMultiplier;
 	}
 	
 	
@@ -138,9 +157,9 @@ public class ClientSpecifiesNonRedundantAlgorithm
 	 * of renewal/blocking we are built upon will limit exactly how much we can
 	 * do.
 	 */
-	protected void sendDoWork() {
-		sendEvent( this, new AlgorithmDoWorkMessage() );
-	}
+	//protected void sendDoWork() {
+	//	sendEvent( this, new AlgorithmDoWorkMessage() );
+	//}
 	
 
 /// IPublicCloneable
@@ -151,9 +170,10 @@ public class ClientSpecifiesNonRedundantAlgorithm
 	 */
 	@Override
 	protected PerformanceRestrictedSimulatable createNew() {
-		ClientSpecifiesNonRedundantAlgorithm result = new ClientSpecifiesNonRedundantAlgorithm();
+		ServerSpecifiesRedundantAlgorithm result = new ServerSpecifiesRedundantAlgorithm();
 		result.setServerCount( this.getServerCount() );
 		result.setDataAmount( this.getDataAmount() );
+		result.setRedundancy( this.getRedundancy() );
 		return result;
 	}
 	

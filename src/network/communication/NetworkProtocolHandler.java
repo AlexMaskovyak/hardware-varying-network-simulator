@@ -64,7 +64,7 @@ public class NetworkProtocolHandler
 		_adaptors = new HashSet<IConnectionAdaptor>();
 		_table = new RoutingTable();
 		_protocol = NetworkProtocolHandler.PROTOCAL;
-		setTTL( 10 );
+		setTTL( 15 );
 		setTransitTime( .0000001 );
 	}
 

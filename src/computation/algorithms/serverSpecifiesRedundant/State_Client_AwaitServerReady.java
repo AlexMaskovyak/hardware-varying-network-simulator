@@ -1,5 +1,7 @@
 package computation.algorithms.serverSpecifiesRedundant;
 
+import network.routing.IAddress;
+import simulation.event.DEvent;
 import simulation.event.IDEvent;
 import simulation.event.IDEvent.IMessage;
 import computation.algorithms.AbstractAlgorithm;
@@ -12,9 +14,26 @@ import computation.state.IState;
  *
  */
 public class State_Client_AwaitServerReady 
-		extends AbstractState
-		implements IState<AbstractAlgorithm> {
+		extends AbstractState<ServerSpecifiesRedundantAlgorithm>
+		implements IState<ServerSpecifiesRedundantAlgorithm> {
 
+/// Fields
+	
+	/** server's address. */
+	protected IAddress _serverAddress;
+	
+
+/// Construction
+	
+	/**
+	 * Default constructor.
+	 * @param serverAddress address of the server.
+	 */
+	public State_Client_AwaitServerReady( IAddress serverAddress ) {
+		_serverAddress = serverAddress;
+	}
+	
+	
 /// IState
 
 	/*
@@ -28,15 +47,33 @@ public class State_Client_AwaitServerReady
 			AlgorithmMessage aMessage = (AlgorithmMessage)message;
 			switch( aMessage.getType() ) {
 			
-				case CLIENT_ACCEPTS_VOLUNTEER: 
-					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_VOLUNTEER", 0, 0, 0, 1, 0, 0) );
+				// nope, you missed your chance, maybe some other time
+				case SERVER_VOLUNTEERS:
+					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "CLIENT_AWAIT_SERVER_READY", 0, 0, 1, 1, 0, 0) );
 					
-					updateStateHolder( new State_Client_AwaitServerReady() ); 
+					// reject volunteers since we already have enough
+					sendMessageDownStack( 
+						new AlgorithmMessage( 
+							AlgorithmMessage.TYPE.CLIENT_REJECTS_VOLUNTEER), 
+							(IAddress)aMessage.getValue( AlgorithmMessage.VOLUNTEER_ADDRESS ) );
 					break;
-				case CLIENT_REJECTS_VOLUNTEER: 
-					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_VOLUNTEER", 0, 0, 0, 1, 0, 0) );
+				
+				// the primary server is ready, begin the distribution stage
+				case SERVER_INDICATES_STORE_READY: 
+					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "CLIENT_AWAIT_SERVER_READY", 0, 0, 0, 1, 0, 0) );
+					System.out.println( "client got store ready from server." );
+					// create next state
+					updateStateHolder( 
+						new State_Client_Distribute( 
+							_serverAddress, 
+							0, 
+							getStateHolder().getDataAmount() - 1 ) ); 
 					
-					updateStateHolder( new State_NullRole() );
+					// start the work distribute cycle
+					sendEvent( 
+						getStateHolder(), 
+						new AlgorithmMessage( AlgorithmMessage.TYPE.CLIENT_DO_DISTRIBUTE ),
+						DEvent.INTERNAL );
 					break;
 				default: break;
 			}
@@ -48,6 +85,6 @@ public class State_Client_AwaitServerReady
 	 * @see java.lang.Object#toString()
 	 */
 	public String toString() {
-		return String.format( "State_Client_Volunteered" );
+		return String.format( "State_Client_AwaitServerReady" );
 	}
 }
