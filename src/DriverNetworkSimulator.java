@@ -55,7 +55,7 @@ public class DriverNetworkSimulator {
 		
 		
 		ComputerNetworkSimulator sim = configManager.configureSimulator();
-		sim.addListener(new ReportingSimulatorListener(new File("C:\\Users\\user\\workspaces\\gradproject\\hardware-varying-network-simulator-5\\output\\sim.txt")));
+		//sim.addListener(new ReportingSimulatorListener(new File("C:\\Users\\user\\workspaces\\gradproject\\hardware-varying-network-simulator-5\\output\\sim.txt")));
 		sim.setOutputPath( outputPath.getAbsolutePath() );
 		sim.addAlgorithmListeners();
 		

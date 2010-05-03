@@ -55,7 +55,7 @@ public class State_Server_Secondary_Service
 			
 				// case where the client requests a range of data
 				case CLIENT_REQUESTS_DATA:
-					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SECONDARY_SERVICE", 0, 0, 1, 1, 0, 0) );
+					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_SECONDARY_SERVICE", 0, 0, 1, 1, 0, 0) );
 					
 					// get their address
 					_clientAddress = (IAddress)aMessage.getValue( AlgorithmMessage.CLIENT_ADDRESS );
@@ -69,8 +69,9 @@ public class State_Server_Secondary_Service
 					break;
 				// general work case where we make sure that the cache is updated
 				case DO_WORK:
-					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVICE_FILL_CACHE", 0, 0, 1, 1, 0, 0) );
+					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_SECONDARY_SERVICE_FILL_CACHE", 0, 0, 1, 0, 0, 0) );
 					
+					// get the freespace amount
 					int freespace = (Integer)aMessage.getValue( AlgorithmMessage.AMOUNT );
 					
 					Harddrive hd = getStateHolder().getComputer().getHarddrive();
@@ -87,6 +88,7 @@ public class State_Server_Secondary_Service
 								-1,
 								null ) );
 					
+					// if there is freespace then send another message
 					if( freespace > 0 ) {
 						aMessage.setValue( AlgorithmMessage.AMOUNT, freespace - 1 );
 						sendEvent( getStateHolder(), aMessage );
@@ -94,34 +96,34 @@ public class State_Server_Secondary_Service
 					
 					break;
 			}
+		// handle information retrieved
 		} else if( message instanceof StorageDeviceMessage ) {
 			StorageDeviceMessage sdMessage = (StorageDeviceMessage)message;
 			switch( sdMessage.getType() ) {
-			
+				// we'll only get or care about responses
 				case RESPONSE: 
 					switch( sdMessage.getDeviceType() ) {
 						// harddrive serviced it
 						case HARDDRIVE:
-							getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVICE", 0, 0, 0, 1, 0, 1) );
+							getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_SECONDARY_SERVICE", 1, 0, 0, 0, 0, 1) );
 							
-							
+							// send it to the client
 							AlgorithmMessage response = new AlgorithmMessage( AlgorithmMessage.TYPE.SERVER_RESPONDS_WITH_DATA );
 							response.setValue( AlgorithmMessage.INDEX, sdMessage.getIndex() );
 							response.setValue( AlgorithmMessage.DATA, sdMessage.getData() );
 							
-							System.out.println( "send data to client");
-							
 							sendMessageDownStack( response, _clientAddress );
 							break;
-							
+						// cache services it
 						case CACHE:
-							getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVICE", 0, 0, 0, 1, 0, 1) );
+							getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_SECONDARY_SERVICE", 1, 0, 0, 0, 0, 1) );
 							
 							IData data = sdMessage.getData();
 							Integer index = sdMessage.getIndex();
 							
 							// cache miss send request to hd
 							if( data == null ) {
+								getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_SECONDARY_SERVICE", 0, 0, 1, 0, 0, 0) );
 								// send a request to our harddrive
 								sendEvent( 
 									getStateHolder().getComputer().getHarddrive(),
@@ -130,6 +132,8 @@ public class State_Server_Secondary_Service
 								
 								return;
 							}
+							
+							getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_SECONDARY_SERVICE", 1, 0, 0, 0, 0, 1) );
 							
 							// cache hit
 							AlgorithmMessage responseFromCache = new AlgorithmMessage( AlgorithmMessage.TYPE.SERVER_RESPONDS_WITH_DATA );
@@ -140,9 +144,6 @@ public class State_Server_Secondary_Service
 							AlgorithmMessage doWork = new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK );
 							doWork.setValue( AlgorithmMessage.AMOUNT, 1 );
 							sendEvent( getStateHolder(), doWork );
-							
-							System.out.println( "send data to client");
-							
 							
 							break;
 					}

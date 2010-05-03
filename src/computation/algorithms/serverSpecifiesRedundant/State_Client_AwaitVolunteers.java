@@ -1,13 +1,9 @@
 package computation.algorithms.serverSpecifiesRedundant;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import network.routing.IAddress;
 
 import simulation.event.IDEvent;
 import simulation.event.IDEvent.IMessage;
-import computation.algorithms.AbstractAlgorithm;
 import computation.algorithms.listeners.AlgorithmEvent;
 import computation.state.IState;
 
@@ -60,7 +56,7 @@ public class State_Client_AwaitVolunteers
 			switch( aMessage.getType() ) {
 			
 				case SERVER_VOLUNTEERS:
-					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "CLIENT_AWAIT_VOLUNTEERS", 0, 0, 0, 1, 0, 0) );
+					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "CLIENT_AWAIT_VOLUNTEERS", 0, 0, 1, 1, 0, 0) );
 					
 					// tally it
 					IAddress volunteerAddress = (IAddress)aMessage.getValue( AlgorithmMessage.VOLUNTEER_ADDRESS );
@@ -70,8 +66,6 @@ public class State_Client_AwaitVolunteers
 					AlgorithmMessage response = new AlgorithmMessage( AlgorithmMessage.TYPE.SERVER_VOLUNTEERS );
 					response.setValue( AlgorithmMessage.VOLUNTEER_ADDRESS, volunteerAddress );
 					
-					System.out.printf("got volunteer %s total = %d of = %d\n", volunteerAddress, _volunteersFound, _volunteersSought );
-					
 					// inform the primary server of a new volunteer
 					sendMessageDownStack( 
 						response, 
@@ -79,9 +73,6 @@ public class State_Client_AwaitVolunteers
 					
 					// are we done looking?
 					if( _volunteersFound == _volunteersSought ) {
-						//updateStateHolder( new State_Client_Distribute( _servers ) );
-						getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "CLIENT_AWAIT_VOLUNTEERS", 0, 0, 1, 0, 0, 0) );
-
 						// we now wait for the server to finish setting itself
 						// and its volunteers up.
 						updateStateHolder( new State_Client_AwaitServerReady( _primaryServerAddress ) );						

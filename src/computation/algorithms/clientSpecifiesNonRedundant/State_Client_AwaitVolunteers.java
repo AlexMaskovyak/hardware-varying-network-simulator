@@ -17,7 +17,7 @@ import computation.state.IState;
  *
  */
 public class State_Client_AwaitVolunteers
-		extends AbstractState 
+		extends AbstractState
 		implements IState<AbstractAlgorithm> {
 
 /// Fields	
@@ -61,9 +61,7 @@ public class State_Client_AwaitVolunteers
 					// add it
 					IAddress volunteerAddress = (IAddress)aMessage.getValue( AlgorithmMessage.VOLUNTEER_ADDRESS );
 					_servers.add( volunteerAddress );
-					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "AWAIT_VOLUNTEERS", 0, 0, 0, 1, 0, 0) );
-					
-					System.out.printf("got volunteer %s\n", volunteerAddress );
+					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "CLIENT_AWAIT_VOLUNTEERS", 0, 0, 0, 1, 0, 0) );
 					
 					// inform them
 					sendMessageDownStack( new AlgorithmMessage( AlgorithmMessage.TYPE.CLIENT_ACCEPTS_VOLUNTEER ), volunteerAddress );
@@ -71,7 +69,6 @@ public class State_Client_AwaitVolunteers
 					// are we done looking?
 					if( _servers.size() == _volunteersSought ) {
 						updateStateHolder( new State_Client_Distribute( _servers ) );
-						getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SETUP", 0, 0, 1, 0, 0, 0) );
 						
 						AlgorithmMessage doWork = new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK );
 						doWork.setValue( AlgorithmMessage.START_INDEX, 0 );

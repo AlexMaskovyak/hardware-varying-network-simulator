@@ -3,7 +3,6 @@ package computation.algorithms.serverSpecifiesRedundant;
 import network.routing.IAddress;
 import simulation.event.IDEvent;
 import simulation.event.IDEvent.IMessage;
-import computation.algorithms.AbstractAlgorithm;
 import computation.algorithms.listeners.AlgorithmEvent;
 import computation.state.IState;
 
@@ -52,7 +51,7 @@ public class State_Client_AwaitFirstVolunteer
 			switch( aMessage.getType() ) {
 				// got our first volunteer
 				case SERVER_VOLUNTEERS: 
-					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "CLIENT_AWAIT_FIRST_VOLUNTEER", 0, 0, 0, 1, 0, 0) );
+					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "CLIENT_AWAIT_FIRST_VOLUNTEER", 0, 0, 1, 1, 0, 0) );
 					
 					// this will become the primary server
 					IAddress serverAddress = (IAddress)aMessage.getValue( AlgorithmMessage.VOLUNTEER_ADDRESS );
@@ -62,9 +61,6 @@ public class State_Client_AwaitFirstVolunteer
 					response.setValue( AlgorithmMessage.REDUNDANCY_REQUESTED, _redundancy );
 					response.setValue( AlgorithmMessage.START_INDEX, 0);
 					response.setValue( AlgorithmMessage.END_INDEX, getStateHolder().getDataAmount() - 1 );
-					
-					
-					System.out.printf( "got first volunteer %s (base: %d red: %d tot: %d)\n", serverAddress, _serverAmount, _redundancy, _serverAmount * _redundancy );
 					
 					// await more volunteers to pass along to our primary
 					updateStateHolder( new State_Client_AwaitVolunteers( ( _serverAmount * _redundancy ), serverAddress ) ); 
@@ -77,7 +73,7 @@ public class State_Client_AwaitFirstVolunteer
 					break;
 				// we don't do anything explicitly for this case
 				case SERVER_REJECTS_VOLUNTEER_REQUEST: 
-					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "CLIENT_AWAIT_FIRST_VOLUNTEER_REJECTION", 0, 0, 0, 1, 0, 0) );
+					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "CLIENT_AWAIT_FIRST_VOLUNTEER", 0, 0, 0, 1, 0, 0) );
 					break;
 				default: break;
 			}

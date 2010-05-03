@@ -100,11 +100,10 @@ public class State_Server_Primary_AwaitStorage
 			switch( aMessage.getType() ) {
 				// storing data
 				case CLIENT_REQUESTS_DATA_STORE:
-					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_AWAIT_STORAGE", 0, 0, 0, 1, 0, 0) );
+					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_PRIMARY_AWAIT_STORAGE", 0, 0, 0, 1, 0, 0) );
 					
 					dataIndex = (Integer)aMessage.getValue( AlgorithmMessage.INDEX );
 					data = (IData)aMessage.getValue( AlgorithmMessage.DATA );
-					System.out.printf("client requests data store %d %s \n", dataIndex, data );
 					
 					List<IAddress> serverAddresses = _serverGroups.get( getServerGroupIndex( dataIndex ) );
 					for( IAddress serverAddress : serverAddresses ) {
@@ -117,15 +116,13 @@ public class State_Server_Primary_AwaitStorage
 					
 					break;
 				case DO_WORK:
-					
-					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_AWAIT_STORAGE", 0, 0, 0, 1, 0, 0) );
-					
 					dataIndex = (Integer)aMessage.getValue( AlgorithmMessage.INDEX );
 					data = (IData)aMessage.getValue( AlgorithmMessage.DATA );
 					IAddress serverAddress = (IAddress)aMessage.getValue( AlgorithmMessage.SERVER_ADDRESS );
 					
 					// is this for us?
 					if( serverAddress.equals( getStateHolder().getComputer().getAddress() ) ) {
+						getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_PRIMARY_AWAIT_STORAGE", 0, 1, 0, 0, 1, 0) );
 						sendEvent(
 							getStateHolder().getComputer().getHarddrive(),
 							new StorageDeviceMessage( 
@@ -136,6 +133,7 @@ public class State_Server_Primary_AwaitStorage
 								data ) );
 					// tell the server to store it
 					} else {
+						getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_PRIMARY_AWAIT_STORAGE", 0, 1, 1, 0, 0, 0) );
 						AlgorithmMessage dataStore = new AlgorithmMessage( AlgorithmMessage.TYPE.CLIENT_REQUESTS_DATA_STORE  );
 						dataStore.setValue( AlgorithmMessage.SERVER_ADDRESS, serverAddress );
 						dataStore.setValue( AlgorithmMessage.DATA, data );
@@ -151,14 +149,17 @@ public class State_Server_Primary_AwaitStorage
 					
 				case SERVER_INDICATES_READ_READY:
 					_serversDone++;
-					System.out.printf( "stored %d servers done \n", _serversDone );
-					// one less than the total number of servers since we are done as wells
+					// one less than the total number of servers since we are done as well
 					if( _serversDone == getStateHolder().getServerCount() -1 ) {
+						getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_PRIMARY_AWAIT_STORAGE", 0, 0, 1, 0, 0, 0) );
 						sendMessageDownStack( 
 							new AlgorithmMessage( AlgorithmMessage.TYPE.SERVER_INDICATES_READ_READY ),
 							_clientAddress );
-						updateStateHolder( new State_Server_Primary_Service(
-							_serverGroups, _startIndex, _endIndex));
+						updateStateHolder( 
+							new State_Server_Primary_Service(
+								_serverGroups, 
+								_startIndex, 
+								_endIndex ) );
 					}
 				default: break;
 			}

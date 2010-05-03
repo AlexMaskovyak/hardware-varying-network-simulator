@@ -78,7 +78,7 @@ public class State_Client_Distribute
 			
 				// nope, you missed your chance, maybe some other time
 				case CLIENT_ACCEPTS_VOLUNTEER:
-					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SETUP", 0, 0, 1, 1, 0, 0) );
+					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "CLIENT_DISTRIBUTE", 0, 0, 1, 1, 0, 0) );
 					
 					sendMessageDownStack( 
 						new AlgorithmMessage( 
@@ -92,7 +92,7 @@ public class State_Client_Distribute
 					int endIndex = (Integer)aMessage.getValue( AlgorithmMessage.END_INDEX );
 					_endIndex = endIndex;
 					
-					System.out.println( "request local " + currentIndex );
+					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "LOCAL", 0, 0, 1, 0, 0, 0) );
 					
 					// request data
 					sendEvent( getStateHolder().getComputer().getHarddrive(), 
@@ -101,7 +101,6 @@ public class State_Client_Distribute
 					
 					// more data to request, schedule it
 					if( currentIndex <= endIndex ) {
-						getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "LOCAL", 0, 0, 1, 0, 0, 0) );
 						AlgorithmMessage doWork = new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK );
 						doWork.setValue( AlgorithmMessage.START_INDEX, currentIndex );
 						doWork.setValue( AlgorithmMessage.END_INDEX, endIndex );
@@ -118,9 +117,9 @@ public class State_Client_Distribute
 			
 				// got data requested, send it to a server
 				case RESPONSE:
-					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "LOCAL", 1, 0, 1, 1, 0, 1 ) );
+					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "LOCAL", 1, 1, 1, 1, 0, 1 ) );
 					
-					AlgorithmMessage dataStore = new AlgorithmMessage( AlgorithmMessage.TYPE.CLIENT_REQUESTS_DATA_STORE);
+					AlgorithmMessage dataStore = new AlgorithmMessage( AlgorithmMessage.TYPE.CLIENT_REQUESTS_DATA_STORE );
 					dataStore.setValue( AlgorithmMessage.INDEX, stMessage.getIndex() );
 					dataStore.setValue( AlgorithmMessage.DATA, stMessage.getData() );
 	
@@ -133,11 +132,7 @@ public class State_Client_Distribute
 					
 					// send it
 					sendMessageDownStack( dataStore, address );
-
 					_storageMap.get( address ).add( stMessage.getIndex() );
-					
-					System.out.println( "distribute data" + stMessage.getIndex() );
-					
 					_dataSent++;
 					
 					// we just sent the last thing

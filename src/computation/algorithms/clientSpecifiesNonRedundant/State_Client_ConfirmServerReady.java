@@ -66,7 +66,7 @@ public class State_Client_ConfirmServerReady
 			switch( aMessage.getType() ) {
 				// tell all servers that we're through sending them info
 				case DO_WORK:
-					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "CONFIRMREADY", 0, 0, 1, 1, 0, 0));
+					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "CLIENT_CONFIRM_SERVER_READY", 0, 0, 1, 1, 0, 0));
 					
 					// indices of the servers to tell
 					int currentIndex = (Integer)aMessage.getValue( AlgorithmMessage.START_INDEX );
@@ -80,7 +80,6 @@ public class State_Client_ConfirmServerReady
 					
 					// if we haven't hit the end index, we need to do more work
 					if( currentIndex < endIndex ) {
-						System.out.println( "not done asking for confirm" + currentIndex + " " + endIndex );
 						AlgorithmMessage doWork = new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK );
 						doWork.setValue( AlgorithmMessage.START_INDEX, ++currentIndex );
 						System.out.println( currentIndex );
@@ -90,15 +89,13 @@ public class State_Client_ConfirmServerReady
 					break;
 				// response that its ready...
 				case SERVER_INDICATES_READ_READY:
-					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "DISTR", 0, 0, 1, 1, 0, 0));
+					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "CLIENT_CONFIRM_SERVER_READY", 0, 0, 1, 1, 0, 0));
 					
 					// add it
 					_readyServers.add( (IAddress) aMessage.getValue( AlgorithmMessage.SERVER_ADDRESS ) );
 					// if the sizes are equal everyone is ready
 					if( _readyServers.size() == _servers.size() ) {
 						AlgorithmMessage doWork = new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK );
-						//doWork.setValue( AlgorithmMessage.START_INDEX, 0 );
-						//doWork.setValue( AlgorithmMessage.END_INDEX, getStateHolder().getDataAmount() - 1  );
 						
 						updateStateHolder( new State_Client_Read( _servers, _storageMap ) );
 						sendEvent( getStateHolder(), doWork, DEvent.INTERNAL );
