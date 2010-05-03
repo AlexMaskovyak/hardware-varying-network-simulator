@@ -17,32 +17,34 @@ import computation.state.IState;
  *
  */
 public class State_Client_AwaitVolunteers
-		extends AbstractState 
-		implements IState<AbstractAlgorithm> {
+		extends AbstractState<ServerSpecifiesRedundantAlgorithm>
+		implements IState<ServerSpecifiesRedundantAlgorithm> {
 
 /// Fields	
 
-	/** servers we have found. */
-	protected List<IAddress> _servers;
 	/** server total we seek. */
 	protected int _volunteersSought;
-
+	/** number of volunteers located. */
+	protected int _volunteersFound;
+	/** primary server's address. */
+	protected IAddress _primaryServerAddress;
+	
 /// Construction
 	
 	/**
-	 * Servers to seek.
+	 * Default constructor.
 	 * @param servers we need to obtain.
+	 * @param primaryServerAddress to which to send volunteer addresses.
 	 */
-	public State_Client_AwaitVolunteers( int servers ) {
+	public State_Client_AwaitVolunteers( int servers, IAddress primaryServerAddress ) {
 		_volunteersSought = servers;
-		init();
+		_primaryServerAddress = primaryServerAddress;
 	}
 	
 	/** externalize instantiation. */
 	protected void init() {
-		_servers = new ArrayList<IAddress>();
+		_volunteersFound = 1;
 	}
-	
 	
 /// IState
 	
@@ -58,26 +60,33 @@ public class State_Client_AwaitVolunteers
 			switch( aMessage.getType() ) {
 			
 				case SERVER_VOLUNTEERS:
-					// add it
+					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "CLIENT_AWAIT_VOLUNTEERS", 0, 0, 0, 1, 0, 0) );
+					
+					// tally it
 					IAddress volunteerAddress = (IAddress)aMessage.getValue( AlgorithmMessage.VOLUNTEER_ADDRESS );
-					_servers.add( volunteerAddress );
-					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "AWAIT_VOLUNTEERS", 0, 0, 0, 1, 0, 0) );
+					_volunteersFound++;
 					
-					System.out.printf("got volunteer %s\n", volunteerAddress );
+					// relay to primary
+					AlgorithmMessage response = new AlgorithmMessage( AlgorithmMessage.TYPE.SERVER_VOLUNTEERS );
+					response.setValue( AlgorithmMessage.VOLUNTEER_ADDRESS, volunteerAddress );
 					
-					// inform them
-					sendMessageDownStack( new AlgorithmMessage( AlgorithmMessage.TYPE.CLIENT_ACCEPTS_VOLUNTEER ), volunteerAddress );
+					System.out.printf("got volunteer %s total = %d of = %d\n", volunteerAddress, _volunteersFound, _volunteersSought );
+					
+					// inform the primary server of a new volunteer
+					sendMessageDownStack( 
+						response, 
+						_primaryServerAddress );
 					
 					// are we done looking?
-					if( _servers.size() == _volunteersSought ) {
+					if( _volunteersFound == _volunteersSought ) {
 						//updateStateHolder( new State_Client_Distribute( _servers ) );
-						getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SETUP", 0, 0, 1, 0, 0, 0) );
-						
-						AlgorithmMessage doWork = new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK );
-						doWork.setValue( AlgorithmMessage.START_INDEX, 0 );
-						doWork.setValue( AlgorithmMessage.END_INDEX, getStateHolder().getDataAmount() - 1 );
-						sendEvent( getStateHolder(), doWork );
+						getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "CLIENT_AWAIT_VOLUNTEERS", 0, 0, 1, 0, 0, 0) );
+
+						// we now wait for the server to finish setting itself
+						// and its volunteers up.
+						updateStateHolder( new State_Client_AwaitServerReady( _primaryServerAddress ) );						
 					}
+
 					break;
 				// nothing else is worth our time
 				default: break;

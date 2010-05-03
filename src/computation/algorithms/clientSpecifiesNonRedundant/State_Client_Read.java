@@ -5,9 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
-import javax.swing.GroupLayout.Alignment;
-
-import messages.StorageDeviceMessage;
 import network.routing.IAddress;
 
 import simulation.event.DEvent;
@@ -124,7 +121,6 @@ public class State_Client_Read
 					
 					AlgorithmMessage doWork = new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK );
 					sendEvent( getStateHolder(), doWork, DEvent.INTERNAL );
-					
 					
 					
 					break;

@@ -1,6 +1,7 @@
 package computation.algorithms.serverSpecifiesRedundant;
 
 import network.routing.IAddress;
+import simulation.event.DEvent;
 import simulation.event.IDEvent;
 import simulation.event.IDEvent.IMessage;
 import simulation.simulatable.ISimulatable;
@@ -12,13 +13,13 @@ import computation.state.IState;
  * @author Alex Maskovyak
  *
  */
-public abstract class AbstractState
-		implements IState<AbstractAlgorithm> {
+public abstract class AbstractState<T extends AbstractAlgorithm>
+		implements IState<T> {
 
 /// Fields
 	
 	/** stateholder that possesses us. */
-	protected AbstractAlgorithm _holder;
+	protected T _holder;
 	
 	
 /// IState
@@ -28,7 +29,7 @@ public abstract class AbstractState
 	 * @see computation.state.IState#getStateHolder()
 	 */
 	@Override
-	public AbstractAlgorithm getStateHolder() {
+	public T getStateHolder() {
 		return _holder;
 	}
 
@@ -39,7 +40,7 @@ public abstract class AbstractState
 	 * @see computation.state.IState#setStateHolder(computation.state.IStateHolder)
 	 */
 	@Override
-	public void setStateHolder(AbstractAlgorithm holder) {
+	public void setStateHolder(T holder) {
 		_holder = holder;
 	}
 
@@ -62,6 +63,14 @@ public abstract class AbstractState
 	 */
 	public void sendEvent( ISimulatable destination, IMessage message ) {
 		getStateHolder().sendEvent( destination, message );
+	}
+	
+	/**
+	 * Sends a instant event to ourselves.
+	 * @param message to send to our self.
+	 */
+	public void sendInstantEvent( IMessage message ) {
+		getStateHolder().sendEvent( getStateHolder(), message, 0.000000001, DEvent.INTERNAL );
 	}
 	
 	/**
