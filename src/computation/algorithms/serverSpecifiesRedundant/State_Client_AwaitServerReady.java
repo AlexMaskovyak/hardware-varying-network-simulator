@@ -4,7 +4,6 @@ import network.routing.IAddress;
 import simulation.event.DEvent;
 import simulation.event.IDEvent;
 import simulation.event.IDEvent.IMessage;
-import computation.algorithms.AbstractAlgorithm;
 import computation.algorithms.listeners.AlgorithmEvent;
 import computation.state.IState;
 
@@ -61,7 +60,7 @@ public class State_Client_AwaitServerReady
 				// the primary server is ready, begin the distribution stage
 				case SERVER_INDICATES_STORE_READY: 
 					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "CLIENT_AWAIT_SERVER_READY", 0, 0, 0, 1, 0, 0) );
-					System.out.println( "client got store ready from server." );
+					
 					// create next state
 					updateStateHolder( 
 						new State_Client_Distribute( 

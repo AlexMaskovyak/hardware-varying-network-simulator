@@ -4,7 +4,6 @@ import network.routing.IAddress;
 import simulation.event.IDEvent;
 import simulation.event.IDEvent.IMessage;
 import computation.IData;
-import computation.algorithms.AbstractAlgorithm;
 import computation.algorithms.listeners.AlgorithmEvent;
 import computation.hardware.Harddrive;
 import computation.state.IState;
@@ -70,7 +69,7 @@ public class State_Client_Read
 					break;
 				// request data
 				case CLIENT_DO_READ:
-					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "REMOTE", 0, 0, 0, 1, 0, 0) );
+					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "REMOTE", 0, 0, 1, 0, 0, 0) );
 					
 					// request current index
 					AlgorithmMessage request = new AlgorithmMessage( AlgorithmMessage.TYPE.CLIENT_REQUESTS_DATA );
@@ -92,7 +91,7 @@ public class State_Client_Read
 					
 				// the server responds with information
 				case SERVER_RESPONDS_WITH_DATA:
-					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "REMOTE", 0, 1, 0, 0, 0, 0));
+					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "REMOTE", 0, 1, 0, 0, 1, 0));
 					
 					IData data = (IData)aMessage.getValue( AlgorithmMessage.DATA );
 					int index = (Integer)aMessage.getValue( AlgorithmMessage.INDEX );

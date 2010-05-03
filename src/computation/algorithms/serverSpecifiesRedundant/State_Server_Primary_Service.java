@@ -3,11 +3,9 @@ package computation.algorithms.serverSpecifiesRedundant;
 import java.util.List;
 import java.util.Random;
 
-import messages.StorageDeviceMessage;
 import network.routing.IAddress;
 import simulation.event.IDEvent;
 import simulation.event.IDEvent.IMessage;
-import computation.algorithms.AbstractAlgorithm;
 import computation.algorithms.listeners.AlgorithmEvent;
 import computation.state.IState;
 
@@ -105,8 +103,7 @@ public class State_Server_Primary_Service
 					// give it to the server that we selected
 					} else {
 						getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "PRIMARY_SERVICE", 0, 0, 1, 1, 0, 0) );
-						sendMessageDownStack(
-							aMessage, server);
+						sendMessageDownStack( aMessage, server );
 					}					
 					break;
 				

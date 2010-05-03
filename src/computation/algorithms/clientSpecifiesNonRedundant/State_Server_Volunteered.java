@@ -29,12 +29,12 @@ public class State_Server_Volunteered
 			switch( aMessage.getType() ) {
 			
 				case CLIENT_ACCEPTS_VOLUNTEER: 
-					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_VOLUNTEER", 0, 0, 0, 1, 0, 0) );
+					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_VOLUNTEERED", 0, 0, 0, 1, 0, 0) );
 					
 					updateStateHolder( new State_Server_AwaitStorage() ); 
 					break;
 				case CLIENT_REJECTS_VOLUNTEER: 
-					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_VOLUNTEER", 0, 0, 0, 1, 0, 0) );
+					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_VOLUNTEERED", 0, 0, 0, 1, 0, 0) );
 					
 					updateStateHolder( new State_NullRole() );
 					break;

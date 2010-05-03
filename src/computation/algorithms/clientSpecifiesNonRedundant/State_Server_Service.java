@@ -4,7 +4,6 @@ import java.util.Random;
 
 import network.routing.IAddress;
 import messages.StorageDeviceMessage;
-import messages.StorageDeviceMessage.TYPE;
 import simulation.event.IDEvent;
 import simulation.event.IDEvent.IMessage;
 import computation.IData;
@@ -13,7 +12,6 @@ import computation.algorithms.listeners.AlgorithmEvent;
 import computation.hardware.Cache;
 import computation.hardware.Harddrive;
 import computation.state.IState;
-import computation.state.IStateHolder;
 
 /**
  * Performs all data storage/retrieval services in response to a client.
@@ -60,7 +58,7 @@ public class State_Server_Service
 			
 				// case where the client requests a range of data
 				case CLIENT_REQUESTS_DATA:
-					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVICE", 0, 0, 1, 1, 0, 0) );
+					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_SERVICE", 0, 0, 1, 1, 0, 0) );
 					
 					// get their address
 					_clientAddress = (IAddress)aMessage.getValue( AlgorithmMessage.CLIENT_ADDRESS );
@@ -74,7 +72,7 @@ public class State_Server_Service
 					break;
 				// general work case where we make sure that the cache is updated
 				case DO_WORK:
-					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVICE_FILL_CACHE", 0, 0, 1, 1, 0, 0) );
+					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_SERVICE_FILL_CACHE", 0, 0, 1, 1, 0, 0) );
 					
 					int freespace = (Integer)aMessage.getValue( AlgorithmMessage.AMOUNT );
 					
@@ -107,8 +105,7 @@ public class State_Server_Service
 					switch( sdMessage.getDeviceType() ) {
 						// harddrive serviced it
 						case HARDDRIVE:
-							getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVICE", 0, 0, 0, 1, 0, 1) );
-							
+							getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_SERVICE", 1, 0, 0, 1, 0, 1) );
 							
 							AlgorithmMessage response = new AlgorithmMessage( AlgorithmMessage.TYPE.SERVER_RESPONDS_WITH_DATA );
 							response.setValue( AlgorithmMessage.INDEX, sdMessage.getIndex() );
@@ -116,15 +113,16 @@ public class State_Server_Service
 							
 							sendMessageDownStack( response, _clientAddress );
 							break;
-							
+						// cache services it
 						case CACHE:
-							getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVICE", 0, 0, 0, 1, 0, 1) );
+							getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_SERVICE", 0, 0, 0, 1, 0, 0) );
 							
 							IData data = sdMessage.getData();
 							Integer index = sdMessage.getIndex();
 							
 							// cache miss send request to hd
 							if( data == null ) {
+								getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_SERVICE", 0, 0, 1, 0, 0, 0) );
 								// send a request to our harddrive
 								sendEvent( 
 									getStateHolder().getComputer().getHarddrive(),
@@ -133,6 +131,8 @@ public class State_Server_Service
 								
 								return;
 							}
+							
+							getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_SERVICE", 1, 0, 0, 0, 0, 1) );
 							
 							// cache hit
 							AlgorithmMessage responseFromCache = new AlgorithmMessage( AlgorithmMessage.TYPE.SERVER_RESPONDS_WITH_DATA );

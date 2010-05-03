@@ -1,13 +1,10 @@
 package computation.algorithms.serverSpecifiesRedundant;
 
-import java.util.List;
-
 import network.routing.IAddress;
 import messages.StorageDeviceMessage;
 import simulation.event.IDEvent;
 import simulation.event.IDEvent.IMessage;
 import computation.IData;
-import computation.algorithms.AbstractAlgorithm;
 import computation.algorithms.listeners.AlgorithmEvent;
 import computation.state.IState;
 
@@ -59,7 +56,7 @@ public class State_Server_Secondary_AwaitStorage
 				// store data
 				case CLIENT_REQUESTS_DATA_STORE:
 					ServerSpecifiesRedundantAlgorithm algorithm = getStateHolder();
-					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SECONDARY_AWAIT_STORAGE", 0, 1, 0, 0, 1, 0) );
+					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_SECONDARY_AWAIT_STORAGE", 0, 1, 0, 0, 1, 0) );
 					sendEvent( 
 						algorithm.getComputer().getHarddrive(), 
 						new StorageDeviceMessage( 
@@ -69,8 +66,9 @@ public class State_Server_Secondary_AwaitStorage
 							-1,
 							(IData)aMessage.getValue(AlgorithmMessage.DATA) ) );
 					_dataStored++;
+					// we've stored everything we need to
 					if( _dataStored == _dataToStoreTotal ) {
-						System.out.printf("server secondary done storing data %s send to %s.\n", getStateHolder().getComputer().getAddress(), _primaryAddress );
+						getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_SECONDARY_AWAIT_STORAGE", 0, 0, 1, 0, 0, 0) );
 						sendMessageDownStack(
 							new AlgorithmMessage( AlgorithmMessage.TYPE.SERVER_INDICATES_READ_READY ),
 							_primaryAddress );

@@ -34,25 +34,23 @@ public class State_NullRole
 			switch( aMessage.getType() ) {
 			
 				case SET_CLIENT: 
-					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SETUP", 0, 0, 1, 0, 0, 0) );
-					
 					// send volunteer request
 					AlgorithmMessage volunteerRequest = new AlgorithmMessage( AlgorithmMessage.TYPE.CLIENT_REQUESTS_VOLUNTEERS );
 					volunteerRequest.setValue( AlgorithmMessage.CLIENT_ADDRESS, getStateHolder().getComputer().getAddress() );
 					volunteerRequest.setValue( AlgorithmMessage.AMOUNT, getStateHolder().getDataAmount() / getStateHolder().getServerCount() );
-					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "NULL", 0, 0, 1, 0, 0, 0) );
+					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "NULL_ROLE", 0, 0, 1, 0, 0, 0) );
 					sendMessageDownStack( volunteerRequest, Address.BROADCAST );
 					
 					// record servers needed and set next state
-					int servers =  getStateHolder().getServerCount(); //(Integer)aMessage.getValue( AlgorithmMessage.SERVERS );
+					int servers =  getStateHolder().getServerCount();
 					updateStateHolder( new State_Client_AwaitVolunteers( servers ) ); 
 					sendEvent( getStateHolder(), new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK ) );
 					
 					break;
 				case CLIENT_REQUESTS_VOLUNTEERS: 
-					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "NULL", 0, 0, 1, 1, 0, 0) );
+					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "NULL_ROLE", 0, 0, 1, 1, 0, 0) );
 					
-					// check to make sure we have enought space
+					// check to make sure we have enough space
 					if( (Integer)aMessage.getValue( AlgorithmMessage.AMOUNT ) 
 							>= getStateHolder().getComputer().getHarddrive().freeSpace() ) {
 						return;

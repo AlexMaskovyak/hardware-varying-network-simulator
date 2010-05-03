@@ -1,7 +1,6 @@
 package computation.algorithms.serverSpecifiesRedundant;
 
 import messages.StorageDeviceMessage;
-import messages.StorageDeviceMessage.TYPE;
 import network.routing.IAddress;
 import simulation.event.IDEvent;
 import simulation.event.IDEvent.IMessage;
@@ -101,13 +100,11 @@ public class State_Client_Distribute
 					// send it
 					sendMessageDownStack( dataStore, _primaryServerAddress );
 	
-					System.out.println( "distribute data" + stMessage.getIndex() );
-					
 					_dataSent++;
 					
 					// we just sent the last thing
 					if( _dataSent == _endIndex + 1 ) {
-						System.out.println("done distributing");
+						System.out.println("Done Distributing.");
 						// go to the read state and wait to be able to read
 						updateStateHolder( new State_Client_Read( _primaryServerAddress, 0, _endIndex ) );
 					}

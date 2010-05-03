@@ -47,7 +47,7 @@ public class State_Server_Volunteered
 			switch( aMessage.getType() ) {
 				// we've been assigned as a primary
 				case CLIENT_ACCEPTS_VOLUNTEER_AS_PRIMARY: 
-					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_VOLUNTEER", 0, 0, 0, 1, 0, 0) );
+					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_VOLUNTEERED", 0, 0, 0, 1, 0, 0) );
 					
 					// get requested values for storage
 					IAddress clientAddress = (IAddress)aMessage.getValue( AlgorithmMessage.CLIENT_ADDRESS );
@@ -60,9 +60,9 @@ public class State_Server_Volunteered
 					// allows us to check whether we need to gather more volunteers
 					sendEvent(
 						getStateHolder(),
-						new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK ),
-						
-						DEvent.INTERNAL );
+						new AlgorithmMessage( 
+							AlgorithmMessage.TYPE.DO_WORK ),
+							DEvent.INTERNAL );
 					
 					break;
 				// we are a secondary storage unit for a primary storage
@@ -77,8 +77,7 @@ public class State_Server_Volunteered
 					break;
 				// we've been rejected and don't have a role aside from existing
 				case CLIENT_REJECTS_VOLUNTEER: 
-					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_VOLUNTEER", 0, 0, 0, 1, 0, 0) );
-					
+					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_VOLUNTEERED", 0, 0, 0, 1, 0, 0 ) );
 					updateStateHolder( new State_NullRole() );
 					break;
 				default: break;

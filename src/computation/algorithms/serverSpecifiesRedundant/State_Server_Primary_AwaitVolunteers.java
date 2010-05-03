@@ -99,10 +99,9 @@ public class State_Server_Primary_AwaitVolunteers
 		if( message instanceof AlgorithmMessage ) {
 			AlgorithmMessage aMessage = (AlgorithmMessage)message;
 			switch( aMessage.getType() ) {
-			
+				// a server has volunteered
 				case SERVER_VOLUNTEERS: 
-					
-					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_AWAIT_VOLUNTEERS", 0, 0, 0, 1, 0, 0) );
+					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_PRIMARY_AWAIT_VOLUNTEERS", 0, 0, 1, 1, 0, 0) );
 					
 					// tally it
 					IAddress volunteerAddress = (IAddress)aMessage.getValue( AlgorithmMessage.VOLUNTEER_ADDRESS );
@@ -118,11 +117,10 @@ public class State_Server_Primary_AwaitVolunteers
 					
 					
 					if( _volunteersFound == _serverAmount * _redundancy ) {	
-						getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_AWAIT_VOLUNTEERS", 0, 0, 0, 1, 0, 0) );
+						getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_PRIMARY_AWAIT_VOLUNTEERS", 0, 0, 1, 0, 0, 0) );
 						updateStateHolder( new State_Server_Primary_AwaitStorage( _serverGroups, _clientAddress, _redundancy, _startIndex, _endIndex ) );
 						
-						System.out.printf( "got all volunteers, send ready to server %s\n", _clientAddress );
-						
+						// got all volunteers
 						sendMessageDownStack(
 							new AlgorithmMessage( AlgorithmMessage.TYPE.SERVER_INDICATES_STORE_READY ), 
 							_clientAddress );
@@ -132,13 +130,9 @@ public class State_Server_Primary_AwaitVolunteers
 				// check to see if we only need one volunteer
 				case DO_WORK:
 					// have we found all that we need?
-					System.out.printf( "do work %d == %d", _volunteersFound, _serverAmount * _redundancy );
-					if( _volunteersFound == _serverAmount * _redundancy ) {
-						
-						getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_AWAIT_VOLUNTEERS", 0, 0, 0, 1, 0, 0) );
-						
+					if( _volunteersFound == _serverAmount * _redundancy ) {	
+						getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_PRIMARY_AWAIT_VOLUNTEERS", 0, 0, 1, 0, 0, 0) );
 						updateStateHolder( new State_Server_Primary_AwaitStorage( _serverGroups, _clientAddress, _redundancy, _startIndex, _endIndex ) );
-						
 						sendMessageDownStack(
 							new AlgorithmMessage( AlgorithmMessage.TYPE.SERVER_INDICATES_STORE_READY ), 
 							_clientAddress );
