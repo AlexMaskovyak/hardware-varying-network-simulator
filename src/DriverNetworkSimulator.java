@@ -61,15 +61,15 @@ public class DriverNetworkSimulator {
 		System.out.println( "Processing Collection of Configuration Sets." );
 		for( File setDirectory : setDirectories ) {
 			ConfigurationSetManager setManager = new ConfigurationSetManager( setDirectory );
-			if( !new File("C:\\Users\\user\\workspaces\\gradproject\\configurations\\config_set_2_server_count\\").equals( setDirectory ) ) {
-				continue;
-			}
+			//if( !new File("C:\\Users\\user\\workspaces\\gradproject\\configurations\\config_set_1_adaptor_speed\\").equals( setDirectory ) ) {
+			//	continue;
+			//}
 			System.out.printf( "Processing Configuration Set %s.\n", setDirectory );
 			for( ConfigurationManager configManager : setManager.getConfigurationManagers() ) {
 				for( int i = 0; i < runs; ++i ) {
-					if( !new File("C:\\Users\\user\\workspaces\\gradproject\\configurations\\config_set_2_server_count\\config_4").equals( configManager.getRunsDirectory() ) ) {
-						continue;
-					}
+					//if( !new File("C:\\Users\\user\\workspaces\\gradproject\\configurations\\config_set_1_adaptor_speed\\config_1").equals( configManager.getRunsDirectory() ) ) {
+					//	continue;
+					//}
 					File outputPath = configManager.makeNewRunDirectory();
 					System.out.println( "===" );
 					System.out.printf( "Configuration file: '%s'\n", configManager.getConfigFile() );

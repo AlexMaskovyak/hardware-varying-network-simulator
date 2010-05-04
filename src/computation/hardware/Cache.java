@@ -23,6 +23,12 @@ public class Cache
 					e.getSource(), 
 					new StorageDeviceMessage( StorageDeviceMessage.TYPE.RESPONSE, StorageDeviceMessage.DEVICE_TYPE.CACHE, message.getIndex(), message.getRequestId(), getIndex( message.getIndex() ) ) );
 				break;
+			case RETRIEVE_AND_REMOVE:
+				sendEvent( 
+						e.getSource(), 
+						new StorageDeviceMessage( StorageDeviceMessage.TYPE.RESPONSE, StorageDeviceMessage.DEVICE_TYPE.CACHE, message.getIndex(), message.getRequestId(), getIndex( message.getIndex() ) ) );
+				deleteIndex( message.getIndex() );
+				break;
 			case STORE:
 				storeData( message.getIndex(), message.getData() );
 				break;

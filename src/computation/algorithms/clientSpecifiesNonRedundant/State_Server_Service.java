@@ -68,7 +68,7 @@ public class State_Server_Service
 					sendEvent( 
 						getStateHolder().getComputer().getCache(),
 						new StorageDeviceMessage(
-							StorageDeviceMessage.TYPE.RETRIEVE, StorageDeviceMessage.DEVICE_TYPE.CACHE, currentIndex, currentIndex, null ) );
+							StorageDeviceMessage.TYPE.RETRIEVE_AND_REMOVE, StorageDeviceMessage.DEVICE_TYPE.CACHE, currentIndex, currentIndex, null ) );
 					break;
 				// general work case where we make sure that the cache is updated
 				case DO_WORK:
