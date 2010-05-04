@@ -2,6 +2,7 @@ package computation.algorithms.serverSpecifiesRedundant;
 
 import network.routing.IAddress;
 import messages.StorageDeviceMessage;
+import simulation.event.DEvent;
 import simulation.event.IDEvent;
 import simulation.event.IDEvent.IMessage;
 import computation.IData;
@@ -73,6 +74,11 @@ public class State_Server_Secondary_AwaitStorage
 							new AlgorithmMessage( AlgorithmMessage.TYPE.SERVER_INDICATES_READ_READY ),
 							_primaryAddress );
 						updateStateHolder( new State_Server_Secondary_Service() );
+						
+						AlgorithmMessage doWork = new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK );
+						doWork.setValue( AlgorithmMessage.AMOUNT, getStateHolder().getComputer().getCache().freeSpace() );
+						sendEvent( getStateHolder(), doWork, DEvent.INTERNAL );
+						
 					}
 					break;
 				default: break;

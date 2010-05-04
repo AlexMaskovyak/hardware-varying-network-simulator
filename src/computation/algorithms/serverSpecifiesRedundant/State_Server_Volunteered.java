@@ -73,7 +73,7 @@ public class State_Server_Volunteered
 					updateStateHolder( 
 						new State_Server_Secondary_AwaitStorage( 
 							(IAddress)aMessage.getValue( AlgorithmMessage.SERVER_ADDRESS ),
-							_dataAmount ) );
+							(Integer)aMessage.getValue( AlgorithmMessage.DATA_AMOUNT ) ) );
 					break;
 				// we've been rejected and don't have a role aside from existing
 				case CLIENT_REJECTS_VOLUNTEER: 

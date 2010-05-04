@@ -46,6 +46,8 @@ public class State_Server_Primary_AwaitStorage
 	protected int _endIndex;
 	/** total data we have stored. */
 	protected int _dataStored;
+	/** the total amount the last slice must store. */
+	protected int _dataForLastSlice;
 	
 /// Construction
 	
@@ -67,6 +69,7 @@ public class State_Server_Primary_AwaitStorage
 		_dataSize = ( endIndex - startIndex ) + 1;
 		_dataSlices = _serverGroups.size();
 		_dataPerSlice = ( _dataSize / _dataSlices );
+		_dataForLastSlice = ( _dataPerSlice ) + ( _dataSize - ( _dataSlices * _dataPerSlice ));
 		_serversDone = 0;
 		_dataStored = 0;
 	}

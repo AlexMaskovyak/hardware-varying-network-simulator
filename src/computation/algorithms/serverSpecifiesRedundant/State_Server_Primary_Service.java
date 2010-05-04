@@ -36,6 +36,8 @@ public class State_Server_Primary_Service
 	State_Server_Secondary_Service _serviceDelegate;
 	/** random number generator. */
 	public Random _rng;
+	/** data that the last slice contains. */
+	public int _dataForLastSlice;
 	
 	
 /// Construction
@@ -50,7 +52,8 @@ public class State_Server_Primary_Service
 		_serverGroups = serverGroups;
 		_dataSize = ( endIndex - startIndex ) + 1;
 		_dataSlices = _serverGroups.size();
-		_dataPerSlice = ( _dataSize / _dataSlices );		
+		_dataPerSlice = (int)Math.floor( _dataSize / _dataSlices );	
+		_dataForLastSlice = ( _dataPerSlice ) + ( _dataSize - ( _dataSlices * _dataPerSlice ));
 		init();
 	}
 	
@@ -80,6 +83,7 @@ public class State_Server_Primary_Service
 	 */
 	public int getServerGroupIndex( int dataIndex ) {
 		return dataIndex / _dataPerSlice;
+		//return 
 		//return ( index == _serverGroups.size() ) ? index - 1 : index;
 	}
 	
