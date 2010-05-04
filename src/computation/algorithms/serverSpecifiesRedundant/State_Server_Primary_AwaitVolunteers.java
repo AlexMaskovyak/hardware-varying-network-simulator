@@ -39,8 +39,13 @@ public class State_Server_Primary_AwaitVolunteers
 	/** ending index for data. */
 	protected int _endIndex;
 	/** amount of data for a server to store. */
-	protected int _dataSlice;
-	
+	protected int _dataPerSlice;
+	/** size of all data. */
+	protected int _dataSize;
+	/** amount of data the last server stores. */
+	protected int _dataForLastSlice;
+	/** total number of data slices. */
+	protected int _dataSlices;
 	
 /// Construction
 	
@@ -75,7 +80,11 @@ public class State_Server_Primary_AwaitVolunteers
 		// we're a part of the first group
 		_serverGroups.get( 0 ).add( _ourAddress );
 		_volunteersFound = 1;
-		_dataSlice =  ( ( _endIndex - _startIndex ) + 1 ) / _serverAmount;
+		_dataSlices = _serverAmount;
+		_dataSize = ( _endIndex - _startIndex ) + 1;
+		_dataPerSlice =  (int) Math.floor( ( _dataSize ) / _serverAmount );
+		_dataForLastSlice = ( _dataPerSlice ) + ( _dataSize - ( _dataSlices * _dataPerSlice ));
+		
 	}
 	
 	/**
@@ -108,12 +117,18 @@ public class State_Server_Primary_AwaitVolunteers
 					IAddress volunteerAddress = (IAddress)aMessage.getValue( AlgorithmMessage.VOLUNTEER_ADDRESS );
 					
 					// indicate that they are a server now
-					_serverGroups.get( nextServerGroupIndex() ).add( volunteerAddress );
+					int index = nextServerGroupIndex();
+					_serverGroups.get( index ).add( volunteerAddress );
 					
 					
 					// tell them
 					AlgorithmMessage response = new AlgorithmMessage( AlgorithmMessage.TYPE.SERVER_ACCEPTS_VOLUNTEER_AS_SECONDARY );
 					response.setValue( AlgorithmMessage.SERVER_ADDRESS, getStateHolder().getComputer().getAddress() );
+					// set the amount they are to store,
+					// the servers managing the last slice may have a different value...
+					response.setValue( 
+							AlgorithmMessage.DATA_AMOUNT, 
+							( index == _serverGroups.size() ) ? _dataForLastSlice : _dataPerSlice );
 					sendMessageDownStack( response, volunteerAddress );
 					
 					_volunteersFound++;
