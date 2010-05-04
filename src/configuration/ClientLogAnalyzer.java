@@ -1,7 +1,9 @@
 package configuration;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
@@ -85,8 +87,11 @@ public class ClientLogAnalyzer {
 		double totalLocal = 0;
 		double totalRemote = 0;
 		for( File f : files ) {
-			reset();
-			if( scan( new Scanner( f ) ) ) {
+			// note, we use a fileinputstream here due to problems associated
+			// with passing a bare file in, this code works in either case as
+			// it appears here, oddly, large problems occurred with reading the 
+			// file after the simulation was run without it...
+			if( scan( new Scanner( new FileInputStream( f ) ) ) ) {
 				logFileTotal++;
 				totalLocal += getTotalLocalTime();
 				totalRemote += getTotalRemoteTime();
@@ -109,6 +114,7 @@ public class ClientLogAnalyzer {
 	 * @param scanner to use for information acquisition.
 	 */
 	public boolean scan( Scanner scanner ) {
+		scanner.reset();
 		try {
 			while( scanner.hasNext() ) {
 				String epoch = scanner.next();
@@ -132,6 +138,7 @@ public class ClientLogAnalyzer {
 				scanner.nextInt();			
 			}
 		} catch( Exception e ) {
+			e.printStackTrace();
 			return false;
 		}
 		
@@ -151,9 +158,13 @@ public class ClientLogAnalyzer {
 	/**
 	 * Outputs scanned values into the specified file.
 	 * @param file to contain the averaged/scanned values.
-	 * @throws FileNotFoundException if the file cannot be located.
+	 * @throws IOException if a problem occurs trying to write to the file.
 	 */
-	public void output( File file ) throws FileNotFoundException {
+	public void output( File file ) throws IOException {
+		if( !file.exists() ) {
+			file.getAbsoluteFile().getParentFile().mkdirs();
+			file.getAbsoluteFile().createNewFile();
+		}
 		output( new PrintWriter( file ) );
 	}
 	

@@ -27,6 +27,13 @@ public interface ISimulatable extends EventListener {
 	public void removeListener(ISimulatableListener listener);
 	
 	/**
+	 * Obtains the listeners for this simulatable.
+	 * @return listeners listening to this simulatable.
+	 */
+	public ISimulatableListener[] getListeners();
+	
+	
+	/**
 	 * Tests whether this ISimulatable can currently perform an operation or 
 	 * not.
 	 * @return true if an operation can be performed, false otherwise.

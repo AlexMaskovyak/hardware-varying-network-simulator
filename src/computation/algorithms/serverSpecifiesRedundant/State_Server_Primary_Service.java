@@ -6,8 +6,11 @@ import java.util.Random;
 import network.routing.IAddress;
 import simulation.event.IDEvent;
 import simulation.event.IDEvent.IMessage;
+import simulation.simulatable.listeners.ISimulatableListener;
 import computation.algorithms.listeners.AlgorithmEvent;
+import computation.algorithms.listeners.AlgorithmListener;
 import computation.state.IState;
+import computation.state.IStateHolder;
 
 /**
  * Volunteered State where the server is waiting for confirmation of status.
@@ -57,7 +60,15 @@ public class State_Server_Primary_Service
 		_rng = new Random();
 	}
 	
-
+	/**
+	 * Overriden for the delegate we possess.
+	 * @param stateHolder
+	 */
+	public void setStateHolder( ServerSpecifiesRedundantAlgorithm stateHolder ) {
+		super.setStateHolder( stateHolder );
+		_serviceDelegate.setStateHolder( stateHolder );
+	}
+	
 /// Helper Methods
 	
 	/**
@@ -99,7 +110,7 @@ public class State_Server_Primary_Service
 					
 					// did we select ourselves?
 					if( server.equals( getStateHolder().getComputer().getAddress() ) ) {
-						handleEventDelegate( event );
+						_serviceDelegate.handleEventDelegate( event );
 					// give it to the server that we selected
 					} else {
 						getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "PRIMARY_SERVICE", 0, 0, 1, 1, 0, 0) );
@@ -108,7 +119,9 @@ public class State_Server_Primary_Service
 					break;
 				
 				default: break;
-			}
+			} 
+		} else {
+			_serviceDelegate.handleEventDelegate( event );
 		}
 	}
 

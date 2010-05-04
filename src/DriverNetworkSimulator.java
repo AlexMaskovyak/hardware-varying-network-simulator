@@ -1,5 +1,6 @@
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,40 +35,49 @@ import network.entities.INode;
  */
 public class DriverNetworkSimulator {
 	
-	
-	
 	/**
-	 * Read in the configuration file.J
+	 * Read in the configuration file.
 	 * @param args
 	 */
 	public static void main(String... args) throws Exception {
 		PropertyConfigurator.configure("log4j.properties"); // disable it
-		if( args.length != 2 ) {
+		if( args.length != 3 ) {
 			System.err.println( "java -jar hardwareSimulation.jar <path to config file> <config file name>" );
 		}
 		
-		ConfigurationManager configManager = new ConfigurationManager( args[ 0 ], args[ 0 ] + File.separator + args[ 1 ], "run_" );
-		File outputPath = configManager.makeNewRunDirectory();
+		String runsDirectory = null;
+		String configFile = null;
+		int runs = 0;
 		
+		try {
+			runsDirectory = args[ 0 ]; 
+			configFile = args[ 1 ]; //runsDirectory + File.separator + args[ 1 ]; 
+			runs = Integer.parseInt( args[ 2 ] );
+		} catch( Exception e ) {
+			System.err.println( "java -jar hardwareSimulation.jar <path to config file> <config file name> <runs>" );
+			return;
+		}
 		
+		ConfigurationManager configManager = new ConfigurationManager( runsDirectory, configFile );
 		
-		System.out.println("starting");
-		
-		
-		ComputerNetworkSimulator sim = configManager.configureSimulator();
-		//sim.addListener(new ReportingSimulatorListener(new File("C:\\Users\\user\\workspaces\\gradproject\\hardware-varying-network-simulator-5\\output\\sim.txt")));
-		sim.setOutputPath( outputPath.getAbsolutePath() );
-		sim.addAlgorithmListeners();
-		
-		
-		
-		Thread t = new Thread((Runnable)sim);
-		t.start();
-		sim.start();
-		HardwareComputerNode c = (HardwareComputerNode)sim.getClient();
-		c.start();
-		
-		//configManager.
+		for( int i = 0; i < runs; ++i ) {
+			File outputPath = configManager.makeNewRunDirectory();		
+			System.out.println("starting");
+			
+			ComputerNetworkSimulator sim = configManager.configureSimulator();
+			//sim.addListener(new ReportingSimulatorListener(new File("C:\\Users\\user\\workspaces\\gradproject\\hardware-varying-network-simulator-5\\output\\sim.txt")));
+			sim.setOutputPath( outputPath.getAbsolutePath() );
+			sim.addAlgorithmListeners();
+			
+			Thread t = new Thread( new SimRunnable( configManager, sim ) );
+			t.start();
+			sim.start();
+			
+	
+			HardwareComputerNode c = (HardwareComputerNode)sim.getClient();
+			c.start();
+			t.join();
+		}
 	}
 	
 	/**
@@ -161,5 +171,36 @@ public class DriverNetworkSimulator {
 		
 		//sim.resume();
 		
+	}
+}
+
+class SimRunnable implements Runnable {
+	
+	/** configuration manager. */
+	protected ConfigurationManager _manager;
+	/** simulator. */
+	protected ComputerNetworkSimulator _sim;
+	
+	/**
+	 * Default constructor.
+	 * @param sim to run.
+	 * @param manager configured to create averages.
+	 */
+	public SimRunnable( ConfigurationManager manager, ComputerNetworkSimulator sim ) {
+		_manager = manager;
+		_sim = sim;
+	}
+	
+	/**
+	 * 
+	 */
+	public void run() {
+		try {
+			_sim.run();
+			_manager.makeAveragesDirectory();
+			
+		} catch( Exception e ) {
+			e.printStackTrace();
+		}
 	}
 }

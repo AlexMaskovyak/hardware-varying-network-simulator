@@ -58,6 +58,14 @@ public class ConfigurationSetManager {
 	}
 	
 	/**
+	 * Get the configuration managers managed by this set.
+	 * @return configuration managers.
+	 */
+	public List<ConfigurationManager> getConfigurationManagers() {
+		return _managers;
+	}
+	
+	/**
 	 * Scans for configuration files, creates ConfigurationManagers for those
 	 * files.  Grabs files specified by the filter.
 	 * @param setDirectory to scan for files.
@@ -106,6 +114,12 @@ public class ConfigurationSetManager {
 		String configFile = "C:\\Users\\user\\workspaces\\gradproject\\configurations\\config_set_1_adaptor_speed\\config_1.cfg";
 		ConfigurationSetManager manager = 
 			new ConfigurationSetManager( configSetDirectory );
-		
+		List<ConfigurationManager> managers = manager.getConfigurationManagers();
+		for( ConfigurationManager m : managers ) {
+			System.out.println( m.getBaseRunName() );
+			System.out.println( m.getMaxRunNumber() );
+			System.out.println( m.getRunsDirectory() );
+			System.out.println( m.getConfigFile() );
+		}
 	}
 }

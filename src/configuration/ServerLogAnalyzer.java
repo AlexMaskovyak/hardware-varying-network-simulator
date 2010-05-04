@@ -1,6 +1,7 @@
 package configuration;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -63,7 +64,7 @@ public class ServerLogAnalyzer {
 		reset();
 		try {
 			for( File f : files ) {
-				if( scan( new Scanner( f ) ) ) {
+				if( scan( new Scanner( new FileInputStream( f ) ) ) ) {
 					_name = f.getName();
 					logFileTotal++;
 				}

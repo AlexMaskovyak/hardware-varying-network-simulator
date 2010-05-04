@@ -46,6 +46,13 @@ public class CentralRouter {
 	}
 	
 	/**
+	 * Resets everything.
+	 */
+	public void reset() {
+		init();
+	}
+	
+	/**
 	 * Add a connection to the CentralRouter's knowledge-base.
 	 * @param a1 address of first node.
 	 * @param a2 address of second node.
