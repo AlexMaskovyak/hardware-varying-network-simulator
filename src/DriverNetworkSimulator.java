@@ -18,6 +18,7 @@ import computation.algorithms.dummy.DummyAlgorithm;
 import computation.hardware.Cache;
 import computation.hardware.Harddrive;
 import configuration.ConfigurationManager;
+import configuration.ConfigurationSetManager;
 
 import simulation.simulator.ComputerNetworkSimulator;
 import simulation.simulator.listeners.ReportingSimulatorListener;
@@ -40,6 +41,68 @@ public class DriverNetworkSimulator {
 	 * @param args
 	 */
 	public static void main(String... args) throws Exception {
+		PropertyConfigurator.configure("log4j.properties"); // disable it
+		if( args.length != 2 ) {
+			System.err.println( "java -jar hardwareSimulation.jar <run amount> <configuration set collection directory>" );
+		}
+		
+		File collectionDirectory = null;
+		int runs = 0;
+		
+		try {
+			collectionDirectory = new File( args[ 0 ] );
+			runs = Integer.parseInt( args[ 1 ] );
+		} catch( Exception e ) {
+			System.err.println( "java -jar hardwareSimulation.jar <run amount> <configuration set collection directory>" );
+			return;
+		}
+
+		File[] setDirectories = collectionDirectory.listFiles();
+		System.out.println( "Processing Collection of Configuration Sets." );
+		for( File setDirectory : setDirectories ) {
+			ConfigurationSetManager setManager = new ConfigurationSetManager( setDirectory );
+			if( !new File("C:\\Users\\user\\workspaces\\gradproject\\configurations\\config_set_2_server_count\\").equals( setDirectory ) ) {
+				continue;
+			}
+			System.out.printf( "Processing Configuration Set %s.\n", setDirectory );
+			for( ConfigurationManager configManager : setManager.getConfigurationManagers() ) {
+				for( int i = 0; i < runs; ++i ) {
+					if( !new File("C:\\Users\\user\\workspaces\\gradproject\\configurations\\config_set_2_server_count\\config_4").equals( configManager.getRunsDirectory() ) ) {
+						continue;
+					}
+					File outputPath = configManager.makeNewRunDirectory();
+					System.out.println( "===" );
+					System.out.printf( "Configuration file: '%s'\n", configManager.getConfigFile() );
+					System.out.printf( "Runs directory: '%s'\n", configManager.getRunsDirectory() );
+					System.out.printf( "Run number: '%d'\n", configManager.getMaxRunNumber() );
+					
+					System.out.println( "Starting." );
+					
+					ComputerNetworkSimulator sim = configManager.configureSimulator();
+					//sim.addListener(new ReportingSimulatorListener(new File("C:\\Users\\user\\workspaces\\gradproject\\hardware-varying-network-simulator-5\\output\\sim.txt")));
+					sim.setOutputPath( outputPath.getAbsolutePath() );
+					sim.addAlgorithmListeners();
+					
+					Thread t = new Thread( new SimRunnable( configManager, sim ) );
+					t.start();
+					sim.start();
+					
+			
+					HardwareComputerNode c = (HardwareComputerNode)sim.getClient();
+					c.start();
+					t.join();
+					
+					System.out.println( "Finished." );
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Read in the configuration file.
+	 * @param args
+	 */
+	public static void mainOld(String... args) throws Exception {
 		PropertyConfigurator.configure("log4j.properties"); // disable it
 		if( args.length != 3 ) {
 			System.err.println( "java -jar hardwareSimulation.jar <path to config file> <config file name>" );
@@ -78,21 +141,6 @@ public class DriverNetworkSimulator {
 			c.start();
 			t.join();
 		}
-	}
-	
-	/**
-	 * Generates the quantity of data specified.
-	 * @param amount
-	 * @return
-	 */
-	public static IData[] generateData( int amount ) {
-		List<IData> data = new ArrayList<IData>( amount );
-		for( int i = 0; i < amount; ++i ) {
-			data.add( new Data( i, new byte[] { Byte.parseByte( String.format( "%d", i % 128 ) )  } ) );
-		}
-		IData[] dataArray = new IData[ data.size() ];
-		dataArray = data.toArray( dataArray );
-		return dataArray;
 	}
 	
 	public static void oldMain( String... args) throws OperationsException, InterruptedException {

@@ -2,6 +2,7 @@ package computation.algorithms.serverSpecifiesRedundant;
 
 import network.routing.IAddress;
 
+import simulation.event.DEvent;
 import simulation.event.IDEvent;
 import simulation.event.IDEvent.IMessage;
 import computation.algorithms.listeners.AlgorithmEvent;
@@ -72,14 +73,30 @@ public class State_Client_AwaitVolunteers
 						_primaryServerAddress );
 					
 					// are we done looking?
-					if( _volunteersFound == _volunteersSought ) {
+					//if( _volunteersFound == _volunteersSought ) {
 						// we now wait for the server to finish setting itself
 						// and its volunteers up.
-						updateStateHolder( new State_Client_AwaitServerReady( _primaryServerAddress ) );						
-					}
+					//	updateStateHolder( new State_Client_AwaitServerReady( _primaryServerAddress ) );						
+					//}
 
 					break;
-				// nothing else is worth our time
+					// the primary server is ready, begin the distribution stage
+				case SERVER_INDICATES_STORE_READY: 
+					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "CLIENT_AWAIT_VOLUNTEERS", 0, 0, 0, 1, 0, 0) );
+					
+					// create next state
+					updateStateHolder( 
+						new State_Client_Distribute( 
+							_primaryServerAddress, 
+							0, 
+							getStateHolder().getDataAmount() - 1 ) ); 
+					
+					// start the work distribute cycle
+					sendEvent( 
+						getStateHolder(), 
+						new AlgorithmMessage( AlgorithmMessage.TYPE.CLIENT_DO_DISTRIBUTE ),
+						DEvent.INTERNAL );
+					break;
 				default: break;
 			}
 		}

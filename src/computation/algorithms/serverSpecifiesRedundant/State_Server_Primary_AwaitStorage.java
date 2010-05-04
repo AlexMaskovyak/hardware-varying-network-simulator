@@ -44,7 +44,8 @@ public class State_Server_Primary_AwaitStorage
 	protected int _startIndex;
 	/** ending index of the data. */
 	protected int _endIndex;
-	
+	/** total data we have stored. */
+	protected int _dataStored;
 	
 /// Construction
 	
@@ -67,6 +68,7 @@ public class State_Server_Primary_AwaitStorage
 		_dataSlices = _serverGroups.size();
 		_dataPerSlice = ( _dataSize / _dataSlices );
 		_serversDone = 0;
+		_dataStored = 0;
 	}
 	
 	
@@ -79,9 +81,12 @@ public class State_Server_Primary_AwaitStorage
 	 * receive the data.
 	 */
 	public int getServerGroupIndex( int dataIndex ) {
-		return dataIndex / _dataPerSlice;
+		return dataIndex / _dataPerSlice ;
 	}
-	
+	/*public int getServerGroupIndex( int dataIndex ) {
+		int index = dataIndex / _dataPerSlice;
+		return ( index == _serverGroups.size() ) ? index - 1 : index;
+	}*/
 	
 /// IState
 
@@ -98,6 +103,17 @@ public class State_Server_Primary_AwaitStorage
 			
 			AlgorithmMessage aMessage = (AlgorithmMessage)message;
 			switch( aMessage.getType() ) {
+				// nope, you missed your chance, maybe some other time
+				case SERVER_VOLUNTEERS:
+					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "CLIENT_AWAIT_SERVER_READY", 0, 0, 1, 1, 0, 0) );
+					
+					// reject volunteers since we already have enough
+					sendMessageDownStack( 
+						new AlgorithmMessage( 
+							AlgorithmMessage.TYPE.CLIENT_REJECTS_VOLUNTEER), 
+							(IAddress)aMessage.getValue( AlgorithmMessage.VOLUNTEER_ADDRESS ) );
+					break;
+			
 				// storing data
 				case CLIENT_REQUESTS_DATA_STORE:
 					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_PRIMARY_AWAIT_STORAGE", 0, 0, 0, 1, 0, 0) );
@@ -105,6 +121,7 @@ public class State_Server_Primary_AwaitStorage
 					dataIndex = (Integer)aMessage.getValue( AlgorithmMessage.INDEX );
 					data = (IData)aMessage.getValue( AlgorithmMessage.DATA );
 					
+					//System.out.println( "serverGroups: " + _serverGroups.size() );
 					List<IAddress> serverAddresses = _serverGroups.get( getServerGroupIndex( dataIndex ) );
 					for( IAddress serverAddress : serverAddresses ) {
 						AlgorithmMessage doWork = new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK );
@@ -131,6 +148,10 @@ public class State_Server_Primary_AwaitStorage
 								dataIndex,
 								dataIndex,
 								data ) );
+						_dataStored++;
+						if( _dataStored == _dataPerSlice ) {
+							sendInstantEvent( new AlgorithmMessage( AlgorithmMessage.TYPE.SERVER_INDICATES_READ_READY ) );
+						}
 					// tell the server to store it
 					} else {
 						getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_PRIMARY_AWAIT_STORAGE", 0, 1, 1, 0, 0, 0) );
@@ -150,7 +171,7 @@ public class State_Server_Primary_AwaitStorage
 				case SERVER_INDICATES_READ_READY:
 					_serversDone++;
 					// one less than the total number of servers since we are done as well
-					if( _serversDone == getStateHolder().getServerCount() -1 ) {
+					if( _serversDone == getStateHolder().getServerCount() ) {
 						getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_PRIMARY_AWAIT_STORAGE", 0, 0, 1, 0, 0, 0) );
 						sendMessageDownStack( 
 							new AlgorithmMessage( AlgorithmMessage.TYPE.SERVER_INDICATES_READ_READY ),

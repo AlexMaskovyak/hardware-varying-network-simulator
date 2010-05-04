@@ -83,7 +83,8 @@ public class State_Server_Primary_AwaitVolunteers
 	 * @return the next server group index to store an address.
 	 */
 	public int nextServerGroupIndex() {
-		return _volunteersFound % _serverAmount;
+		int index = _volunteersFound % _serverAmount;
+		return ( index == _serverGroups.size() ) ? index - 1: index;
 	}
 	
 	
