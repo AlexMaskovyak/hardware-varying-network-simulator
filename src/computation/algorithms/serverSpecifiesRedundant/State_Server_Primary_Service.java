@@ -80,9 +80,10 @@ public class State_Server_Primary_Service
 	 */
 	public int getServerGroupIndex( int dataIndex ) {
 		return dataIndex / _dataPerSlice;
+		//return ( index == _serverGroups.size() ) ? index - 1 : index;
 	}
 	
-	
+
 /// IState
 
 	/*

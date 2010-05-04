@@ -202,7 +202,6 @@ public class ConfigurationManager {
 	 */
 	public void makeAveragesDirectory() throws FileNotFoundException {
 		// check if the averages directory exists
-		System.out.println("make averages...");
 		
 		// create analyzer
 		ClientLogAnalyzer clientAnalyzer = new ClientLogAnalyzer();

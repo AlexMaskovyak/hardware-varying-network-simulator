@@ -102,9 +102,9 @@ public class State_Client_Read
 					IData baseLine = harddrive.getIndex( index );
 					if( baseLine.equals( data) ) {
 						harddrive.deleteIndex( index );
-						System.out.println( "We got good data! " + data + " left: " + harddrive.getSize() );
+						//System.out.println( "We got good data! " + data + " left: " + harddrive.getSize() );
 					} else {
-						System.out.println( "We received bad data!" );
+						System.out.printf( "We received bad data! Expected: %s. Received %s.\n", baseLine, data );
 					}
 					
 					// if we've deleted everything, we've received all data
