@@ -105,16 +105,17 @@ public class State_Server_Primary_AwaitVolunteers
 					
 					// tally it
 					IAddress volunteerAddress = (IAddress)aMessage.getValue( AlgorithmMessage.VOLUNTEER_ADDRESS );
-					_volunteersFound++;
 					
 					// indicate that they are a server now
 					_serverGroups.get( nextServerGroupIndex() ).add( volunteerAddress );
+					
 					
 					// tell them
 					AlgorithmMessage response = new AlgorithmMessage( AlgorithmMessage.TYPE.SERVER_ACCEPTS_VOLUNTEER_AS_SECONDARY );
 					response.setValue( AlgorithmMessage.SERVER_ADDRESS, getStateHolder().getComputer().getAddress() );
 					sendMessageDownStack( response, volunteerAddress );
 					
+					_volunteersFound++;
 					
 					if( _volunteersFound == _serverAmount * _redundancy ) {	
 						getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_PRIMARY_AWAIT_VOLUNTEERS", 0, 0, 1, 0, 0, 0) );

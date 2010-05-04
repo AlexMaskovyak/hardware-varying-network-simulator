@@ -202,10 +202,12 @@ public class ConfigurationManager {
 	 */
 	public void makeAveragesDirectory() throws FileNotFoundException {
 		// check if the averages directory exists
+		System.out.println("make averages...");
 		
 		// create analyzer
 		ClientLogAnalyzer clientAnalyzer = new ClientLogAnalyzer();
 		ServerLogAnalyzer serverAnalyzer = new ServerLogAnalyzer();
+		refreshValues();
 		File runDir1 = _runDirectories.get( 0 );
 		StringBuilder serverLines = new StringBuilder();
 		
@@ -214,16 +216,17 @@ public class ConfigurationManager {
 		System.out.println(runDir1.listFiles().length);
 		for( File baseLog : runDir1.listFiles() ) {
 			List<File> logs = getLogsAcrossRunsFor( baseLog.getName() );
-			// 
 			clientAnalyzer.reset();
 			if( clientAnalyzer.average( logs ) ) {
-				clientAnalyzer.output( 
-					new File( 
-						String.format( 
-							"%s%savg%sclient.log",
-							_runsDirectory, 
-							File.separator, 
-							File.separator ) ) );
+				try {
+					clientAnalyzer.output( 
+						new File( 
+							String.format( 
+								"%s%savg%sclient.log",
+								_runsDirectory, 
+								File.separator, 
+								File.separator ) ) );
+				} catch( Exception e ) { e.printStackTrace(); }
 			}
 			serverAnalyzer.reset();
 			serverAnalyzer.average( logs ); 
@@ -291,14 +294,14 @@ public class ConfigurationManager {
 	 */
 	public static void main(String... args) throws FileNotFoundException {
 		String runsDirectory = "C:\\Users\\user\\workspaces\\gradproject\\configurations\\config_set_1_adaptor_speed\\config_1\\";
-		String configFile = "C:\\Users\\user\\workspaces\\gradproject\\configurations\\config_set_1_adaptor_speed\\config_1.cfg";
+		String configFile = "C:\\Users\\user\\workspaces\\gradproject\\configurations\\config_set_1_adaptor_speed\\config_1\\config_1.cfg";
 		ConfigurationManager manager = new ConfigurationManager( runsDirectory, configFile );
+		//System.out.println( manager.makeNewRunDirectory() );
 		System.out.println( manager.getConfigFile() );
 		System.out.println( manager.getRunsDirectory() );
 		System.out.println( manager.getBaseRunName() );
 		System.out.println( manager.getMaxRunNumber() );
 		manager.makeAveragesDirectory();
-		//System.out.println( manager.makeNewRunDirectory() );
 	}
 	
 }

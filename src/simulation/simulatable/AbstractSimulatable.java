@@ -110,6 +110,17 @@ public abstract class AbstractSimulatable
 	
 	/*
 	 * (non-Javadoc)
+	 * @see simulation.simulatable.ISimulatable#getListeners()
+	 */
+	@Override
+	public ISimulatableListener[] getListeners() {
+		ISimulatableListener[] listenerArray = new ISimulatableListener[ _listeners.size() ];
+		listenerArray = _listeners.toArray( listenerArray );
+		return listenerArray;
+	}
+	
+	/*
+	 * (non-Javadoc)
 	 * @see simulation.ISimulatable#notify(simulation.ISimulatableEvent)
 	 */
 	@Override

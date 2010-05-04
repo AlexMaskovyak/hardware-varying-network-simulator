@@ -17,6 +17,11 @@ public class AddressCreator {
 	
 	/** Default constructor. */
 	protected AddressCreator() {
+		init();
+	}
+	
+	/** externalize instantiation. */
+	protected void init() {
 		_currentAddress = 0;
 	}
 	
@@ -29,6 +34,13 @@ public class AddressCreator {
 			AddressCreator._instance = new AddressCreator();
 		}
 		return AddressCreator._instance;
+	}
+	
+	/**
+	 * Reset everything.
+	 */
+	public void reset() {
+		init();
 	}
 	
 	/**

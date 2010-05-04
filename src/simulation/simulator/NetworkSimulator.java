@@ -55,7 +55,10 @@ public class NetworkSimulator
 	protected void init() {
 		super.init();
 		_addressCreator = AddressCreator.getInstance();
+		_addressCreator.reset();
 		_router = CentralRouter.getInstance();
+		_router.reset();
+		
 		setBaseNode( new Node() );
 		setBaseAdaptor( new ConnectionAdaptor() );
 		setBaseMedium( new ConnectionMedium() );
