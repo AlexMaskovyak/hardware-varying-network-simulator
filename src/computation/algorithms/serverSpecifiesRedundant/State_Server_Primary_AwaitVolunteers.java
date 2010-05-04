@@ -128,7 +128,7 @@ public class State_Server_Primary_AwaitVolunteers
 					// the servers managing the last slice may have a different value...
 					response.setValue( 
 							AlgorithmMessage.DATA_AMOUNT, 
-							( index == _serverGroups.size() ) ? _dataForLastSlice : _dataPerSlice );
+							( index == _serverGroups.size() - 1 ) ? _dataForLastSlice : _dataPerSlice );
 					sendMessageDownStack( response, volunteerAddress );
 					
 					_volunteersFound++;

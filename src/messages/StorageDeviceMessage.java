@@ -14,7 +14,7 @@ public class StorageDeviceMessage
 
 /// Class variables
 	
-	public static enum TYPE { STORE, RETRIEVE, RESPONSE, FREE_SPACE, DELETE };
+	public static enum TYPE { STORE, RETRIEVE, RESPONSE, FREE_SPACE, DELETE, RETRIEVE_AND_REMOVE };
 	public static enum DEVICE_TYPE { CACHE, HARDDRIVE };
 	
 /// Fields

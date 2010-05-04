@@ -83,13 +83,13 @@ public class State_Server_Primary_AwaitStorage
 	 * @return index of the servergroup which lists addresses which are to 
 	 * receive the data.
 	 */
-	public int getServerGroupIndex( int dataIndex ) {
-		return dataIndex / _dataPerSlice ;
-	}
 	/*public int getServerGroupIndex( int dataIndex ) {
-		int index = dataIndex / _dataPerSlice;
-		return ( index == _serverGroups.size() ) ? index - 1 : index;
+		return dataIndex / _dataPerSlice ;
 	}*/
+	public int getServerGroupIndex( int dataIndex ) {
+		int index = dataIndex / _dataPerSlice;
+		return ( index == _dataSlices ) ? index - 1 : index;
+	}
 	
 /// IState
 
@@ -184,6 +184,11 @@ public class State_Server_Primary_AwaitStorage
 								_serverGroups, 
 								_startIndex, 
 								_endIndex ) );
+						
+						AlgorithmMessage doWork = new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK );
+						doWork.setValue( AlgorithmMessage.AMOUNT, getStateHolder().getComputer().getCache().freeSpace() );
+						sendEvent( getStateHolder(), doWork, DEvent.INTERNAL );
+						
 					}
 				default: break;
 			}

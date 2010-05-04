@@ -81,12 +81,15 @@ public class State_Server_Primary_Service
 	 * @return index of the servergroup which lists addresses which are to 
 	 * receive the data.
 	 */
-	public int getServerGroupIndex( int dataIndex ) {
+	/*public int getServerGroupIndex( int dataIndex ) {
 		return dataIndex / _dataPerSlice;
 		//return 
 		//return ( index == _serverGroups.size() ) ? index - 1 : index;
+	}*/
+	public int getServerGroupIndex( int dataIndex ) {
+		int index = dataIndex / _dataPerSlice;
+		return ( index == _dataSlices ) ? index - 1 : index;
 	}
-	
 
 /// IState
 
