@@ -2,15 +2,12 @@ package computation.algorithms.serverSpecifiesRedundant;
 
 import java.util.List;
 
-import javax.swing.GroupLayout.Alignment;
-
 import messages.StorageDeviceMessage;
 import network.routing.IAddress;
 import simulation.event.DEvent;
 import simulation.event.IDEvent;
 import simulation.event.IDEvent.IMessage;
 import computation.IData;
-import computation.algorithms.AbstractAlgorithm;
 import computation.algorithms.listeners.AlgorithmEvent;
 import computation.state.IState;
 
@@ -108,7 +105,7 @@ public class State_Server_Primary_AwaitStorage
 			switch( aMessage.getType() ) {
 				// nope, you missed your chance, maybe some other time
 				case SERVER_VOLUNTEERS:
-					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "CLIENT_AWAIT_SERVER_READY", 0, 0, 1, 1, 0, 0) );
+					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_PRIMARY_AWAIT_STORAGE", 0, 0, 1, 1, 0, 0) );
 					
 					// reject volunteers since we already have enough
 					sendMessageDownStack( 
@@ -174,7 +171,7 @@ public class State_Server_Primary_AwaitStorage
 				case SERVER_INDICATES_READ_READY:
 					_serversDone++;
 					// one less than the total number of servers since we are done as well
-					if( _serversDone == getStateHolder().getServerCount() ) {
+					if( _serversDone == _dataSlices * _redundancy ) {
 						getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_PRIMARY_AWAIT_STORAGE", 0, 0, 1, 0, 0, 0) );
 						sendMessageDownStack( 
 							new AlgorithmMessage( AlgorithmMessage.TYPE.SERVER_INDICATES_READ_READY ),

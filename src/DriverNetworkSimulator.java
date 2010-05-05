@@ -1,19 +1,13 @@
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.management.OperationsException;
 
 import org.apache.log4j.PropertyConfigurator;
 
-import computation.Data;
 import computation.HardwareComputerNode;
-import computation.IData;
 import computation.algorithms.AbstractAlgorithm;
 import computation.algorithms.IAlgorithm;
-import computation.algorithms.ClientSpecifiesNonRedundantAlgorithm;
 import computation.algorithms.dummy.DummyAlgorithm;
 import computation.hardware.Cache;
 import computation.hardware.Harddrive;
@@ -21,8 +15,6 @@ import configuration.ConfigurationManager;
 import configuration.ConfigurationSetManager;
 
 import simulation.simulator.ComputerNetworkSimulator;
-import simulation.simulator.listeners.ReportingSimulatorListener;
-import network.communication.Address;
 import network.entities.ConnectionAdaptor;
 import network.entities.ConnectionMedium;
 import network.entities.INode;
@@ -41,7 +33,7 @@ public class DriverNetworkSimulator {
 	 * @param args
 	 */
 	public static void main(String... args) throws Exception {
-		PropertyConfigurator.configure("log4j.properties"); // disable it
+		PropertyConfigurator.configure( "log4j.properties" ); // disable it
 		if( args.length != 2 ) {
 			System.err.println( "java -jar hardwareSimulation.jar <run amount> <configuration set collection directory>" );
 		}
@@ -60,16 +52,25 @@ public class DriverNetworkSimulator {
 		File[] setDirectories = collectionDirectory.listFiles();
 		System.out.println( "Processing Collection of Configuration Sets." );
 		for( File setDirectory : setDirectories ) {
-			ConfigurationSetManager setManager = new ConfigurationSetManager( setDirectory );
-			//if( !new File("C:\\Users\\user\\workspaces\\gradproject\\configurations\\config_set_1_adaptor_speed\\").equals( setDirectory ) ) {
+			ConfigurationSetManager setManager = new ConfigurationSetManager( setDirectory.getAbsoluteFile() );
+			//if( !((new File("C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm2\\config_set_5_cache_size")).equals( setDirectory ) ) ) {
+			//	System.out.println( setDirectory );
 			//	continue;
 			//}
 			System.out.printf( "Processing Configuration Set %s.\n", setDirectory );
 			for( ConfigurationManager configManager : setManager.getConfigurationManagers() ) {
 				for( int i = 0; i < runs; ++i ) {
-					//if( !new File("C:\\Users\\user\\workspaces\\gradproject\\configurations\\config_set_1_adaptor_speed\\config_1").equals( configManager.getRunsDirectory() ) ) {
-					//	continue;
-					//}
+					
+					/*if( (new File("C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm2\\config_set_2_server_count\\config_10.cfg").equals( configManager.getConfigFile() ) ) ) {
+						System.out.println( "continue: " + configManager.getConfigFile() );
+						continue;
+					}
+					if( (new File("C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm2\\config_set_2_server_count\\config_1.cfg").equals( configManager.getConfigFile() ) ) ) {
+						System.out.println( "continue: " + configManager.getConfigFile() );
+						continue;
+					}*/
+					
+					
 					File outputPath = configManager.makeNewRunDirectory();
 					System.out.println( "===" );
 					System.out.printf( "Configuration file: '%s'\n", configManager.getConfigFile() );

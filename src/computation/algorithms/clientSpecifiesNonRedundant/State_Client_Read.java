@@ -53,7 +53,6 @@ public class State_Client_Read
 	public State_Client_Read( List<IAddress> servers, Map<IAddress, Queue<Integer>> storageMap ) {
 		_storageMap = storageMap;
 		_servers = servers;
-		System.out.println("server size" + _servers.size());
 		_iterator = servers.iterator();
 	}
 	
@@ -72,8 +71,6 @@ public class State_Client_Read
 			
 			_currentAddress = _iterator.next();
 			_currentIndex = _storageMap.get( _currentAddress ).poll();
-			
-			System.out.println( "inside " + _currentAddress + " " + _currentIndex );
 			
 			// if null then the index is empty
 			if( _currentIndex == null ) {
@@ -117,7 +114,6 @@ public class State_Client_Read
 
 					_currentAddress = null;
 					_currentIndex = null;
-					//System.out.println( _currentAddress + " " + _currentIndex );
 					
 					AlgorithmMessage doWork = new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK );
 					sendEvent( getStateHolder(), doWork, DEvent.INTERNAL );
@@ -130,17 +126,19 @@ public class State_Client_Read
 					
 					IData data = (IData)aMessage.getValue( AlgorithmMessage.DATA );
 					int index = (Integer)aMessage.getValue( AlgorithmMessage.INDEX );
+					IAddress server = (IAddress)aMessage.getValue( AlgorithmMessage.SERVER_ADDRESS );
 					
 					// this needn't be done in the traditional way through an 
 					// event since this is only here to demonstrate correctness.
 					Harddrive harddrive = getStateHolder().getComputer().getHarddrive();
 					IData baseLine = harddrive.getIndex( index );
 					if( baseLine.equals( data) ) {
-						System.out.println( "We got good data! " + data );
+						//System.out.println( "We got good data! " + data );
 						harddrive.deleteIndex( index );
 					} else {
-						System.out.println( "We received bad data!" );
+						System.out.printf( "We received bad data! Expected: %s. Received %s. From %s.\n", baseLine, data, server );
 					}
+					
 					
 					// if we've deleted everything, we've received all data
 					// and it matched baseline.

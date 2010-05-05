@@ -1,12 +1,9 @@
 package computation.algorithms.clientSpecifiesNonRedundant;
 
 import network.communication.Address;
-import network.communication.Packet;
 import network.routing.IAddress;
-import messages.ProtocolHandlerMessage;
 import simulation.event.IDEvent;
 import simulation.event.IDEvent.IMessage;
-import simulation.simulatable.ISimulatable;
 import computation.algorithms.AbstractAlgorithm;
 import computation.algorithms.listeners.AlgorithmEvent;
 import computation.state.IState;
@@ -32,7 +29,6 @@ public class State_NullRole
 		if( message instanceof AlgorithmMessage ) {
 			AlgorithmMessage aMessage = (AlgorithmMessage)message;
 			switch( aMessage.getType() ) {
-			
 				case SET_CLIENT: 
 					// send volunteer request
 					AlgorithmMessage volunteerRequest = new AlgorithmMessage( AlgorithmMessage.TYPE.CLIENT_REQUESTS_VOLUNTEERS );

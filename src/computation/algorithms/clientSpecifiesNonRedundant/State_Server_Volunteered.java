@@ -1,5 +1,9 @@
 package computation.algorithms.clientSpecifiesNonRedundant;
 
+import javax.swing.GroupLayout.Alignment;
+
+import network.routing.IAddress;
+
 import simulation.event.IDEvent;
 import simulation.event.IDEvent.IMessage;
 import computation.algorithms.AbstractAlgorithm;
@@ -27,11 +31,13 @@ public class State_Server_Volunteered
 		if( message instanceof AlgorithmMessage ) {
 			AlgorithmMessage aMessage = (AlgorithmMessage)message;
 			switch( aMessage.getType() ) {
-			
 				case CLIENT_ACCEPTS_VOLUNTEER: 
 					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_VOLUNTEERED", 0, 0, 0, 1, 0, 0) );
-					
+					sendMessageDownStack(
+							new AlgorithmMessage( AlgorithmMessage.TYPE.SERVER_ACKNOWLEDGES), 
+							(IAddress)aMessage.getValue( AlgorithmMessage.CLIENT_ADDRESS ) );
 					updateStateHolder( new State_Server_AwaitStorage() ); 
+					
 					break;
 				case CLIENT_REJECTS_VOLUNTEER: 
 					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_VOLUNTEERED", 0, 0, 0, 1, 0, 0) );
