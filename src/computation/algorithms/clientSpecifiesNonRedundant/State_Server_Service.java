@@ -55,7 +55,6 @@ public class State_Server_Service
 		if( message instanceof AlgorithmMessage ) {
 			AlgorithmMessage aMessage = (AlgorithmMessage)message;
 			switch( aMessage.getType() ) {
-			
 				// case where the client requests a range of data
 				case CLIENT_REQUESTS_DATA:
 					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_SERVICE", 0, 0, 1, 1, 0, 0) );
@@ -100,7 +99,7 @@ public class State_Server_Service
 		} else if( message instanceof StorageDeviceMessage ) {
 			StorageDeviceMessage sdMessage = (StorageDeviceMessage)message;
 			switch( sdMessage.getType() ) {
-			
+			// store data for the client
 				case RESPONSE: 
 					switch( sdMessage.getDeviceType() ) {
 						// harddrive serviced it
@@ -110,6 +109,7 @@ public class State_Server_Service
 							AlgorithmMessage response = new AlgorithmMessage( AlgorithmMessage.TYPE.SERVER_RESPONDS_WITH_DATA );
 							response.setValue( AlgorithmMessage.INDEX, sdMessage.getIndex() );
 							response.setValue( AlgorithmMessage.DATA, sdMessage.getData() );
+							response.setValue( AlgorithmMessage.SERVER_ADDRESS, getStateHolder().getComputer().getAddress() );
 							
 							sendMessageDownStack( response, _clientAddress );
 							break;
@@ -138,6 +138,7 @@ public class State_Server_Service
 							AlgorithmMessage responseFromCache = new AlgorithmMessage( AlgorithmMessage.TYPE.SERVER_RESPONDS_WITH_DATA );
 							responseFromCache.setValue( AlgorithmMessage.INDEX, sdMessage.getIndex() );
 							responseFromCache.setValue( AlgorithmMessage.DATA, sdMessage.getData() );
+							responseFromCache.setValue( AlgorithmMessage.SERVER_ADDRESS, getStateHolder().getComputer().getAddress() );
 							sendMessageDownStack( responseFromCache, _clientAddress );
 							
 							AlgorithmMessage doWork = new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK );

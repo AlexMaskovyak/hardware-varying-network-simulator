@@ -44,6 +44,9 @@ public class State_Server_AwaitStorage
 							(Integer)aMessage.getValue(AlgorithmMessage.INDEX),
 							-1,
 							(IData)aMessage.getValue(AlgorithmMessage.DATA) ) );
+					sendMessageDownStack( 
+						new AlgorithmMessage( AlgorithmMessage.TYPE.SERVER_ACKNOWLEDGES), 
+						(IAddress)aMessage.getValue( AlgorithmMessage.CLIENT_ADDRESS ) );
 					break;
 				// acknowledge done storing data, move to service state
 				case CLIENT_INDICATES_DATA_STORE_COMPLETE:

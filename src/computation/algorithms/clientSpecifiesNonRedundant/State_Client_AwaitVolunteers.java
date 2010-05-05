@@ -26,7 +26,10 @@ public class State_Client_AwaitVolunteers
 	protected List<IAddress> _servers;
 	/** server total we seek. */
 	protected int _volunteersSought;
-
+	/** volunteers acknowledged.*/
+	protected int _volunteers;
+	
+	
 /// Construction
 	
 	/**
@@ -58,16 +61,24 @@ public class State_Client_AwaitVolunteers
 			switch( aMessage.getType() ) {
 			
 				case SERVER_VOLUNTEERS:
-					// add it
-					IAddress volunteerAddress = (IAddress)aMessage.getValue( AlgorithmMessage.VOLUNTEER_ADDRESS );
-					_servers.add( volunteerAddress );
-					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "CLIENT_AWAIT_VOLUNTEERS", 0, 0, 0, 1, 0, 0) );
-					
-					// inform them
-					sendMessageDownStack( new AlgorithmMessage( AlgorithmMessage.TYPE.CLIENT_ACCEPTS_VOLUNTEER ), volunteerAddress );
+					if( _servers.size() < _volunteersSought ) {
+						// add it
+						IAddress volunteerAddress = (IAddress)aMessage.getValue( AlgorithmMessage.VOLUNTEER_ADDRESS );
+						_servers.add( volunteerAddress );
+						getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "CLIENT_AWAIT_VOLUNTEERS", 0, 0, 0, 1, 0, 0) );
+						
+						// inform them
+						AlgorithmMessage response = new AlgorithmMessage( AlgorithmMessage.TYPE.CLIENT_ACCEPTS_VOLUNTEER );
+						response.setValue( AlgorithmMessage.CLIENT_ADDRESS, getStateHolder().getComputer().getAddress() );
+						sendMessageDownStack( response, volunteerAddress );
+					}
+
+					break;
+				case SERVER_ACKNOWLEDGES:
+					_volunteers++;
 					
 					// are we done looking?
-					if( _servers.size() == _volunteersSought ) {
+					if( _volunteers == _volunteersSought ) {
 						updateStateHolder( new State_Client_Distribute( _servers ) );
 						
 						AlgorithmMessage doWork = new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK );

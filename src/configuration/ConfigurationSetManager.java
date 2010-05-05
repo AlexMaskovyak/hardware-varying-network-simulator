@@ -81,17 +81,19 @@ public class ConfigurationSetManager {
 		
 		// apply filter
 		File[] configurationFiles = setDirectory.listFiles( filter );
-		for( File configFile : configurationFiles ) {
-			if( configFile.isDirectory() ) { continue; } // only files
-			File configDirectory = 
-				new File( String.format(
-					"%s%s%s",
-					setDirectory.getAbsolutePath(),
-					File.separator,
-					stripExtension( configFile.getName() ) ) );
-			configDirectory.mkdirs();
-			managers.add( 
-				new ConfigurationManager(configDirectory, configFile) );
+		if( configurationFiles != null ) {
+			for( File configFile : configurationFiles ) {
+				if( configFile.isDirectory() ) { continue; } // only files
+				File configDirectory = 
+					new File( String.format(
+						"%s%s%s",
+						setDirectory.getAbsolutePath(),
+						File.separator,
+						stripExtension( configFile.getName() ) ) );
+				configDirectory.mkdirs();
+				managers.add( 
+					new ConfigurationManager(configDirectory, configFile) );
+			}
 		}
 		return managers;
 	}

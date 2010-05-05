@@ -1,7 +1,5 @@
 package computation.algorithms.clientSpecifiesNonRedundant;
 
-import javax.swing.GroupLayout.Alignment;
-
 import computation.IData;
 import computation.IHardwareComputer;
 import computation.algorithms.AbstractAlgorithm;
@@ -11,7 +9,6 @@ import computation.state.IStateHolder;
 
 import network.communication.IPacket;
 import network.communication.IProtocolHandler;
-import network.routing.IAddress;
 
 import simulation.event.IDEvent;
 import simulation.simulatable.ISimulatable;

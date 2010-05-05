@@ -67,6 +67,7 @@ public class State_Server_Secondary_AwaitStorage
 							-1,
 							(IData)aMessage.getValue(AlgorithmMessage.DATA) ) );
 					_dataStored++;
+					
 					// we've stored everything we need to
 					if( _dataStored == _dataToStoreTotal ) {
 						getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_SECONDARY_AWAIT_STORAGE", 0, 0, 1, 0, 0, 0) );

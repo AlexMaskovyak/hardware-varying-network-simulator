@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
-import javax.swing.GroupLayout.Alignment;
-
 import network.routing.IAddress;
 import simulation.event.DEvent;
 import simulation.event.IDEvent;
@@ -82,7 +80,6 @@ public class State_Client_ConfirmServerReady
 					if( currentIndex < endIndex ) {
 						AlgorithmMessage doWork = new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK );
 						doWork.setValue( AlgorithmMessage.START_INDEX, ++currentIndex );
-						System.out.println( currentIndex );
 						doWork.setValue( AlgorithmMessage.END_INDEX, endIndex );
 						sendEvent( getStateHolder(), doWork, DEvent.INTERNAL );
 					}

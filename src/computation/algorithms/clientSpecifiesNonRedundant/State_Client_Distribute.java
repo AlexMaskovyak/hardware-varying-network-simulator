@@ -7,14 +7,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
-import javax.swing.GroupLayout.Alignment;
-
 import messages.StorageDeviceMessage;
 import network.routing.IAddress;
 
+import simulation.event.DEvent;
 import simulation.event.IDEvent;
 import simulation.event.IDEvent.IMessage;
-import computation.IData;
 import computation.algorithms.AbstractAlgorithm;
 import computation.algorithms.listeners.AlgorithmEvent;
 import computation.state.IState;
@@ -40,6 +38,8 @@ public class State_Client_Distribute
 	protected Map<IAddress, Queue<Integer>> _storageMap; 
 	/** total data sent out. */
 	protected int _dataSent;
+	/** acknowledged data. */
+	protected int _dataAcknowledged;
 	
 /// Construction
 	
@@ -61,6 +61,7 @@ public class State_Client_Distribute
 			_storageMap.put( server, new LinkedList<Integer>());
 		}
 		_dataSent = 0;
+		_dataAcknowledged = 0;
 	}
 	
 /// IState
@@ -85,6 +86,18 @@ public class State_Client_Distribute
 							AlgorithmMessage.TYPE.CLIENT_REJECTS_VOLUNTEER), 
 							(IAddress)aMessage.getValue( AlgorithmMessage.VOLUNTEER_ADDRESS ) );
 					break;
+				case SERVER_ACKNOWLEDGES:
+					_dataAcknowledged++;
+					// we just sent the last thing
+					if( _dataAcknowledged == _endIndex + 1 ) {
+						System.out.println("done distributing");
+						updateStateHolder( new State_Client_ConfirmServerReady( _servers, _storageMap ) );
+						AlgorithmMessage doWork = new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK );
+						doWork.setValue( AlgorithmMessage.START_INDEX, 0 );
+						doWork.setValue( AlgorithmMessage.END_INDEX, _servers.size() - 1 );
+						sendEvent( getStateHolder(), doWork );
+					}
+					break;
 				// this is our call to retrieve from local
 				case DO_WORK:
 					// request information from harddrive
@@ -95,16 +108,16 @@ public class State_Client_Distribute
 					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "LOCAL", 0, 0, 1, 0, 0, 0) );
 					
 					// request data
-					sendEvent( getStateHolder().getComputer().getHarddrive(), 
+					sendEvent( 
+						getStateHolder().getComputer().getHarddrive(), 
 						new StorageDeviceMessage( StorageDeviceMessage.TYPE.RETRIEVE, StorageDeviceMessage.DEVICE_TYPE.HARDDRIVE, currentIndex++, -1, null ) );
-					
 					
 					// more data to request, schedule it
 					if( currentIndex <= endIndex ) {
 						AlgorithmMessage doWork = new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK );
 						doWork.setValue( AlgorithmMessage.START_INDEX, currentIndex );
 						doWork.setValue( AlgorithmMessage.END_INDEX, endIndex );
-						sendEvent( getStateHolder(), doWork );
+						sendEvent( getStateHolder(), doWork, DEvent.INTERNAL );
 						return;
 					}
 					
@@ -120,6 +133,7 @@ public class State_Client_Distribute
 					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "LOCAL", 1, 1, 1, 1, 0, 1 ) );
 					
 					AlgorithmMessage dataStore = new AlgorithmMessage( AlgorithmMessage.TYPE.CLIENT_REQUESTS_DATA_STORE );
+					dataStore.setValue( AlgorithmMessage.CLIENT_ADDRESS, getStateHolder().getComputer().getAddress() );
 					dataStore.setValue( AlgorithmMessage.INDEX, stMessage.getIndex() );
 					dataStore.setValue( AlgorithmMessage.DATA, stMessage.getData() );
 	
@@ -134,16 +148,6 @@ public class State_Client_Distribute
 					sendMessageDownStack( dataStore, address );
 					_storageMap.get( address ).add( stMessage.getIndex() );
 					_dataSent++;
-					
-					// we just sent the last thing
-					if( _dataSent == _endIndex + 1 ) {
-						System.out.println("done distributing");
-						updateStateHolder( new State_Client_ConfirmServerReady( _servers, _storageMap ) );
-						AlgorithmMessage doWork = new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK );
-						doWork.setValue( AlgorithmMessage.START_INDEX, 0 );
-						doWork.setValue( AlgorithmMessage.END_INDEX, _servers.size() - 1 );
-						sendEvent( getStateHolder(), doWork );
-					}
 					break;
 			}
 		}
