@@ -1,10 +1,14 @@
 package configuration;
 
 import java.io.File;
+import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Scanner;
 
 /**
  * Handles a set of configuration files.  These files each have a configuration
@@ -20,6 +24,8 @@ public class ConfigurationSetManager {
 	
 	/** configuration management underneath this set. */
 	protected List<ConfigurationManager> _managers;
+	/** directory of configurations. */
+	protected File _setDirectory;
 	
 	
 /// Construction
@@ -39,6 +45,7 @@ public class ConfigurationSetManager {
 	 */
 	public ConfigurationSetManager( File setDirectory ) {
 		init(); 
+		_setDirectory = setDirectory;
 		_managers.addAll( createManagers( setDirectory ) );
 	}
 	
@@ -54,7 +61,15 @@ public class ConfigurationSetManager {
 	 * @return list of ConfigurationManagers created.
 	 */
 	public Collection<ConfigurationManager> createManagers( File setDirectory ) {
-		return createManagers( setDirectory, null );
+		return createManagers( 
+			setDirectory, 
+			new FilenameFilter() {
+
+				@Override
+				public boolean accept(File dir, String name) {
+					return !name.endsWith( ".log" );
+				}
+			}  );
 	}
 	
 	/**
@@ -108,12 +123,56 @@ public class ConfigurationSetManager {
 	}
 	
 	/**
+	 * Aggregates the averages files for each manager.
+	 */
+	public void aggregateClientAverages() {
+		try {
+			List<File> clientLogs = new ArrayList<File>();
+			for( ConfigurationManager manager : _managers ) {
+				File avg = new File( String.format(
+					"%s%savg%sclient.log",
+					manager.getRunsDirectory().getAbsolutePath(),
+					File.separator,
+					File.separator ) );
+				clientLogs.add( avg );
+			}
+			
+			StringBuilder aggregate = new StringBuilder();
+			// open each file, read its line and concatenate it
+			for( File clientLog : clientLogs ) {
+				if( clientLog.exists() ) {
+					Scanner s = new Scanner( new FileInputStream( clientLog ) );
+					if( s.hasNextLine() ) {
+						aggregate.append( s.nextLine() );
+						aggregate.append( "\n" );
+					}
+					s.close();
+				}
+			}
+			
+			File aggregateFile = 
+				new File( 
+					String.format(
+						"%s%sclient_set_averages.log", 
+						_setDirectory,
+						File.separator ) );
+			FileWriter writer = new FileWriter( aggregateFile );
+			writer.write( aggregate.toString() );
+			writer.close();
+		} catch( Exception e ) {
+			e.printStackTrace();
+		}
+	}
+	
+	
+	/**
 	 * Test driver.
 	 * @param args N/A.
 	 */
 	public static void main(String... args) {
-		String configSetDirectory = "C:\\Users\\user\\workspaces\\gradproject\\configurations\\config_set_1_adaptor_speed\\";
-		String configFile = "C:\\Users\\user\\workspaces\\gradproject\\configurations\\config_set_1_adaptor_speed\\config_1.cfg";
+		
+		String configSetDirectory = "C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm1\\config_set_5_cache_size";
+		String configFile = "C:\\Users\\user\\workspaces\\gradproject\\configurations-1\\config_set_5_cache_size\\config_5.cfg";
 		ConfigurationSetManager manager = 
 			new ConfigurationSetManager( configSetDirectory );
 		List<ConfigurationManager> managers = manager.getConfigurationManagers();
@@ -123,5 +182,6 @@ public class ConfigurationSetManager {
 			System.out.println( m.getRunsDirectory() );
 			System.out.println( m.getConfigFile() );
 		}
+		manager.aggregateClientAverages();
 	}
 }

@@ -1,6 +1,7 @@
 package network.entities;
 
 import network.communication.IPacket;
+import network.routing.IAddress;
 
 
 /**
@@ -63,4 +64,11 @@ public interface IConnectionMedium
 	 * @param packet to be sent.
 	 */
 	public void send(IConnectionAdaptor sender, IPacket packet);
+	
+	/**
+	 * Determines if the address is reachable along this medium.
+	 * @param address whose reachability is in question.
+	 * @return true if the address is reachable, false otherwise.
+	 */
+	public boolean reachable( IAddress address );
 }

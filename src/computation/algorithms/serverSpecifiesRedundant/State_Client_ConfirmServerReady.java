@@ -12,7 +12,7 @@ import computation.state.IState;
  * @author Alex Maskovyak
  *
  */
-public class State_Client_AwaitServerReady 
+public class State_Client_ConfirmServerReady 
 		extends AbstractState<ServerSpecifiesRedundantAlgorithm>
 		implements IState<ServerSpecifiesRedundantAlgorithm> {
 
@@ -28,7 +28,7 @@ public class State_Client_AwaitServerReady
 	 * Default constructor.
 	 * @param serverAddress address of the server.
 	 */
-	public State_Client_AwaitServerReady( IAddress serverAddress ) {
+	public State_Client_ConfirmServerReady( IAddress serverAddress ) {
 		_serverAddress = serverAddress;
 	}
 	

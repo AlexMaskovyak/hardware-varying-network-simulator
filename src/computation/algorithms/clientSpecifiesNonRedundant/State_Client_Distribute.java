@@ -1,11 +1,13 @@
 package computation.algorithms.clientSpecifiesNonRedundant;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 
 import messages.StorageDeviceMessage;
 import network.routing.IAddress;
@@ -39,7 +41,9 @@ public class State_Client_Distribute
 	/** total data sent out. */
 	protected int _dataSent;
 	/** acknowledged data. */
-	protected int _dataAcknowledged;
+	//protected int _dataAcknowledged;
+	/** acknowledgements. */
+	protected Set<Integer> _acknowledgements;
 	
 /// Construction
 	
@@ -61,7 +65,8 @@ public class State_Client_Distribute
 			_storageMap.put( server, new LinkedList<Integer>());
 		}
 		_dataSent = 0;
-		_dataAcknowledged = 0;
+		_acknowledgements = new HashSet<Integer>();
+		//_dataAcknowledged = 0;
 	}
 	
 /// IState
@@ -87,9 +92,16 @@ public class State_Client_Distribute
 							(IAddress)aMessage.getValue( AlgorithmMessage.VOLUNTEER_ADDRESS ) );
 					break;
 				case SERVER_ACKNOWLEDGES:
-					_dataAcknowledged++;
+					Integer index = (Integer)aMessage.getValue( AlgorithmMessage.INDEX );
+					if( index == null ) {
+						return;
+					}
+					_acknowledgements.add( index );
+					//System.out.println( "ack: " + index + " size: " + _acknowledgements.size() );
+					//_dataAcknowledged++;
 					// we just sent the last thing
-					if( _dataAcknowledged == _endIndex + 1 ) {
+					//if( _dataAcknowledged == _endIndex + 1 ) {
+					if( _acknowledgements.size() == _endIndex + 1 ) {
 						System.out.println("done distributing");
 						updateStateHolder( new State_Client_ConfirmServerReady( _servers, _storageMap ) );
 						AlgorithmMessage doWork = new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK );

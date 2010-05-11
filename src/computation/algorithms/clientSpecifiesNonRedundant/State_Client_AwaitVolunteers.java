@@ -1,10 +1,13 @@
 package computation.algorithms.clientSpecifiesNonRedundant;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import network.routing.IAddress;
 
+import simulation.event.DEvent;
 import simulation.event.IDEvent;
 import simulation.event.IDEvent.IMessage;
 import computation.algorithms.AbstractAlgorithm;
@@ -27,8 +30,9 @@ public class State_Client_AwaitVolunteers
 	/** server total we seek. */
 	protected int _volunteersSought;
 	/** volunteers acknowledged.*/
-	protected int _volunteers;
-	
+	//protected int _volunteers;
+	/** server acknowledgements. */
+	protected Set<IAddress> _acknowledgements;
 	
 /// Construction
 	
@@ -44,6 +48,7 @@ public class State_Client_AwaitVolunteers
 	/** externalize instantiation. */
 	protected void init() {
 		_servers = new ArrayList<IAddress>();
+		_acknowledgements = new HashSet<IAddress>();
 	}
 	
 	
@@ -64,27 +69,31 @@ public class State_Client_AwaitVolunteers
 					if( _servers.size() < _volunteersSought ) {
 						// add it
 						IAddress volunteerAddress = (IAddress)aMessage.getValue( AlgorithmMessage.VOLUNTEER_ADDRESS );
-						_servers.add( volunteerAddress );
-						getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "CLIENT_AWAIT_VOLUNTEERS", 0, 0, 0, 1, 0, 0) );
-						
-						// inform them
-						AlgorithmMessage response = new AlgorithmMessage( AlgorithmMessage.TYPE.CLIENT_ACCEPTS_VOLUNTEER );
-						response.setValue( AlgorithmMessage.CLIENT_ADDRESS, getStateHolder().getComputer().getAddress() );
-						sendMessageDownStack( response, volunteerAddress );
+						if( !_servers.contains( volunteerAddress ) ) {
+							_servers.add( volunteerAddress );
+							getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "CLIENT_AWAIT_VOLUNTEERS", 0, 0, 0, 1, 0, 0) );
+							
+							// inform them
+							AlgorithmMessage response = new AlgorithmMessage( AlgorithmMessage.TYPE.CLIENT_ACCEPTS_VOLUNTEER );
+							response.setValue( AlgorithmMessage.CLIENT_ADDRESS, getStateHolder().getComputer().getAddress() );
+							sendMessageDownStack( response, volunteerAddress );
+						}
 					}
 
 					break;
 				case SERVER_ACKNOWLEDGES:
-					_volunteers++;
+					_acknowledgements.add( (IAddress)aMessage.getValue( AlgorithmMessage.SERVER_ADDRESS ) );
+					//_volunteers++;
 					
 					// are we done looking?
-					if( _volunteers == _volunteersSought ) {
+					if( _acknowledgements.size() == _volunteersSought ) {
 						updateStateHolder( new State_Client_Distribute( _servers ) );
 						
 						AlgorithmMessage doWork = new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK );
 						doWork.setValue( AlgorithmMessage.START_INDEX, 0 );
 						doWork.setValue( AlgorithmMessage.END_INDEX, getStateHolder().getDataAmount() - 1 );
-						sendEvent( getStateHolder(), doWork );
+						getStateHolder().sendEvent( getStateHolder(), doWork, getStateHolder().getTransitTime(), DEvent.INTERNAL );
+						//sendEvent( getStateHolder(), doWork );
 					}
 					break;
 				// nothing else is worth our time

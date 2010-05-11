@@ -198,15 +198,26 @@ public class ConfigurationManager {
 	 * Runs the RunAnalyzer which in turn runs the LogAnalyzers.  This will 
 	 * create aggregated data files of this run in the sum directory of the 
 	 * configuration directory.
-	 * @throws FileNotFoundException if a file cannot be found by the scanner.
+	 * @throws IOException 
 	 */
-	public void makeAveragesDirectory() throws FileNotFoundException {
+	public void makeAveragesDirectory() throws IOException {
 		// check if the averages directory exists
+		File avgDir = 
+			new File(
+				String.format(
+					"%s%savg",
+					_runsDirectory.getAbsolutePath(),
+					File.separator ) );
+		avgDir.mkdirs();
+		
 		
 		// create analyzer
 		ClientLogAnalyzer clientAnalyzer = new ClientLogAnalyzer();
 		ServerLogAnalyzer serverAnalyzer = new ServerLogAnalyzer();
 		refreshValues();
+		if( _runDirectories.size() == 0 ) {
+			return;
+		}
 		File runDir1 = _runDirectories.get( 0 );
 		StringBuilder serverLines = new StringBuilder();
 		
@@ -232,14 +243,17 @@ public class ConfigurationManager {
 			serverLines.append( serverAnalyzer );
 			serverLines.append("\n");
 		}
+		File serverFile =
+			new File( 
+				String.format( 
+					"%s%savg%sserver.log",
+					_runsDirectory, 
+					File.separator, 
+					File.separator ) );
+		serverFile.createNewFile();
 		PrintWriter writer = 
 			new PrintWriter(
-				new File( 
-					String.format( 
-						"%s%savg%sserver.log",
-						_runsDirectory, 
-						File.separator, 
-						File.separator ) ) );
+				serverFile );
 		writer.write( serverLines.toString() );
 		writer.flush();
 		writer.close();
@@ -260,6 +274,7 @@ public class ConfigurationManager {
 		}
 		return logsForFilename;
 	}
+	
 	
 /// Utility
 
@@ -289,9 +304,9 @@ public class ConfigurationManager {
 	/**
 	 * Test driver.
 	 * @param args N/A
-	 * @throws FileNotFoundException 
+	 * @throws IOException 
 	 */
-	public static void main(String... args) throws FileNotFoundException {
+	public static void main(String... args) throws IOException {
 		String runsDirectory = "C:\\Users\\user\\workspaces\\gradproject\\configurations\\config_set_1_adaptor_speed\\config_1\\";
 		String configFile = "C:\\Users\\user\\workspaces\\gradproject\\configurations\\config_set_1_adaptor_speed\\config_1\\config_1.cfg";
 		ConfigurationManager manager = new ConfigurationManager( runsDirectory, configFile );

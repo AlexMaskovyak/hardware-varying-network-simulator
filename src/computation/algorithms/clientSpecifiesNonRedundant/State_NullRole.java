@@ -30,6 +30,8 @@ public class State_NullRole
 			AlgorithmMessage aMessage = (AlgorithmMessage)message;
 			switch( aMessage.getType() ) {
 				case SET_CLIENT: 
+					System.out.println( "Set Client." );
+					
 					// send volunteer request
 					AlgorithmMessage volunteerRequest = new AlgorithmMessage( AlgorithmMessage.TYPE.CLIENT_REQUESTS_VOLUNTEERS );
 					volunteerRequest.setValue( AlgorithmMessage.CLIENT_ADDRESS, getStateHolder().getComputer().getAddress() );
@@ -40,17 +42,22 @@ public class State_NullRole
 					// record servers needed and set next state
 					int servers =  getStateHolder().getServerCount();
 					updateStateHolder( new State_Client_AwaitVolunteers( servers ) ); 
-					sendEvent( getStateHolder(), new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK ) );
+					//sendEvent( getStateHolder(), new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK ) );
 					
 					break;
 				case CLIENT_REQUESTS_VOLUNTEERS: 
 					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "NULL_ROLE", 0, 0, 1, 1, 0, 0) );
 					
+					//System.out.println( "got volunteer request" );
+					
 					// check to make sure we have enough space
 					if( (Integer)aMessage.getValue( AlgorithmMessage.AMOUNT ) 
-							>= getStateHolder().getComputer().getHarddrive().freeSpace() ) {
+							> getStateHolder().getComputer().getHarddrive().freeSpace() ) {
+						//System.out.println( (Integer)aMessage.getValue( AlgorithmMessage.AMOUNT )+  " and have " + getStateHolder().getComputer().getHarddrive().freeSpace() );
 						return;
 					}
+					
+					//System.out.println( "have enough space. ");
 					
 					// send response to client
 					IAddress clientAddress = (IAddress)aMessage.getValue( AlgorithmMessage.CLIENT_ADDRESS );

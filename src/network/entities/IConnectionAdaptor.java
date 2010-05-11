@@ -70,4 +70,11 @@ public interface IConnectionAdaptor<U, L>
 	 * @param packet to send across the medium.
 	 */
 	public void send(IPacket<IPacket> packet);
+	
+	/**
+	 * Determines if the address is reachable via this adaptor.
+	 * @param address whose reachable is in question.
+	 * @return true if the address is reachable, false otherwise.
+	 */
+	public boolean reachable(IAddress address);
 }

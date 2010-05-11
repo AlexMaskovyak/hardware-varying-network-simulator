@@ -33,8 +33,10 @@ public class State_Server_Volunteered
 			switch( aMessage.getType() ) {
 				case CLIENT_ACCEPTS_VOLUNTEER: 
 					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_VOLUNTEERED", 0, 0, 0, 1, 0, 0) );
+					AlgorithmMessage ack = new AlgorithmMessage( AlgorithmMessage.TYPE.SERVER_ACKNOWLEDGES);
+					ack.setValue( AlgorithmMessage.SERVER_ADDRESS, getStateHolder().getComputer().getAddress() );
 					sendMessageDownStack(
-							new AlgorithmMessage( AlgorithmMessage.TYPE.SERVER_ACKNOWLEDGES), 
+							ack,
 							(IAddress)aMessage.getValue( AlgorithmMessage.CLIENT_ADDRESS ) );
 					updateStateHolder( new State_Server_AwaitStorage() ); 
 					
@@ -44,6 +46,7 @@ public class State_Server_Volunteered
 					
 					updateStateHolder( new State_NullRole() );
 					break;
+				
 				default: break;
 			}
 		}
