@@ -245,4 +245,9 @@ public class ConnectionAdaptor
 	public String toString() {
 		return String.format("Adaptor[%s]", getAddress());
 	}
+
+	@Override
+	public boolean reachable(IAddress address) {
+		return getConnectedMedium().reachable( address );
+	}
 }

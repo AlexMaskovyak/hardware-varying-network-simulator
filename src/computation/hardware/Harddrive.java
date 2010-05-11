@@ -1,5 +1,6 @@
 package computation.hardware;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -37,6 +38,8 @@ public class Harddrive<T extends IData>
 	protected int _speed;
 	/** values. */
 	protected Map<Integer, IData> _data;
+	/** random number generation. */
+	protected Random _rng;
 	
 /// Construction
 
@@ -54,6 +57,7 @@ public class Harddrive<T extends IData>
 		super.setTransitTime( 5 );
 		super.setMaxAllowedOperations( 3 );
 		super.setRefreshInterval( 1 );
+		_rng = new Random();
 	}
 	
 	
@@ -207,8 +211,15 @@ public class Harddrive<T extends IData>
 	 */
 	public Integer getFilledIndex() {
 		Set<Integer> indices = _data.keySet();
+		int random = _rng.nextInt(indices.size());
 		Iterator<Integer> it = indices.iterator();
-		return (it.hasNext()) ? it.next() : null;
+		Integer result = null;
+		for( int i = 0; i <= random; ++i ) {
+			if( it.hasNext() ) {
+				result = it.next(); 
+			}
+		}
+		return result;
 	}
 	
 	
@@ -227,6 +238,12 @@ public class Harddrive<T extends IData>
 				sendEvent( 
 					e.getSource(), 
 					new StorageDeviceMessage( StorageDeviceMessage.TYPE.RESPONSE, StorageDeviceMessage.DEVICE_TYPE.HARDDRIVE, message.getIndex(), message.getRequestId(), getIndex( message.getIndex() ) ) );
+				break;
+			case RETRIEVE_AND_REMOVE:
+				sendEvent( 
+						e.getSource(), 
+						new StorageDeviceMessage( StorageDeviceMessage.TYPE.RESPONSE, StorageDeviceMessage.DEVICE_TYPE.HARDDRIVE, message.getIndex(), message.getRequestId(), getIndex( message.getIndex() ) ) );
+				deleteIndex( message.getIndex() );
 				break;
 			// this case allows for cache and harddrives to communicate directly
 			// with one another

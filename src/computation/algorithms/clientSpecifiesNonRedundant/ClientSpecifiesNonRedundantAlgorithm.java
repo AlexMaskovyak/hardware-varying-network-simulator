@@ -81,6 +81,7 @@ public class ClientSpecifiesNonRedundantAlgorithm
 	@Override
 	public void distribute() {
 		// load data to harddrive
+		System.out.println( "Distribute called." );
 		getComputer().getHarddrive().generateAndLoadData( getDataAmount() );
 		// kick off
 		sendEvent( this, new AlgorithmMessage( AlgorithmMessage.TYPE.SET_CLIENT ) );

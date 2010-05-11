@@ -132,11 +132,16 @@ public class State_Client_Read
 					// event since this is only here to demonstrate correctness.
 					Harddrive harddrive = getStateHolder().getComputer().getHarddrive();
 					IData baseLine = harddrive.getIndex( index );
-					if( baseLine.equals( data) ) {
-						//System.out.println( "We got good data! " + data );
-						harddrive.deleteIndex( index );
+					if( baseLine == null ) {
+						//System.out.printf( "%d is a bad index. Data from: %s. Awaiting %d pieces.\n", index, server, harddrive.getSize() );
 					} else {
-						System.out.printf( "We received bad data! Expected: %s. Received %s. From %s.\n", baseLine, data, server );
+						if( baseLine.equals( data ) ) {
+							//System.out.println( "We got good data! " + data );
+							harddrive.deleteIndex( index );
+							// System.out.printf( "We received good data %s.  Awaiting %d pieces.\n", data, harddrive.getSize() );
+						} else {
+							System.out.printf( "We received bad data! Expected: %s. Received %s. From %s. Awaiting %d pieces.\n", baseLine, data, server, harddrive.getSize() );
+						}
 					}
 					
 					

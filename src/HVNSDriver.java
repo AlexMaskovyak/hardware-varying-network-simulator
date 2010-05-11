@@ -15,6 +15,7 @@ import configuration.ConfigurationManager;
 import configuration.ConfigurationSetManager;
 
 import simulation.simulator.ComputerNetworkSimulator;
+import simulation.simulator.listeners.ReportingSimulatorListener;
 import network.entities.ConnectionAdaptor;
 import network.entities.ConnectionMedium;
 import network.entities.INode;
@@ -26,7 +27,7 @@ import network.entities.INode;
  * @author Alex Maskovyak
  *
  */
-public class DriverNetworkSimulator {
+public class HVNSDriver {
 	
 	/**
 	 * Read in the configuration file.
@@ -53,23 +54,55 @@ public class DriverNetworkSimulator {
 		System.out.println( "Processing Collection of Configuration Sets." );
 		for( File setDirectory : setDirectories ) {
 			ConfigurationSetManager setManager = new ConfigurationSetManager( setDirectory.getAbsoluteFile() );
-			//if( !((new File("C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm2\\config_set_5_cache_size")).equals( setDirectory ) ) ) {
-			//	System.out.println( setDirectory );
-			//	continue;
-			//}
+			if( !((new File("C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm1-trial3\\config_set_1_adaptor_speed")).equals( setDirectory ) ) ) {
+				//System.out.println( setDirectory );
+				continue;
+			}
 			System.out.printf( "Processing Configuration Set %s.\n", setDirectory );
 			for( ConfigurationManager configManager : setManager.getConfigurationManagers() ) {
 				for( int i = 0; i < runs; ++i ) {
 					
-					/*if( (new File("C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm2\\config_set_2_server_count\\config_10.cfg").equals( configManager.getConfigFile() ) ) ) {
-						System.out.println( "continue: " + configManager.getConfigFile() );
-						continue;
-					}
-					if( (new File("C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm2\\config_set_2_server_count\\config_1.cfg").equals( configManager.getConfigFile() ) ) ) {
-						System.out.println( "continue: " + configManager.getConfigFile() );
+					/*if( ((new File("C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm1-trial3\\config_set_1_adaptor_speed\\config_1.cfg").equals( configManager.getConfigFile() ) ) ) ) {
+						//System.out.println( "continue: " + configManager.getConfigFile() );
 						continue;
 					}*/
-					
+					/*if( ((new File("C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm1-trial3\\config_set_1_adaptor_speed\\config_2.cfg").equals( configManager.getConfigFile() ) ) ) ) {
+						//System.out.println( "continue: " + configManager.getConfigFile() );
+						continue;
+					}
+					if( ((new File("C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm1-trial3\\config_set_1_adaptor_speed\\config_3.cfg").equals( configManager.getConfigFile() ) ) ) ) {
+						//System.out.println( "continue: " + configManager.getConfigFile() );
+						continue;
+					}
+					if( ((new File("C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm1-trial3\\config_set_1_adaptor_speed\\config_4.cfg").equals( configManager.getConfigFile() ) ) ) ) {
+						//System.out.println( "continue: " + configManager.getConfigFile() );
+						continue;
+					}
+					if( ((new File("C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm1-trial3\\config_set_1_adaptor_speed\\config_5.cfg").equals( configManager.getConfigFile() ) ) ) ) {
+						//System.out.println( "continue: " + configManager.getConfigFile() );
+						continue;
+					}
+					if( ((new File("C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm1-trial3\\config_set_1_adaptor_speed\\config_6.cfg").equals( configManager.getConfigFile() ) ) ) ) {
+						//System.out.println( "continue: " + configManager.getConfigFile() );
+						continue;
+					}
+					if( ((new File("C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm1-trial3\\config_set_1_adaptor_speed\\config_7.cfg").equals( configManager.getConfigFile() ) ) ) ) {
+						//System.out.println( "continue: " + configManager.getConfigFile() );
+						continue;
+					}
+					if( ((new File("C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm1-trial3\\config_set_1_adaptor_speed\\config_8.cfg").equals( configManager.getConfigFile() ) ) ) ) {
+						//System.out.println( "continue: " + configManager.getConfigFile() );
+						continue;
+					}
+					if( ((new File("C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm1-trial3\\config_set_1_adaptor_speed\\config_9.cfg").equals( configManager.getConfigFile() ) ) ) ) {
+						//System.out.println( "continue: " + configManager.getConfigFile() );
+						continue;
+					}
+					if( ((new File("C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm1-trial3\\config_set_1_adaptor_speed\\config_10.cfg").equals( configManager.getConfigFile() ) ) ) ) {
+						//System.out.println( "continue: " + configManager.getConfigFile() );
+						continue;
+					}*/
+
 					
 					File outputPath = configManager.makeNewRunDirectory();
 					System.out.println( "===" );
@@ -95,12 +128,14 @@ public class DriverNetworkSimulator {
 					
 					System.out.println( "Finished." );
 				}
+				configManager.makeAveragesDirectory();
 			}
+			setManager.aggregateClientAverages();
 		}
 	}
 	
 	/**
-	 * Read in the configuration file.
+	 * Read in the configuration file.j
 	 * @param args
 	 */
 	public static void mainOld(String... args) throws Exception {
@@ -246,7 +281,7 @@ class SimRunnable implements Runnable {
 	public void run() {
 		try {
 			_sim.run();
-			_manager.makeAveragesDirectory();
+			//_manager.makeAveragesDirectory();
 			
 		} catch( Exception e ) {
 			e.printStackTrace();

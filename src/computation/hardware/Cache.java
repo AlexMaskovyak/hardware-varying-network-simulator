@@ -29,6 +29,11 @@ public class Cache
 						new StorageDeviceMessage( StorageDeviceMessage.TYPE.RESPONSE, StorageDeviceMessage.DEVICE_TYPE.CACHE, message.getIndex(), message.getRequestId(), getIndex( message.getIndex() ) ) );
 				deleteIndex( message.getIndex() );
 				break;
+				// this case allows for cache and harddrives to communicate directly
+				// with one another
+			case RESPONSE:
+				storeData( message.getIndex(), message.getData() );
+				break;				
 			case STORE:
 				storeData( message.getIndex(), message.getData() );
 				break;

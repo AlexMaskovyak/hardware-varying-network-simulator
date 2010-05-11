@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import network.communication.IPacket;
+import network.routing.IAddress;
 
 import messages.ConnectionAdaptorMessage;
 import messages.ConnectionMediumMessage;
@@ -115,6 +116,20 @@ public class ConnectionMedium
 	@Override
 	public void receive(IPacket packet) {
 		send(null, packet);
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see network.entities.IConnectionMedium#reachable(network.routing.IAddress)
+	 */
+	@Override
+	public boolean reachable( IAddress address ) {
+		for( IConnectionAdaptor adaptor : _adaptors ) {
+			if( adaptor.getAddress().equals( address) ) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	

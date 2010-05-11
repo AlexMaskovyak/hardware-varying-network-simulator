@@ -172,8 +172,13 @@ public class NetworkProtocolHandler
 		IAddress destination = payload.getDestination();
 
 		// get next hop
-		IAddress nextHop = _table.getNextHop( destination );
-		
+		IAddress nextHop = null;
+		if( destination == Address.BROADCAST ) {
+			nextHop = destination;
+		} else {
+			nextHop = _table.getNextHop( destination );
+		}
+			
 		// create new packet
 		IPacket outgoing = new Packet<IPacket>(payload, getAddress(), nextHop, NetworkProtocolHandler.PROTOCAL, getTTL(), 0);
 		
@@ -228,12 +233,21 @@ public class NetworkProtocolHandler
 		for( IConnectionAdaptor ca : _adaptors ) {
 			// don't send across the same originator of this message
 			if( ca == sender ) { continue; }
-			sendEvent(
-				(ISimulatable)ca, 
-				new ProtocolHandlerMessage( 
-					ProtocolHandlerMessage.TYPE.HANDLE_HIGHER, 
-					outgoing, 
-					this ) );
+			// send to everyone if broadcast
+			if( outgoing.getDestination() == Address.BROADCAST 
+					|| ca.reachable( outgoing.getDestination() ) ) {
+				sendEvent(
+					(ISimulatable)ca, 
+					new ProtocolHandlerMessage( 
+						ProtocolHandlerMessage.TYPE.HANDLE_HIGHER, 
+						outgoing, 
+						this ) );
+				// normal packets don't get sent out to everyone
+				if( outgoing.getDestination() != Address.BROADCAST ) {
+					//System.out.println( "end early" );
+					return;
+				}
+			}
 		}
 	}
 	

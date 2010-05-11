@@ -1,9 +1,11 @@
 package computation.algorithms.clientSpecifiesNonRedundant;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 
 import network.routing.IAddress;
 import simulation.event.DEvent;
@@ -28,7 +30,7 @@ public class State_Client_ConfirmServerReady
 	/** servers we have found. */
 	protected List<IAddress> _servers;
 	/** servers that are ready. */
-	protected List<IAddress> _readyServers;
+	protected Set<IAddress> _readyServers;
 	/** storage map between an address and a queue. */
 	protected Map<IAddress, Queue<Integer>> _storageMap;
 	
@@ -49,7 +51,7 @@ public class State_Client_ConfirmServerReady
 	
 	/** externalize instantation. */
 	protected void init() {
-		_readyServers = new ArrayList<IAddress>( _servers.size() );
+		_readyServers = new HashSet<IAddress>( _servers.size() );
 	}
 	
 	/*
