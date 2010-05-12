@@ -112,6 +112,15 @@ public class State_Server_Secondary_Service
 							response.setValue( AlgorithmMessage.INDEX, sdMessage.getIndex() );
 							response.setValue( AlgorithmMessage.DATA, sdMessage.getData() );
 							
+							sendEvent( 
+									getStateHolder().getComputer().getCache(),
+									new StorageDeviceMessage(
+										StorageDeviceMessage.TYPE.DELETE, 
+										StorageDeviceMessage.DEVICE_TYPE.CACHE, 
+										sdMessage.getIndex(), 
+										sdMessage.getIndex(), 
+										null ) );
+							
 							sendMessageDownStack( response, _clientAddress );
 							break;
 						// cache services it
@@ -128,7 +137,7 @@ public class State_Server_Secondary_Service
 								sendEvent( 
 									getStateHolder().getComputer().getHarddrive(),
 									new StorageDeviceMessage(
-										StorageDeviceMessage.TYPE.RETRIEVE, StorageDeviceMessage.DEVICE_TYPE.HARDDRIVE, index, index, null ) );
+										StorageDeviceMessage.TYPE.RETRIEVE_AND_REMOVE, StorageDeviceMessage.DEVICE_TYPE.HARDDRIVE, index, index, null ) );
 								
 								return;
 							}

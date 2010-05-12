@@ -87,6 +87,7 @@ public class ClientLogAnalyzer {
 		double totalLocal = 0;
 		double totalRemote = 0;
 		for( File f : files ) {
+			reset();
 			// note, we use a fileinputstream here due to problems associated
 			// with passing a bare file in, this code works in either case as
 			// it appears here, oddly, large problems occurred with reading the 
@@ -184,8 +185,8 @@ public class ClientLogAnalyzer {
 	public String toString() {
 		return String.format(
 					"%f\t%f", 
-					_localTimeEnd - _localTimeStart, 
-					_remoteTimeEnd - _remoteTimeStart  );
+					_totalLocalTime, 
+					_totalRemoteTime  );
 	}
 	
 	
@@ -198,12 +199,15 @@ public class ClientLogAnalyzer {
 	public static void main(String... args) {
 		ClientLogAnalyzer client = new ClientLogAnalyzer();
 		try {
-			client.scan( new Scanner( new File( "C:\\Users\\user\\workspaces\\gradproject\\configurations\\config_set_1_adaptor_speed\\config_1\\run_1\\node_0.log" ) ) );
+			client.scan( new Scanner( new File( "C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm1-trial4\\config_set_2_server_count\\config_10\\run_5\\node_0.log" ) ) );
 			System.out.println( client );
-			File[] files = new File[2];
-			files[0] = new File("C:\\Users\\user\\workspaces\\gradproject\\configurations\\config_set_1_adaptor_speed\\config_1\\run_1\\node_0.log");
-			files[1] = new File("C:\\Users\\user\\workspaces\\gradproject\\configurations\\config_set_1_adaptor_speed\\config_1\\run_2\\node_0.log");
-			 
+			File[] files = new File[5];
+			files[0] = new File("C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm1-trial4\\config_set_2_server_count\\config_10\\run_1\\node_0.log");
+			files[1] = new File("C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm1-trial4\\config_set_2_server_count\\config_10\\run_2\\node_0.log");
+			files[2] = new File("C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm1-trial4\\config_set_2_server_count\\config_10\\run_3\\node_0.log");
+			files[3] = new File("C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm1-trial4\\config_set_2_server_count\\config_10\\run_4\\node_0.log");
+			files[4] = new File("C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm1-trial4\\config_set_2_server_count\\config_10\\run_5\\node_0.log");
+
 			client.reset();
 			client.average( Arrays.asList( files ) );
 			System.out.println( client );

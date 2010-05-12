@@ -330,12 +330,16 @@ public class PerformanceRestrictedSimulatable
 	 * receive and deal with it and other requests again.
 	 * @param e event to reschedule for ourselves into the future.
 	 */
-	protected void rescheduleEvent( IDEvent e ) {
+	public void rescheduleEvent( IDEvent e ) {
+		double refreshInterval =
+			( getRefreshInterval() > 0 ) ? getRefreshInterval() : .000001;
+		double lastRefreshTime = 
+			( getLastRefreshTime() > 0 ) ? getLastRefreshTime() : e.getSimulator().getTime(); 
 		IDEvent rescheduledEvent = 
 			new DEvent<IMessage>(
 				e.getSource(), 
 				e.getDestination(), 
-				getLastRefreshTime() + getRefreshInterval(), 
+				lastRefreshTime + refreshInterval, 
 				e.getSimulator(), 
 				e.getMessage(),
 				DEvent.EXTERNAL);

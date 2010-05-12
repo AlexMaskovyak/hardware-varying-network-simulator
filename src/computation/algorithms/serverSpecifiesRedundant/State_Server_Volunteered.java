@@ -4,6 +4,7 @@ import network.routing.IAddress;
 import simulation.event.DEvent;
 import simulation.event.IDEvent;
 import simulation.event.IDEvent.IMessage;
+import simulation.simulator.DESimulator;
 import computation.algorithms.listeners.AlgorithmEvent;
 import computation.state.IState;
 
@@ -45,6 +46,17 @@ public class State_Server_Volunteered
 		if( message instanceof AlgorithmMessage ) {
 			AlgorithmMessage aMessage = (AlgorithmMessage)message;
 			switch( aMessage.getType() ) {
+				// a server has volunteered, that isn't good.
+				case SERVER_VOLUNTEERS: 
+					System.out.printf( 
+						"Race condition detected.  %s Server_Volunteered from %s received Server_Volunteers Message, resent it to ourself until we're formally accepted...!\n",
+						getStateHolder().getComputer().getAddress(),
+						aMessage.getValue( AlgorithmMessage.VOLUNTEER_ADDRESS ) );	
+					System.out.println( event );
+					getStateHolder().rescheduleEvent( event );
+					
+					break;
+				
 				// we've been assigned as a primary
 				case CLIENT_ACCEPTS_VOLUNTEER_AS_PRIMARY: 
 					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_VOLUNTEERED", 0, 0, 0, 1, 0, 0) );
@@ -58,11 +70,11 @@ public class State_Server_Volunteered
 					updateStateHolder( new State_Server_Primary_AwaitVolunteers( clientAddress, getStateHolder().getComputer().getAddress(), servers, redundancy, 0, endIndex ) ); 
 					
 					// allows us to check whether we need to gather more volunteers
-					sendEvent(
-						getStateHolder(),
-						new AlgorithmMessage( 
-							AlgorithmMessage.TYPE.DO_WORK ),
-							DEvent.INTERNAL );
+					//getStateHolder().sendEvent(
+					//	getStateHolder(), 
+					//	new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK ), 
+					//	.0000001, 
+					//	DEvent.INTERNAL);
 					
 					break;
 				// we are a secondary storage unit for a primary storage
