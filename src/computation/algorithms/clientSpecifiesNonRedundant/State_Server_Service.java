@@ -121,6 +121,15 @@ public class State_Server_Service
 								response.setValue( AlgorithmMessage.DATA, sdMessage.getData() );
 								response.setValue( AlgorithmMessage.SERVER_ADDRESS, getStateHolder().getComputer().getAddress() );
 								
+								sendEvent( 
+									getStateHolder().getComputer().getCache(),
+									new StorageDeviceMessage(
+										StorageDeviceMessage.TYPE.DELETE, 
+										StorageDeviceMessage.DEVICE_TYPE.CACHE, 
+										sdMessage.getIndex(), 
+										sdMessage.getIndex(), 
+										null ) );
+									
 								sendMessageDownStack( response, _clientAddress );
 							}
 							// remove it from the cache so it doesn't take up space
@@ -144,7 +153,7 @@ public class State_Server_Service
 								sendEvent( 
 									getStateHolder().getComputer().getHarddrive(),
 									new StorageDeviceMessage(
-										StorageDeviceMessage.TYPE.RETRIEVE, StorageDeviceMessage.DEVICE_TYPE.HARDDRIVE, index, index, null ) );
+										StorageDeviceMessage.TYPE.RETRIEVE_AND_REMOVE, StorageDeviceMessage.DEVICE_TYPE.HARDDRIVE, index, index, null ) );
 								
 								return;
 							}
@@ -161,7 +170,7 @@ public class State_Server_Service
 							AlgorithmMessage doWork = new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK );
 							doWork.setValue( AlgorithmMessage.AMOUNT, 1 );
 							getStateHolder().sendEvent( getStateHolder(), doWork, .00000001, DEvent.INTERNAL );
-							//sendEvent( getStateHolder(), doWork, DEvent.INTERNAL );
+							sendEvent( getStateHolder(), doWork, DEvent.INTERNAL );
 							
 							break;
 					

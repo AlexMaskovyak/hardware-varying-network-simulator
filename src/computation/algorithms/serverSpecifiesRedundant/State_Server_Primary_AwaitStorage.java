@@ -148,6 +148,14 @@ public class State_Server_Primary_AwaitStorage
 								dataIndex,
 								dataIndex,
 								data ) );
+						sendEvent(
+								getStateHolder().getComputer().getCache(),
+								new StorageDeviceMessage( 
+									StorageDeviceMessage.TYPE.STORE, 
+									StorageDeviceMessage.DEVICE_TYPE.CACHE,
+									dataIndex,
+									dataIndex,
+									data ) );
 						_dataStored++;
 						if( _dataStored == _dataPerSlice ) {
 							sendInstantEvent( new AlgorithmMessage( AlgorithmMessage.TYPE.SERVER_INDICATES_READ_READY ) );

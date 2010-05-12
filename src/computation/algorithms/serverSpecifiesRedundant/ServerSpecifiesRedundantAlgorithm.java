@@ -60,6 +60,7 @@ public class ServerSpecifiesRedundantAlgorithm
 	protected void init() {
 		super.init();
 		setTransitTime( .0000001 );
+		setRedundancy( 1 );
 		setIState( new State_NullRole() );
 	}
 	

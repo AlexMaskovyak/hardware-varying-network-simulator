@@ -113,13 +113,23 @@ public class State_Server_Primary_AwaitVolunteers
 				case SERVER_VOLUNTEERS: 
 					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_PRIMARY_AWAIT_VOLUNTEERS", 0, 0, 1, 1, 0, 0) );
 					
+					if( _volunteersFound == _serverAmount * _redundancy ) {	
+						getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_PRIMARY_AWAIT_VOLUNTEERS", 0, 0, 1, 0, 0, 0) );
+						updateStateHolder( new State_Server_Primary_AwaitStorage( _serverGroups, _clientAddress, _redundancy, _startIndex, _endIndex ) );
+						
+						// got all volunteers
+						sendMessageDownStack(
+							new AlgorithmMessage( AlgorithmMessage.TYPE.SERVER_INDICATES_STORE_READY ), 
+							_clientAddress );
+						return;
+					}
+					
 					// tally it
 					IAddress volunteerAddress = (IAddress)aMessage.getValue( AlgorithmMessage.VOLUNTEER_ADDRESS );
 					
 					// indicate that they are a server now
 					int index = nextServerGroupIndex();
 					_serverGroups.get( index ).add( volunteerAddress );
-					
 					
 					// tell them
 					AlgorithmMessage response = new AlgorithmMessage( AlgorithmMessage.TYPE.SERVER_ACCEPTS_VOLUNTEER_AS_SECONDARY );
@@ -132,6 +142,8 @@ public class State_Server_Primary_AwaitVolunteers
 					sendMessageDownStack( response, volunteerAddress );
 					
 					_volunteersFound++;
+					
+					System.out.printf( "Server await volunteers: got %s found %d need %d\n", volunteerAddress, _volunteersFound, _serverAmount * _redundancy );
 					
 					if( _volunteersFound == _serverAmount * _redundancy ) {	
 						getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_PRIMARY_AWAIT_VOLUNTEERS", 0, 0, 1, 0, 0, 0) );

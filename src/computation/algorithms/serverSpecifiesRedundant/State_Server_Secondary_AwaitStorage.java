@@ -58,14 +58,24 @@ public class State_Server_Secondary_AwaitStorage
 				case CLIENT_REQUESTS_DATA_STORE:
 					ServerSpecifiesRedundantAlgorithm algorithm = getStateHolder();
 					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_SECONDARY_AWAIT_STORAGE", 0, 1, 0, 0, 1, 0) );
+					Integer dataIndex = (Integer)aMessage.getValue(AlgorithmMessage.INDEX);
+					IData data = (IData)aMessage.getValue(AlgorithmMessage.DATA);
 					sendEvent( 
 						algorithm.getComputer().getHarddrive(), 
 						new StorageDeviceMessage( 
 							StorageDeviceMessage.TYPE.STORE,
 							StorageDeviceMessage.DEVICE_TYPE.HARDDRIVE,
-							(Integer)aMessage.getValue(AlgorithmMessage.INDEX),
-							-1,
-							(IData)aMessage.getValue(AlgorithmMessage.DATA) ) );
+							dataIndex,
+							dataIndex,
+							data) );
+					sendEvent(
+							getStateHolder().getComputer().getCache(),
+							new StorageDeviceMessage( 
+								StorageDeviceMessage.TYPE.STORE, 
+								StorageDeviceMessage.DEVICE_TYPE.CACHE,
+								dataIndex,
+								dataIndex,
+								data ) );
 					_dataStored++;
 					
 					// we've stored everything we need to

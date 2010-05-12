@@ -5,6 +5,7 @@ import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -168,10 +169,11 @@ public class ConfigurationSetManager {
 	/**
 	 * Test driver.
 	 * @param args N/A.
+	 * @throws IOException 
 	 */
-	public static void main(String... args) {
+	public static void main(String... args) throws IOException {
 		
-		String configSetDirectory = "C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm1\\config_set_5_cache_size";
+		String configSetDirectory = "C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm1-trial4\\config_set_5_cache_size_proper_server_count_slower_cache\\";
 		String configFile = "C:\\Users\\user\\workspaces\\gradproject\\configurations-1\\config_set_5_cache_size\\config_5.cfg";
 		ConfigurationSetManager manager = 
 			new ConfigurationSetManager( configSetDirectory );
@@ -181,6 +183,7 @@ public class ConfigurationSetManager {
 			System.out.println( m.getMaxRunNumber() );
 			System.out.println( m.getRunsDirectory() );
 			System.out.println( m.getConfigFile() );
+			m.makeAveragesDirectory();
 		}
 		manager.aggregateClientAverages();
 	}

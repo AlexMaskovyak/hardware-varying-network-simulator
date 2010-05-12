@@ -36,19 +36,28 @@ public class State_Server_AwaitStorage
 				case CLIENT_REQUESTS_DATA_STORE: 
 					AbstractAlgorithm algorithm = getStateHolder();
 					getStateHolder().notifyListeners( new AlgorithmEvent( getStateHolder(), event.getEventTime(), "SERVER_AWAIT_STORAGE", 0, 1, 0, 0, 1, 0) );
+					
+					StorageDeviceMessage store = 
+						new StorageDeviceMessage( 
+								StorageDeviceMessage.TYPE.STORE,
+								StorageDeviceMessage.DEVICE_TYPE.HARDDRIVE,
+								(Integer)aMessage.getValue(AlgorithmMessage.INDEX),
+								-1,
+								(IData)aMessage.getValue(AlgorithmMessage.DATA) );
 					sendEvent( 
 						algorithm.getComputer().getHarddrive(), 
-						new StorageDeviceMessage( 
-							StorageDeviceMessage.TYPE.STORE,
-							StorageDeviceMessage.DEVICE_TYPE.HARDDRIVE,
-							(Integer)aMessage.getValue(AlgorithmMessage.INDEX),
-							-1,
-							(IData)aMessage.getValue(AlgorithmMessage.DATA) ) );
+						store );
+					sendEvent(
+						algorithm.getComputer().getCache(),
+						store );
 					AlgorithmMessage ack = new AlgorithmMessage( AlgorithmMessage.TYPE.SERVER_ACKNOWLEDGES);
 					ack.setValue( AlgorithmMessage.INDEX, aMessage.getValue( AlgorithmMessage.INDEX ));
 					sendMessageDownStack( 
 						ack, 
 						(IAddress)aMessage.getValue( AlgorithmMessage.CLIENT_ADDRESS ) );
+					
+					
+					
 					break;
 				// acknowledge done storing data, move to service state
 				case CLIENT_INDICATES_DATA_STORE_COMPLETE:
