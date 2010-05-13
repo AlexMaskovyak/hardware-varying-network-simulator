@@ -31,6 +31,8 @@ public class State_Server_Service
 	protected Random _rng;
 	/***/
 	protected int _serviced;
+	/** */
+	public boolean _cacheRefillEnabled;
 	
 /// Construction
 	
@@ -43,6 +45,7 @@ public class State_Server_Service
 	protected void init() {
 		_rng = new Random();
 		_serviced = 0;
+		_cacheRefillEnabled = true;
 	}
 
 	
@@ -133,10 +136,10 @@ public class State_Server_Service
 								sendMessageDownStack( response, _clientAddress );
 							}
 							// remove it from the cache so it doesn't take up space
-							StorageDeviceMessage deleteCache = new StorageDeviceMessage( StorageDeviceMessage.TYPE.DELETE, StorageDeviceMessage.DEVICE_TYPE.CACHE, sdMessage.getIndex(), sdMessage.getIndex(), null );
-							sendEvent(
-								getStateHolder().getComputer().getCache(),
-								deleteCache );
+							//StorageDeviceMessage deleteCache = new StorageDeviceMessage( StorageDeviceMessage.TYPE.DELETE, StorageDeviceMessage.DEVICE_TYPE.CACHE, sdMessage.getIndex(), sdMessage.getIndex(), null );
+							//sendEvent(
+							//	getStateHolder().getComputer().getCache(),
+							//	deleteCache );
 							
 							break;
 						// cache services it
@@ -167,10 +170,12 @@ public class State_Server_Service
 							responseFromCache.setValue( AlgorithmMessage.SERVER_ADDRESS, getStateHolder().getComputer().getAddress() );
 							sendMessageDownStack( responseFromCache, _clientAddress );
 							
-							AlgorithmMessage doWork = new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK );
-							doWork.setValue( AlgorithmMessage.AMOUNT, 1 );
-							getStateHolder().sendEvent( getStateHolder(), doWork, .00000001, DEvent.INTERNAL );
-							sendEvent( getStateHolder(), doWork, DEvent.INTERNAL );
+							if( _cacheRefillEnabled) {
+								AlgorithmMessage doWork = new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK );
+								doWork.setValue( AlgorithmMessage.AMOUNT, 1 );
+								//getStateHolder().sendEvent( getStateHolder(), doWork, .00000001, DEvent.INTERNAL );
+								sendEvent( getStateHolder(), doWork );
+							}
 							
 							break;
 					
