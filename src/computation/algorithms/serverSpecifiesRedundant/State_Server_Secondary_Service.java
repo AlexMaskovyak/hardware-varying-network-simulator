@@ -32,13 +32,23 @@ public class State_Server_Secondary_Service
 	protected IAddress _clientAddress;
 	/** random number generation. */
 	protected Random _rng;
+	/** do we refill the cache?*/
+	protected boolean _cacheRefillEnabled;
 	
 	
 /// Construction
 	
 	/** Constructor. */
-	public State_Server_Secondary_Service() {}
+	public State_Server_Secondary_Service() {
+		init();
+	}
 	
+	/**
+	 * Externalize instantiation.
+	 */
+	protected void init() {
+		_cacheRefillEnabled = true;
+	}
 	
 /// IState
 
@@ -79,14 +89,14 @@ public class State_Server_Secondary_Service
 					
 					// ask hd to store something into cache
 					getStateHolder().sendEventAsProxy(
-							cache,
-							hd,
-							new StorageDeviceMessage( 
-								StorageDeviceMessage.TYPE.RETRIEVE, 
-								StorageDeviceMessage.DEVICE_TYPE.HARDDRIVE, 
-								hd.getFilledIndex(),
-								-1,
-								null ) );
+						cache,
+						hd,
+						new StorageDeviceMessage( 
+							StorageDeviceMessage.TYPE.RETRIEVE, 
+							StorageDeviceMessage.DEVICE_TYPE.HARDDRIVE, 
+							hd.getFilledIndex(),
+							-1,
+							null ) );
 					
 					// if there is freespace then send another message
 					if( freespace > 0 ) {
@@ -150,9 +160,11 @@ public class State_Server_Secondary_Service
 							responseFromCache.setValue( AlgorithmMessage.DATA, sdMessage.getData() );
 							sendMessageDownStack( responseFromCache, _clientAddress );
 							
-							AlgorithmMessage doWork = new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK );
-							doWork.setValue( AlgorithmMessage.AMOUNT, 1 );
-							sendEvent( getStateHolder(), doWork );
+							if( _cacheRefillEnabled ) {
+	 							AlgorithmMessage doWork = new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK );
+								doWork.setValue( AlgorithmMessage.AMOUNT, 1 );
+								sendEvent( getStateHolder(), doWork );
+							}
 							
 							break;
 					}

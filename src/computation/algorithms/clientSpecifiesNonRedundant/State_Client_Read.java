@@ -118,6 +118,7 @@ public class State_Client_Read
 					AlgorithmMessage doWork = new AlgorithmMessage( AlgorithmMessage.TYPE.DO_WORK );
 					sendEvent( getStateHolder(), doWork, DEvent.INTERNAL );
 					
+					//System.out.println( _currentIndex );
 					
 					break;
 				// getting information

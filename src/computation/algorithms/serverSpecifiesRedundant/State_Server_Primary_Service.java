@@ -126,7 +126,9 @@ public class State_Server_Primary_Service
 					}					
 					break;
 				
-				default: break;
+				default: 
+					_serviceDelegate.handleEventDelegate( event );
+					break;
 			} 
 		} else {
 			_serviceDelegate.handleEventDelegate( event );

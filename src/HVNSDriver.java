@@ -54,18 +54,23 @@ public class HVNSDriver {
 		System.out.println( "Processing Collection of Configuration Sets." );
 		for( File setDirectory : setDirectories ) {
 			ConfigurationSetManager setManager = new ConfigurationSetManager( setDirectory.getAbsoluteFile() );
-			if( !((new File("C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm1-trial3\\config_set_1_adaptor_speed")).equals( setDirectory ) ) ) {
+			if( !((new File("C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm1-trial5\\config_set_1_adaptor_speed")).equals( setDirectory ) ) ) {
 				//System.out.println( setDirectory );
 				continue;
 			}
 			System.out.printf( "Processing Configuration Set %s.\n", setDirectory );
 			for( ConfigurationManager configManager : setManager.getConfigurationManagers() ) {
+				//if( ((new File("C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm2-trial4\\config_set_3_redundancy_updated_attributes\\config_10.cfg").equals( configManager.getConfigFile().getAbsoluteFile() ) ) ) ) {
+					//System.out.println( "continue: " + configManager.getConfigFile() );
+				//	continue;
+				//}
+				//if( !((new File("C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm2-trial4\\config_set_3_redundancy_updated_attributes\\config_9.cfg").equals( configManager.getConfigFile().getAbsoluteFile() ) ) ) ) {
+				//	//System.out.println( "continue: " + configManager.getConfigFile() );
+				//	continue;
+				//}
+				
 				for( int i = 0; i < runs; ++i ) {
 					
-					/*if( ((new File("C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm1-trial3\\config_set_1_adaptor_speed\\config_1.cfg").equals( configManager.getConfigFile() ) ) ) ) {
-						//System.out.println( "continue: " + configManager.getConfigFile() );
-						continue;
-					}*/
 					/*if( ((new File("C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm1-trial3\\config_set_1_adaptor_speed\\config_2.cfg").equals( configManager.getConfigFile() ) ) ) ) {
 						//System.out.println( "continue: " + configManager.getConfigFile() );
 						continue;
