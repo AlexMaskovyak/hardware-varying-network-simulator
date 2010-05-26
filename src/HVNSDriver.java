@@ -30,8 +30,9 @@ import network.entities.INode;
 public class HVNSDriver {
 	
 	/**
-	 * Read in the configuration file.
-	 * @param args
+	 * Reads in a configuration set collection and runs every configuration
+	 * set and every configuration manager of that set for some number of runs.
+	 * @param args <run amount> <configuration set collection directory>
 	 */
 	public static void main(String... args) throws Exception {
 		PropertyConfigurator.configure( "log4j.properties" ); // disable it
@@ -54,61 +55,10 @@ public class HVNSDriver {
 		System.out.println( "Processing Collection of Configuration Sets." );
 		for( File setDirectory : setDirectories ) {
 			ConfigurationSetManager setManager = new ConfigurationSetManager( setDirectory.getAbsoluteFile() );
-			if( !((new File("C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm1-trial5\\config_set_1_adaptor_speed")).equals( setDirectory ) ) ) {
-				//System.out.println( setDirectory );
-				continue;
-			}
 			System.out.printf( "Processing Configuration Set %s.\n", setDirectory );
 			for( ConfigurationManager configManager : setManager.getConfigurationManagers() ) {
-				//if( ((new File("C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm2-trial4\\config_set_3_redundancy_updated_attributes\\config_10.cfg").equals( configManager.getConfigFile().getAbsoluteFile() ) ) ) ) {
-					//System.out.println( "continue: " + configManager.getConfigFile() );
-				//	continue;
-				//}
-				//if( !((new File("C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm2-trial4\\config_set_3_redundancy_updated_attributes\\config_9.cfg").equals( configManager.getConfigFile().getAbsoluteFile() ) ) ) ) {
-				//	//System.out.println( "continue: " + configManager.getConfigFile() );
-				//	continue;
-				//}
-				
 				for( int i = 0; i < runs; ++i ) {
-					
-					/*if( ((new File("C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm1-trial3\\config_set_1_adaptor_speed\\config_2.cfg").equals( configManager.getConfigFile() ) ) ) ) {
-						//System.out.println( "continue: " + configManager.getConfigFile() );
-						continue;
-					}
-					if( ((new File("C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm1-trial3\\config_set_1_adaptor_speed\\config_3.cfg").equals( configManager.getConfigFile() ) ) ) ) {
-						//System.out.println( "continue: " + configManager.getConfigFile() );
-						continue;
-					}
-					if( ((new File("C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm1-trial3\\config_set_1_adaptor_speed\\config_4.cfg").equals( configManager.getConfigFile() ) ) ) ) {
-						//System.out.println( "continue: " + configManager.getConfigFile() );
-						continue;
-					}
-					if( ((new File("C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm1-trial3\\config_set_1_adaptor_speed\\config_5.cfg").equals( configManager.getConfigFile() ) ) ) ) {
-						//System.out.println( "continue: " + configManager.getConfigFile() );
-						continue;
-					}
-					if( ((new File("C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm1-trial3\\config_set_1_adaptor_speed\\config_6.cfg").equals( configManager.getConfigFile() ) ) ) ) {
-						//System.out.println( "continue: " + configManager.getConfigFile() );
-						continue;
-					}
-					if( ((new File("C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm1-trial3\\config_set_1_adaptor_speed\\config_7.cfg").equals( configManager.getConfigFile() ) ) ) ) {
-						//System.out.println( "continue: " + configManager.getConfigFile() );
-						continue;
-					}
-					if( ((new File("C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm1-trial3\\config_set_1_adaptor_speed\\config_8.cfg").equals( configManager.getConfigFile() ) ) ) ) {
-						//System.out.println( "continue: " + configManager.getConfigFile() );
-						continue;
-					}
-					if( ((new File("C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm1-trial3\\config_set_1_adaptor_speed\\config_9.cfg").equals( configManager.getConfigFile() ) ) ) ) {
-						//System.out.println( "continue: " + configManager.getConfigFile() );
-						continue;
-					}
-					if( ((new File("C:\\Users\\user\\workspaces\\gradproject\\configurations-algorithm1-trial3\\config_set_1_adaptor_speed\\config_10.cfg").equals( configManager.getConfigFile() ) ) ) ) {
-						//System.out.println( "continue: " + configManager.getConfigFile() );
-						continue;
-					}*/
-
-					
+	
 					File outputPath = configManager.makeNewRunDirectory();
 					System.out.println( "===" );
 					System.out.printf( "Configuration file: '%s'\n", configManager.getConfigFile() );
@@ -118,11 +68,12 @@ public class HVNSDriver {
 					System.out.println( "Starting." );
 					
 					ComputerNetworkSimulator sim = configManager.configureSimulator();
+					// simulator should probably not output for large sets
 					//sim.addListener(new ReportingSimulatorListener(new File("C:\\Users\\user\\workspaces\\gradproject\\hardware-varying-network-simulator-5\\output\\sim.txt")));
 					sim.setOutputPath( outputPath.getAbsolutePath() );
 					sim.addAlgorithmListeners();
 					
-					Thread t = new Thread( new SimRunnable( configManager, sim ) );
+					Thread t = new Thread( sim );
 					t.start();
 					sim.start();
 					
@@ -133,17 +84,19 @@ public class HVNSDriver {
 					
 					System.out.println( "Finished." );
 				}
+				System.out.println( "Making averages directory." );
 				configManager.makeAveragesDirectory();
 			}
+			System.out.println( "Aggregating averages." );
 			setManager.aggregateClientAverages();
 		}
 	}
 	
 	/**
-	 * Read in the configuration file.j
-	 * @param args
+	 * Read in the configuration file and run x number of simulations.
+	 * @param args <path to config file> <config file name>
 	 */
-	public static void mainOld(String... args) throws Exception {
+	public static void oldMain2(String... args) throws Exception {
 		PropertyConfigurator.configure("log4j.properties"); // disable it
 		if( args.length != 3 ) {
 			System.err.println( "java -jar hardwareSimulation.jar <path to config file> <config file name>" );
@@ -173,7 +126,7 @@ public class HVNSDriver {
 			sim.setOutputPath( outputPath.getAbsolutePath() );
 			sim.addAlgorithmListeners();
 			
-			Thread t = new Thread( new SimRunnable( configManager, sim ) );
+			Thread t = new Thread( sim );
 			t.start();
 			sim.start();
 			
@@ -184,11 +137,14 @@ public class HVNSDriver {
 		}
 	}
 	
-	public static void oldMain( String... args) throws OperationsException, InterruptedException {
-		
-		//IHardwareComputer n0 = (IHardwareComputer)sim.createNode();
-		//System.out.println("\n");
-		//n0.install( new RandomDistributionAlgorithm( n0 ) );
+	/**
+	 * Demonstrates the use of the Java API for simulator construction.
+	 * @param args N/A
+	 * @throws OperationsException
+	 * @throws InterruptedException
+	 */
+	public static void oldMain( String... args) 
+			throws OperationsException, InterruptedException {
 		
 		// create the simulator
 		ComputerNetworkSimulator sim = new ComputerNetworkSimulator();
@@ -248,48 +204,12 @@ public class HVNSDriver {
 		
 		
 		// start simulation
-		(new Thread((Runnable)sim)).start();
+		Thread t = new Thread((Runnable)sim);
+		t.start();
 		sim.start();
 
 		// start client
 		client.start();
-		
-		
-		//Thread.currentThread().sleep( 4000 );
-		//configManager.makeAveragesDirectory();
-		
-		//sim.resume();
-		
-	}
-}
-
-class SimRunnable implements Runnable {
-	
-	/** configuration manager. */
-	protected ConfigurationManager _manager;
-	/** simulator. */
-	protected ComputerNetworkSimulator _sim;
-	
-	/**
-	 * Default constructor.
-	 * @param sim to run.
-	 * @param manager configured to create averages.
-	 */
-	public SimRunnable( ConfigurationManager manager, ComputerNetworkSimulator sim ) {
-		_manager = manager;
-		_sim = sim;
-	}
-	
-	/**
-	 * 
-	 */
-	public void run() {
-		try {
-			_sim.run();
-			//_manager.makeAveragesDirectory();
-			
-		} catch( Exception e ) {
-			e.printStackTrace();
-		}
+		t.join();
 	}
 }

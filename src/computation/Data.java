@@ -11,7 +11,7 @@ public class Data implements IData {
 	/** identifier. */
 	protected int _ID;
 	/** content contained by this container, does not currently have a use. */
-	protected byte[] _content;
+	protected byte _content;
 	
 	
 /// Construction
@@ -21,7 +21,7 @@ public class Data implements IData {
 	 * @param ID for this container.
 	 * @param content to hold.
 	 */
-	public Data(int ID, byte[] content) {
+	public Data(int ID, byte content) {
 		_ID = ID;
 		_content = content;
 	}
@@ -43,7 +43,7 @@ public class Data implements IData {
 	 * @see computation.IData#getContent()
 	 */
 	@Override
-	public byte[] getContent() {
+	public byte getContent() {
 		return _content;
 	}
 	

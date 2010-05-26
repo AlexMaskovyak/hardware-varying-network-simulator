@@ -47,7 +47,7 @@ public class State_Server_Secondary_Service
 	 * Externalize instantiation.
 	 */
 	protected void init() {
-		_cacheRefillEnabled = true;
+		_cacheRefillEnabled = false;
 	}
 	
 /// IState
