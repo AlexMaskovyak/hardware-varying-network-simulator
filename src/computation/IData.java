@@ -17,5 +17,5 @@ public interface IData {
 	 * Obtains the actual content stored in this data wrapper.
 	 * @return Data's content;
 	 */
-	public byte[] getContent();
+	public byte getContent();
 }

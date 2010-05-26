@@ -290,7 +290,7 @@ public class Harddrive<T extends IData>
 	 */
 	public void generateAndLoadData( int amount ) {
 		for( int i = 0; i < amount; ++i ) {
-			setIndex( i, new Data( i, new byte[] { Byte.parseByte( String.format( "%d", i % 128 ) ) } ) );
+			setIndex( i, new Data( i, Byte.parseByte( String.format( "%d", i % 128 ) ) ) );
 		}
 	}
 	

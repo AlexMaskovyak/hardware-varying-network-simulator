@@ -45,7 +45,7 @@ public class State_Server_Service
 	protected void init() {
 		_rng = new Random();
 		_serviced = 0;
-		_cacheRefillEnabled = true;
+		_cacheRefillEnabled = false;
 	}
 
 	
