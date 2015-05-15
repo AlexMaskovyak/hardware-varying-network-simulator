@@ -1,0 +1,1 @@
+This simulator is designed to test the effects of hardware variance (cache size, memory speed, etc.) on distributed I/O. This is a capstone project for RIT's Master's of Computer Science. The sole author is Alex Maskovyak.
